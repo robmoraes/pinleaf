@@ -3,6 +3,10 @@
 Pinleaf is a local-first desktop sticky notes app for Linux, built with Python,
 GTK 4 and libadwaita.
 
+Project page: [https://robmoraes.github.io/pinleaf/](https://robmoraes.github.io/pinleaf/)
+
+![Pinleaf desktop overview](docs/site/assets/screenshots/overview.png)
+
 The current MVP supports:
 
 - independent post-it-style note windows;

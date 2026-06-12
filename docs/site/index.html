@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pinleaf</title>
+    <meta name="description" content="Pinleaf is a local-first desktop sticky notes app for Linux.">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Linux desktop sticky notes</p>
+        <h1>Pinleaf</h1>
+        <p class="lead">
+          A local-first GTK/libadwaita app for quick notes, reminders and
+          lightweight desktop scratch space.
+        </p>
+        <div class="actions">
+          <a href="https://github.com/robmoraes/pinleaf">GitHub Repository</a>
+          <a href="#run">Run locally</a>
+        </div>
+      </div>
+      <img src="assets/screenshots/overview.png" alt="Pinleaf desktop with four colored notes, the main panel and the AppIndicator menu open.">
+    </header>
+
+    <main>
+      <section>
+        <h2>What it does</h2>
+        <ul class="features">
+          <li>Independent post-it-style note windows.</li>
+          <li>Autosave and local SQLite persistence.</li>
+          <li>Four note colors with handwriting-style bundled fonts.</li>
+          <li>Main panel with previews of existing notes.</li>
+          <li>AppIndicator menu for quick create, show and quit actions.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Screenshots</h2>
+        <div class="gallery">
+          <figure>
+            <img src="assets/screenshots/panel.png" alt="Pinleaf main panel listing four notes with color indicators.">
+            <figcaption>Main panel</figcaption>
+          </figure>
+          <figure>
+            <img src="assets/screenshots/notes.png" alt="Four overlapping Pinleaf note windows in yellow, green, blue and pink.">
+            <figcaption>Colored notes</figcaption>
+          </figure>
+          <figure>
+            <img src="assets/screenshots/indicator.png" alt="Pinleaf AppIndicator menu with New Note, Show Pinleaf and Quit actions.">
+            <figcaption>AppIndicator</figcaption>
+          </figure>
+          <figure>
+            <img src="assets/screenshots/launcher.png" alt="Pinleaf appearing in Ubuntu application search.">
+            <figcaption>Local launcher</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="run">
+        <h2>Run from source</h2>
+        <p>Install the Ubuntu 24.04 system dependencies:</p>
+        <pre><code>sudo apt install \
+  python3-gi \
+  gir1.2-gtk-4.0 \
+  gir1.2-adw-1 \
+  gir1.2-ayatanaappindicator3-0.1 \
+  libayatana-appindicator3-1</code></pre>
+
+        <p>Clone and run:</p>
+        <pre><code>git clone https://github.com/robmoraes/pinleaf.git
+cd pinleaf
+/usr/bin/python3 -m pinleaf</code></pre>
+
+        <p>Install a user-local desktop launcher:</p>
+        <pre><code>scripts/install-local</code></pre>
+      </section>
+
+      <section>
+        <h2>Current status</h2>
+        <p>
+          Pinleaf MVP is tagged as <code>v0.1.0-mvp</code>. Known limitations
+          include best-effort window positioning and desktop-environment-specific
+          AppIndicator behavior.
+        </p>
+        <p>
+          See <a href="https://github.com/robmoraes/pinleaf/blob/main/docs/known-limitations.md">known limitations</a>
+          for details.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

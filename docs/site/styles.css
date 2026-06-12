@@ -1,0 +1,142 @@
+:root {
+  color-scheme: dark;
+  --bg: #101114;
+  --panel: #1d1f25;
+  --text: #f3f0e8;
+  --muted: #b8b2a6;
+  --accent: #f5d85b;
+  --line: #343842;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Ubuntu, system-ui, sans-serif;
+  line-height: 1.55;
+}
+
+a {
+  color: var(--accent);
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.95fr) minmax(320px, 1.4fr);
+  gap: 32px;
+  align-items: center;
+  min-height: 92vh;
+  padding: 48px;
+  border-bottom: 1px solid var(--line);
+}
+
+.hero img,
+.gallery img {
+  display: block;
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+
+.eyebrow {
+  color: var(--accent);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+h1 {
+  margin: 0;
+  font-size: 64px;
+  line-height: 1;
+}
+
+h2 {
+  margin-top: 0;
+  font-size: 28px;
+}
+
+.lead {
+  max-width: 620px;
+  color: var(--muted);
+  font-size: 20px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.actions a {
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  text-decoration: none;
+}
+
+main {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
+section {
+  margin-bottom: 56px;
+}
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+  padding-left: 20px;
+}
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+figure {
+  margin: 0;
+  padding: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+figcaption {
+  margin-top: 10px;
+  color: var(--muted);
+}
+
+pre {
+  overflow-x: auto;
+  padding: 16px;
+  background: #090a0d;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+code {
+  font-family: "Ubuntu Mono", monospace;
+}
+
+@media (max-width: 840px) {
+  .hero {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    padding: 32px 20px;
+  }
+
+  h1 {
+    font-size: 48px;
+  }
+}

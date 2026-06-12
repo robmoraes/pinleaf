@@ -1,0 +1,28 @@
+#!/usr/bin/env sh
+set -eu
+
+APP_ID="dev.pinleaf.Pinleaf"
+
+bin_dir="${HOME}/.local/bin"
+apps_dir="${HOME}/.local/share/applications"
+icons_root="${HOME}/.local/share/icons/hicolor"
+
+rm -f "${bin_dir}/pinleaf"
+rm -f "${apps_dir}/${APP_ID}.desktop"
+rm -f \
+  "$icons_root/16x16/apps/pinleaf.png" \
+  "$icons_root/32x32/apps/pinleaf.png" \
+  "$icons_root/64x64/apps/pinleaf.png" \
+  "$icons_root/256x256/apps/pinleaf.png" \
+  "$icons_root/scalable/apps/pinleaf.svg"
+
+if command -v update-desktop-database >/dev/null 2>&1; then
+  update-desktop-database "$apps_dir" >/dev/null 2>&1 || true
+fi
+
+if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+  gtk-update-icon-cache "$icons_root" >/dev/null 2>&1 || true
+fi
+
+printf '%s\n' "Removed Pinleaf local launcher files."
+printf '%s\n' "User note data was not removed."

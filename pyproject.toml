@@ -1,0 +1,32 @@
+[project]
+name = "pinleaf"
+version = "0.1.0"
+description = "Desktop sticky notes built with Python and GTK/libadwaita."
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+gtk = [
+  "PyGObject",
+]
+
+[project.scripts]
+pinleaf = "pinleaf.__main__:main"
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["pinleaf*"]
+
+[tool.setuptools.package-data]
+pinleaf = [
+  "resources/*.css",
+  "resources/fonts/*.md",
+  "resources/fonts/**/*.ttf",
+  "resources/fonts/**/*.otf",
+  "resources/fonts/**/*.txt",
+  "resources/icons/*.png",
+  "resources/icons/*.svg",
+]

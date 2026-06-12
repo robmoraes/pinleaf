@@ -1,0 +1,78 @@
+.note-window {
+  border-radius: 6px;
+}
+
+.note-window.note-yellow,
+.note-color-dot.note-yellow {
+  background: #f6e27f;
+}
+
+.note-window.note-green,
+.note-color-dot.note-green {
+  background: #b8e986;
+}
+
+.note-window.note-blue,
+.note-color-dot.note-blue {
+  background: #9fd3ff;
+}
+
+.note-window.note-pink,
+.note-color-dot.note-pink {
+  background: #f4a7c5;
+}
+
+.note-window headerbar,
+.note-window headerbar windowhandle,
+.note-window headerbar label,
+.note-window headerbar button,
+.note-window headerbar image {
+  color: #1f1f1f;
+}
+
+.note-window headerbar button {
+  background: alpha(#fff, 0.28);
+}
+
+.note-window headerbar button:hover {
+  background: alpha(#fff, 0.42);
+}
+
+.note-editor {
+  background: transparent;
+  color: #005BAC;
+  font-family: "Dancing Script", cursive;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 17pt;
+  padding: 14px;
+}
+
+.note-editor text {
+  background: transparent;
+  color: #005BAC;
+  font-family: "Dancing Script", cursive;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 17pt;
+}
+
+.note-editor text selection {
+  background: alpha(#005BAC, 0.22);
+  color: #003a70;
+}
+
+.note-list-row {
+  min-height: 68px;
+}
+
+.note-list-row-content {
+  min-height: 48px;
+}
+
+.note-color-dot {
+  min-width: 14px;
+  min-height: 14px;
+  border-radius: 999px;
+  border: 1px solid alpha(#000, 0.2);
+}

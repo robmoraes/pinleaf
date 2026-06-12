@@ -1,0 +1,123 @@
+# Pinleaf
+
+Pinleaf is a local-first desktop sticky notes app for Linux, built with Python,
+GTK 4 and libadwaita.
+
+The current MVP supports:
+
+- independent post-it-style note windows;
+- local SQLite persistence;
+- autosave while typing;
+- note colors;
+- a main panel with note previews;
+- an AppIndicator status menu for quick actions;
+- an About dialog with maintainer, license and font credits;
+- bundled handwriting-style fonts;
+- bundled app/tray icon assets.
+
+## Development Setup
+
+Install the system dependencies for Python, GTK 4, libadwaita and the
+AppIndicator helper.
+
+On Ubuntu 24.04:
+
+```bash
+sudo apt install \
+  python3-gi \
+  gir1.2-gtk-4.0 \
+  gir1.2-adw-1 \
+  gir1.2-ayatanaappindicator3-0.1 \
+  libayatana-appindicator3-1
+```
+
+Clone the repository and run the app from the project root:
+
+```bash
+git clone https://github.com/<owner>/pinleaf.git
+cd pinleaf
+/usr/bin/python3 -m pinleaf
+```
+
+For isolated development data, set `XDG_DATA_HOME`:
+
+```bash
+XDG_DATA_HOME=/tmp/pinleaf-dev /usr/bin/python3 -m pinleaf
+```
+
+Pinleaf stores notes under:
+
+```text
+~/.local/share/pinleaf/pinleaf.sqlite3
+```
+
+or under:
+
+```text
+$XDG_DATA_HOME/pinleaf/pinleaf.sqlite3
+```
+
+## Local Desktop Install
+
+For a user-local desktop launcher, run from the repository root:
+
+```bash
+scripts/install-local
+```
+
+This installs:
+
+- `~/.local/bin/pinleaf`
+- `~/.local/share/applications/dev.pinleaf.Pinleaf.desktop`
+- Pinleaf icons under `~/.local/share/icons/hicolor`
+
+The local install points to the current source checkout. If you move the
+repository, run `scripts/install-local` again.
+
+To remove the local launcher and icons:
+
+```bash
+scripts/uninstall-local
+```
+
+Uninstalling does not remove note data.
+
+## Test
+
+```bash
+/usr/bin/python3 -m unittest discover -s tests
+/usr/bin/python3 -m compileall pinleaf tests
+```
+
+## Project Structure
+
+```text
+pinleaf/
+  app.py                  GTK/libadwaita application lifecycle
+  config.py               paths and resources
+  fonts.py                bundled font registration
+  models.py               note domain model
+  storage/                SQLite schema and repository
+  services/               note service and autosave
+  ui/                     GTK windows, dialogs and tray controller
+  resources/              CSS, fonts and icons
+docs/.specs/001-desktop-sticky-notes/
+  spec.md
+  plan.md
+  tasks.md
+```
+
+## Known Limitations
+
+See [Known Limitations](docs/known-limitations.md).
+
+## Fonts
+
+Bundled fonts live in `pinleaf/resources/fonts/`.
+
+The included Google Fonts families are distributed under the SIL Open Font
+License. Their `OFL.txt` files are kept beside each font family.
+
+## License
+
+Pinleaf source code is licensed under the MIT License. See [LICENSE](LICENSE).

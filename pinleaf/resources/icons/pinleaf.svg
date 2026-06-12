@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Pinleaf">
+  <defs>
+    <linearGradient id="note" x1="24" y1="24" x2="104" y2="104" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff08a"/>
+      <stop offset="1" stop-color="#f5d85b"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="49" y1="37" x2="91" y2="78" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5fbf6a"/>
+      <stop offset="1" stop-color="#2f8f4a"/>
+    </linearGradient>
+  </defs>
+
+  <path d="M27 21h74c4.4 0 8 3.6 8 8v70c0 4.4-3.6 8-8 8H27c-4.4 0-8-3.6-8-8V29c0-4.4 3.6-8 8-8z" fill="url(#note)"/>
+  <path d="M94 107H72l37-37v22c0 8.3-6.7 15-15 15z" fill="#e7c646"/>
+
+  <circle cx="64" cy="23" r="12" fill="#d94a4a"/>
+  <circle cx="64" cy="23" r="5" fill="#8f2424"/>
+  <path d="M64 35v23" stroke="#8f2424" stroke-width="5" stroke-linecap="round"/>
+
+  <path d="M46 72c26 2 43-14 48-40-25 1-45 13-48 40z" fill="url(#leaf)"/>
+  <path d="M50 69c12-10 24-19 39-31" fill="none" stroke="#d8f5ce" stroke-width="4" stroke-linecap="round"/>
+  <path d="M59 61c-2-8-6-13-13-17" fill="none" stroke="#2f8f4a" stroke-width="3" stroke-linecap="round" opacity=".45"/>
+
+  <path d="M36 86h37" stroke="#005bac" stroke-width="5" stroke-linecap="round"/>
+  <path d="M36 96h25" stroke="#005bac" stroke-width="5" stroke-linecap="round" opacity=".75"/>
+</svg>

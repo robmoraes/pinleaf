@@ -37,16 +37,16 @@ class MainWindow(Adw.ApplicationWindow):
         header = Adw.HeaderBar()
         toolbar.add_top_bar(header)
 
-        new_button = Gtk.Button(label="New")
-        new_button.set_tooltip_text("Create note")
-        new_button.connect("clicked", lambda _: self.on_create_note())
-        header.pack_end(new_button)
-
         menu_button = Gtk.MenuButton()
         menu_button.set_icon_name("open-menu-symbolic")
         menu_button.set_tooltip_text("Main menu")
         menu_button.set_popover(self._build_menu())
         header.pack_end(menu_button)
+
+        new_button = Gtk.Button(label="New")
+        new_button.set_tooltip_text("Create note")
+        new_button.connect("clicked", lambda _: self.on_create_note())
+        header.pack_start(new_button)
 
         self.stack = Gtk.Stack()
         self.stack.set_vexpand(True)

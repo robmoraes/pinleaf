@@ -34,6 +34,9 @@ class NoteService:
     def update_color(self, note_id: str, color: str | NoteColor) -> Note:
         return self.store.update_color(note_id, color, now=self.clock())
 
+    def update_font_family(self, note_id: str, font_family: str | None) -> Note:
+        return self.store.update_font_family(note_id, font_family, now=self.clock())
+
     def close_note(
         self,
         note_id: str,
@@ -50,6 +53,25 @@ class NoteService:
             position_x=position_x,
             position_y=position_y,
             is_open=False,
+            now=self.clock(),
+        )
+
+    def save_open_note_window(
+        self,
+        note_id: str,
+        *,
+        width: int,
+        height: int,
+        position_x: int | None = None,
+        position_y: int | None = None,
+    ) -> Note:
+        return self.store.update_window_state(
+            note_id,
+            width=width,
+            height=height,
+            position_x=position_x,
+            position_y=position_y,
+            is_open=True,
             now=self.clock(),
         )
 

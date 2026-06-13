@@ -8,10 +8,17 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Adw, GLib, Gtk
 
+from pinleaf.appearance import font_css_classes, font_option_for, font_options
 from pinleaf.models import Note, NoteColor
 from pinleaf.services.autosave import Autosave, ScheduledCall
 from pinleaf.services.note_service import NoteService
 from pinleaf.ui.dialogs import show_error
+from pinleaf.ui.geometry import (
+    WindowGeometry,
+    apply_window_geometry,
+    capture_window_geometry,
+    normalize_geometry,
+)
 
 
 class GLibScheduledCall:
@@ -52,23 +59,34 @@ class NoteWindow(Adw.ApplicationWindow):
         self._loading_buffer = False
 
         self.set_title("Pinleaf Note")
-        self.set_default_size(note.width, note.height)
+        apply_window_geometry(
+            self,
+            normalize_geometry(note.width, note.height, note.position_x, note.position_y),
+        )
         self.add_css_class("note-window")
         self.add_css_class(f"note-{note.color.value}")
 
         toolbar = Adw.ToolbarView()
-        header = Adw.HeaderBar()
-        toolbar.add_top_bar(header)
+        self.header = Adw.HeaderBar()
+        toolbar.add_top_bar(self.header)
+        self.header_controls: list[Gtk.Widget] = []
 
         color_button = Gtk.MenuButton(label="Color")
         color_button.set_popover(self._build_color_popover())
-        header.pack_end(color_button)
+        self.header.pack_end(color_button)
+        self.header_controls.append(color_button)
+
+        font_button = Gtk.MenuButton(label="Font")
+        font_button.set_popover(self._build_font_popover())
+        self.header.pack_end(font_button)
+        self.header_controls.append(font_button)
 
         self.text_view = Gtk.TextView()
         self.text_view.set_wrap_mode(Gtk.WrapMode.WORD_CHAR)
         self.text_view.set_vexpand(True)
         self.text_view.set_hexpand(True)
         self.text_view.add_css_class("note-editor")
+        self._apply_font_class(note.font_family)
 
         buffer = self.text_view.get_buffer()
         self._loading_buffer = True
@@ -83,12 +101,23 @@ class NoteWindow(Adw.ApplicationWindow):
         self.set_content(toolbar)
 
         self.connect("close-request", self._on_close_request)
+        self.connect("notify::is-active", self._on_active_changed)
 
     def flush_pending_changes(self) -> bool:
         saved = self.autosave.flush()
         if not saved:
             show_error(self, "Could not save note", "The latest change may not have been saved.")
         return saved
+
+    def save_window_state(self) -> None:
+        geometry = self._capture_geometry()
+        self.note = self.note_service.save_open_note_window(
+            self.note.id,
+            width=geometry.width,
+            height=geometry.height,
+            position_x=geometry.position_x,
+            position_y=geometry.position_y,
+        )
 
     def _build_color_popover(self) -> Gtk.Popover:
         popover = Gtk.Popover()
@@ -101,6 +130,22 @@ class NoteWindow(Adw.ApplicationWindow):
         for color in NoteColor:
             button = Gtk.Button(label=color.value.title())
             button.connect("clicked", lambda _, selected=color: self._set_color(selected))
+            box.append(button)
+
+        popover.set_child(box)
+        return popover
+
+    def _build_font_popover(self) -> Gtk.Popover:
+        popover = Gtk.Popover()
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        box.set_margin_top(8)
+        box.set_margin_bottom(8)
+        box.set_margin_start(8)
+        box.set_margin_end(8)
+
+        for option in font_options():
+            button = Gtk.Button(label=option.label)
+            button.connect("clicked", lambda _, selected=option.value: self._set_font_family(selected))
             box.append(button)
 
         popover.set_child(box)
@@ -120,6 +165,26 @@ class NoteWindow(Adw.ApplicationWindow):
         self.add_css_class(f"note-{color.value}")
         self.on_changed()
 
+    def _set_font_family(self, font_family: str | None) -> None:
+        selected = font_option_for(font_family).value
+        if self.note.font_family == selected:
+            return
+        try:
+            self.note = self.note_service.update_font_family(self.note.id, selected)
+        except Exception:
+            show_error(self, "Could not save font", "The selected note font may not have been saved.")
+            return
+
+        self._apply_font_class(self.note.font_family)
+        self.on_changed()
+
+    def _apply_font_class(self, font_family: str | None) -> None:
+        for css_class in font_css_classes():
+            self.text_view.remove_css_class(css_class)
+        option = font_option_for(font_family)
+        if option.css_class is not None:
+            self.text_view.add_css_class(option.css_class)
+
     def _on_text_changed(self, buffer: Gtk.TextBuffer) -> None:
         if self._loading_buffer:
             return
@@ -132,14 +197,33 @@ class NoteWindow(Adw.ApplicationWindow):
         self.note = self.note_service.update_content(note_id, content)
         self.on_changed()
 
+    def _on_active_changed(self, *_: object) -> None:
+        self._sync_header_visibility()
+
+    def _sync_header_visibility(self) -> None:
+        is_active = self.is_active()
+        self.header.set_show_title(is_active)
+        self.header.set_show_start_title_buttons(is_active)
+        self.header.set_show_end_title_buttons(is_active)
+        for control in self.header_controls:
+            control.set_visible(is_active)
+
     def _on_close_request(self, _: Gtk.Window) -> bool:
         self.flush_pending_changes()
-        self.note_service.close_note(
+        geometry = self._capture_geometry()
+        self.note = self.note_service.close_note(
             self.note.id,
-            width=max(self.get_width(), 1),
-            height=max(self.get_height(), 1),
-            position_x=None,
-            position_y=None,
+            width=geometry.width,
+            height=geometry.height,
+            position_x=geometry.position_x,
+            position_y=geometry.position_y,
         )
         self.on_closed(self.note.id)
         return False
+
+    def _capture_geometry(self) -> WindowGeometry:
+        return capture_window_geometry(
+            self,
+            fallback_position_x=self.note.position_x,
+            fallback_position_y=self.note.position_y,
+        )

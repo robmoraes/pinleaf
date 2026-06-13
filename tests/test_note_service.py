@@ -53,6 +53,32 @@ class NoteServiceTests(unittest.TestCase):
 
         self.assertEqual(updated.color, NoteColor.PINK)
 
+    def test_update_font_family(self) -> None:
+        note = self.service.create_note()
+
+        updated = self.service.update_font_family(note.id, "Cedarville Cursive")
+        reset = self.service.update_font_family(note.id, None)
+
+        self.assertEqual(updated.font_family, "Cedarville Cursive")
+        self.assertIsNone(reset.font_family)
+
+    def test_save_open_note_window_preserves_open_state_and_geometry(self) -> None:
+        note = self.service.create_note()
+
+        updated = self.service.save_open_note_window(
+            note.id,
+            width=500,
+            height=350,
+            position_x=12,
+            position_y=24,
+        )
+
+        self.assertTrue(updated.is_open)
+        self.assertEqual(updated.width, 500)
+        self.assertEqual(updated.height, 350)
+        self.assertEqual(updated.position_x, 12)
+        self.assertEqual(updated.position_y, 24)
+
     def test_empty_note_remains_listed_until_deleted(self) -> None:
         note = self.service.create_note()
 

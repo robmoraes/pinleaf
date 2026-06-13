@@ -67,6 +67,7 @@ def run(argv: Sequence[str] | None = None) -> int:
                 self.tray.stop()
             for window in list(self.note_windows.values()):
                 window.flush_pending_changes()
+                window.save_window_state()
             if self.store is not None:
                 self.store.close()
             Adw.Application.do_shutdown(self)

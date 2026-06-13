@@ -16,6 +16,7 @@ class ModelTests(unittest.TestCase):
         self.assertEqual(note.height, DEFAULT_HEIGHT)
         self.assertIsNone(note.position_x)
         self.assertIsNone(note.position_y)
+        self.assertIsNone(note.font_family)
         self.assertTrue(note.is_open)
         self.assertIsNone(note.deleted_at)
 

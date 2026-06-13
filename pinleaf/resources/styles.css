@@ -62,6 +62,41 @@
   color: #003a70;
 }
 
+.note-editor.note-font-cursive,
+.note-editor.note-font-cursive text {
+  font-family: cursive;
+}
+
+.note-editor.note-font-sans-serif,
+.note-editor.note-font-sans-serif text {
+  font-family: sans-serif;
+}
+
+.note-editor.note-font-dancing-script,
+.note-editor.note-font-dancing-script text {
+  font-family: "Dancing Script", cursive;
+}
+
+.note-editor.note-font-cedarville-cursive,
+.note-editor.note-font-cedarville-cursive text {
+  font-family: "Cedarville Cursive", cursive;
+}
+
+.note-editor.note-font-league-script,
+.note-editor.note-font-league-script text {
+  font-family: "League Script", cursive;
+}
+
+.note-editor.note-font-tangerine,
+.note-editor.note-font-tangerine text {
+  font-family: "Tangerine", cursive;
+}
+
+.note-editor.note-font-updock,
+.note-editor.note-font-updock text {
+  font-family: "Updock", cursive;
+}
+
 .note-list-row {
   min-height: 68px;
 }

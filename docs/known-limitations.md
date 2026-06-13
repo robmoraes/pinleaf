@@ -4,9 +4,9 @@ Pinleaf is currently an MVP.
 
 ## Window Position
 
-Note window size and open state are persisted, but exact window position restore
-is best-effort. On Wayland, applications generally cannot force window
-coordinates; the compositor decides placement.
+Note window size and open state are persisted. Exact window position capture and
+restore are best-effort. GTK 4 on Wayland does not expose a reliable public API
+for application-controlled window coordinates; the compositor decides placement.
 
 ## AppIndicator Behavior
 

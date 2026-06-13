@@ -36,12 +36,17 @@ class SQLiteStoreTests(unittest.TestCase):
                 )
             }
             version = connection.execute("SELECT version FROM schema_version").fetchone()[0]
+            columns = {
+                row[1]
+                for row in connection.execute("PRAGMA table_info(notes)").fetchall()
+            }
         finally:
             connection.close()
 
         self.assertIn("schema_version", tables)
         self.assertIn("notes", tables)
         self.assertIn("idx_notes_deleted_updated", indexes)
+        self.assertIn("font_family", columns)
         self.assertEqual(version, CURRENT_SCHEMA_VERSION)
 
     def test_create_get_and_list_note(self) -> None:
@@ -70,6 +75,23 @@ class SQLiteStoreTests(unittest.TestCase):
         self.assertEqual(recolored.color, NoteColor.BLUE)
         self.assertEqual(recolored.updated_at, "2026-06-12T02:00:00+00:00")
 
+    def test_update_font_family(self) -> None:
+        self.store.create(Note.new("note-1", now="2026-06-12T00:00:00+00:00"))
+
+        updated = self.store.update_font_family(
+            "note-1",
+            "Updock",
+            now="2026-06-12T01:00:00+00:00",
+        )
+        reset = self.store.update_font_family(
+            "note-1",
+            "Unsupported Font",
+            now="2026-06-12T02:00:00+00:00",
+        )
+
+        self.assertEqual(updated.font_family, "Updock")
+        self.assertIsNone(reset.font_family)
+
     def test_update_window_state(self) -> None:
         self.store.create(Note.new("note-1", now="2026-06-12T00:00:00+00:00"))
 
@@ -96,6 +118,71 @@ class SQLiteStoreTests(unittest.TestCase):
 
         self.assertIsNone(self.store.get("note-1"))
         self.assertEqual(self.store.list_notes(), [])
+
+    def test_migrates_version_1_database_to_current_schema(self) -> None:
+        self.store.close()
+        connection = sqlite3.connect(self.database_path)
+        try:
+            connection.execute("DROP TABLE notes")
+            connection.execute("DROP TABLE schema_version")
+            connection.execute(
+                """
+                CREATE TABLE schema_version (
+                  version INTEGER NOT NULL
+                )
+                """
+            )
+            connection.execute("INSERT INTO schema_version (version) VALUES (1)")
+            connection.execute(
+                """
+                CREATE TABLE notes (
+                  id TEXT PRIMARY KEY,
+                  content TEXT NOT NULL DEFAULT '',
+                  color TEXT NOT NULL,
+                  width INTEGER NOT NULL,
+                  height INTEGER NOT NULL,
+                  position_x INTEGER,
+                  position_y INTEGER,
+                  is_open INTEGER NOT NULL DEFAULT 1,
+                  created_at TEXT NOT NULL,
+                  updated_at TEXT NOT NULL,
+                  deleted_at TEXT
+                )
+                """
+            )
+            connection.execute(
+                """
+                INSERT INTO notes (
+                  id, content, color, width, height, position_x, position_y,
+                  is_open, created_at, updated_at, deleted_at
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    "note-1",
+                    "Legacy",
+                    "yellow",
+                    320,
+                    280,
+                    None,
+                    None,
+                    1,
+                    "2026-06-12T00:00:00+00:00",
+                    "2026-06-12T00:00:00+00:00",
+                    None,
+                ),
+            )
+            connection.commit()
+        finally:
+            connection.close()
+
+        self.store = NoteStore(self.database_path)
+
+        note = self.store.get("note-1")
+        self.assertIsNotNone(note)
+        assert note is not None
+        self.assertIsNone(note.font_family)
+        self.assertEqual(self.store.connection.execute("SELECT version FROM schema_version").fetchone()[0], CURRENT_SCHEMA_VERSION)
 
 
 if __name__ == "__main__":

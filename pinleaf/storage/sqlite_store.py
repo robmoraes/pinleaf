@@ -3,6 +3,7 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
+from pinleaf.appearance import normalize_font_family
 from pinleaf.models import Note, NoteColor, utc_now_iso, validate_color
 from pinleaf.storage.migrations import migrate
 
@@ -22,9 +23,9 @@ class NoteStore:
             """
             INSERT INTO notes (
               id, content, color, width, height, position_x, position_y,
-              is_open, created_at, updated_at, deleted_at
+              font_family, is_open, created_at, updated_at, deleted_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             _to_row_values(note),
         )
@@ -76,6 +77,25 @@ class NoteStore:
             WHERE id = ? AND deleted_at IS NULL
             """,
             (validated.value, timestamp, note_id),
+        )
+        self.connection.commit()
+        return self._require(note_id)
+
+    def update_font_family(
+        self,
+        note_id: str,
+        font_family: str | None,
+        now: str | None = None,
+    ) -> Note:
+        timestamp = now or utc_now_iso()
+        normalized = normalize_font_family(font_family)
+        self.connection.execute(
+            """
+            UPDATE notes
+            SET font_family = ?, updated_at = ?
+            WHERE id = ? AND deleted_at IS NULL
+            """,
+            (normalized, timestamp, note_id),
         )
         self.connection.commit()
         return self._require(note_id)
@@ -132,6 +152,7 @@ def _to_row_values(note: Note) -> tuple[object, ...]:
         note.height,
         note.position_x,
         note.position_y,
+        normalize_font_family(note.font_family),
         int(note.is_open),
         note.created_at,
         note.updated_at,
@@ -148,6 +169,7 @@ def _from_row(row: sqlite3.Row) -> Note:
         height=row["height"],
         position_x=row["position_x"],
         position_y=row["position_y"],
+        font_family=normalize_font_family(row["font_family"]),
         is_open=bool(row["is_open"]),
         created_at=row["created_at"],
         updated_at=row["updated_at"],

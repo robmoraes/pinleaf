@@ -37,6 +37,7 @@ class Note:
     height: int
     position_x: int | None
     position_y: int | None
+    font_family: str | None
     is_open: bool
     created_at: str
     updated_at: str
@@ -58,6 +59,7 @@ class Note:
             height=DEFAULT_HEIGHT,
             position_x=None,
             position_y=None,
+            font_family=None,
             is_open=True,
             created_at=timestamp,
             updated_at=timestamp,

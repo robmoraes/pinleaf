@@ -18,7 +18,7 @@
         </p>
         <div class="actions">
           <a href="https://github.com/robmoraes/pinleaf">GitHub Repository</a>
-          <a href="#run">Run locally</a>
+          <a href="#install">Install</a>
         </div>
       </div>
       <img src="assets/screenshots/overview.png" alt="Pinleaf desktop with four colored notes, the main panel and the AppIndicator menu open.">
@@ -30,9 +30,10 @@
         <ul class="features">
           <li>Independent post-it-style note windows.</li>
           <li>Autosave and local SQLite persistence.</li>
-          <li>Four note colors with handwriting-style bundled fonts.</li>
+          <li>Four note colors with curated bundled and system font choices.</li>
           <li>Main panel with previews of existing notes.</li>
           <li>AppIndicator menu for quick create, show and quit actions.</li>
+          <li>Local Debian package installation with apt.</li>
         </ul>
       </section>
 
@@ -58,8 +59,33 @@
         </div>
       </section>
 
+      <section id="install">
+        <h2>Install</h2>
+        <p>Install a downloaded local Debian package:</p>
+        <pre><code>sudo apt install ./pinleaf_*.deb</code></pre>
+
+        <p>Build a local Debian package from the repository root:</p>
+        <pre><code>sudo apt install build-essential debhelper dpkg-dev
+dpkg-buildpackage -us -uc
+sudo apt install ../pinleaf_*.deb</code></pre>
+
+        <p>Run from source with Ubuntu 24.04 system dependencies:</p>
+        <pre><code>sudo apt install \
+  python3-gi \
+  gir1.2-gtk-4.0 \
+  gir1.2-adw-1 \
+  gir1.2-ayatanaappindicator3-0.1 \
+  libayatana-appindicator3-1</code></pre>
+
+        <pre><code>git clone https://github.com/robmoraes/pinleaf.git
+cd pinleaf
+/usr/bin/python3 -m pinleaf</code></pre>
+
+        <p>Pinleaf stores notes locally under <code>~/.local/share/pinleaf</code>. Package removal does not remove note data.</p>
+      </section>
+
       <section id="run">
-        <h2>Run from source</h2>
+        <h2>Development</h2>
         <p>Install the Ubuntu 24.04 system dependencies:</p>
         <pre><code>sudo apt install \
   python3-gi \
@@ -80,9 +106,9 @@ cd pinleaf
       <section>
         <h2>Current status</h2>
         <p>
-          Pinleaf MVP is tagged as <code>v0.1.0-mvp</code>. Known limitations
-          include best-effort window positioning and desktop-environment-specific
-          AppIndicator behavior.
+          Pinleaf is preparing <code>v0.4.0</code> with local Debian package
+          installation. Known limitations include best-effort window positioning
+          and desktop-environment-specific AppIndicator behavior.
         </p>
         <p>
           See <a href="https://github.com/robmoraes/pinleaf/blob/main/docs/known-limitations.md">known limitations</a>

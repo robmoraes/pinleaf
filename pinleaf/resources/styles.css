@@ -74,6 +74,17 @@ tooltip.background label {
   line-height: 1;
 }
 
+.note-window .note-font-choice-button {
+  min-width: 188px;
+  min-height: 34px;
+  padding: 4px 10px;
+}
+
+.note-window .note-font-sample {
+  color: #1f1f1f;
+  font-size: 13pt;
+}
+
 .note-editor {
   background: transparent;
   color: #005BAC;
@@ -100,20 +111,65 @@ tooltip.background label {
 
 .note-editor.note-font-cursive,
 .note-font-icon.note-font-cursive,
+.note-font-sample.note-font-cursive,
 .note-editor.note-font-cursive text {
   font-family: cursive;
 }
 
 .note-editor.note-font-sans-serif,
 .note-font-icon.note-font-sans-serif,
+.note-font-sample.note-font-sans-serif,
 .note-editor.note-font-sans-serif text {
   font-family: sans-serif;
 }
 
+.note-editor.note-font-monospace,
+.note-font-icon.note-font-monospace,
+.note-font-sample.note-font-monospace,
+.note-editor.note-font-monospace text {
+  font-family: monospace;
+}
+
 .note-editor.note-font-dancing-script,
 .note-font-icon.note-font-dancing-script,
+.note-font-sample.note-font-dancing-script,
 .note-editor.note-font-dancing-script text {
   font-family: "Dancing Script", cursive;
+}
+
+.note-editor.note-font-kavoon,
+.note-font-icon.note-font-kavoon,
+.note-font-sample.note-font-kavoon,
+.note-editor.note-font-kavoon text {
+  font-family: "Kavoon", cursive;
+}
+
+.note-editor.note-font-londrina-shadow,
+.note-font-icon.note-font-londrina-shadow,
+.note-font-sample.note-font-londrina-shadow,
+.note-editor.note-font-londrina-shadow text {
+  font-family: "Londrina Shadow", cursive;
+}
+
+.note-editor.note-font-nabla,
+.note-font-icon.note-font-nabla,
+.note-font-sample.note-font-nabla,
+.note-editor.note-font-nabla text {
+  font-family: "Nabla", cursive;
+}
+
+.note-editor.note-font-press-start-2p,
+.note-font-icon.note-font-press-start-2p,
+.note-font-sample.note-font-press-start-2p,
+.note-editor.note-font-press-start-2p text {
+  font-family: "Press Start 2P", monospace;
+}
+
+.note-editor.note-font-style-script,
+.note-font-icon.note-font-style-script,
+.note-font-sample.note-font-style-script,
+.note-editor.note-font-style-script text {
+  font-family: "Style Script", cursive;
 }
 
 .note-list-row {

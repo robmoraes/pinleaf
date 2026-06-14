@@ -26,6 +26,32 @@ Update both selectors when changing the active note font:
 
 The current selected note font is `Dancing Script`.
 
+## Curated Font Selector Families
+
+The note font selector intentionally exposes a curated list rather than every
+bundled or system font. Current selector order:
+
+- Default
+- `cursive`
+- `sans-serif`
+- `monospace`
+- Separator
+- `Dancing Script`
+- `Kavoon`
+- `Londrina Shadow`
+- `Nabla`
+- `Press Start 2P`
+- `Style Script`
+
+When adding a curated bundled family, update:
+
+- `pinleaf/appearance.py`
+- `pinleaf/resources/styles.css`
+- `tests/test_appearance.py`
+- `pinleaf/resources/fonts/README.md`
+
+Each bundled family must keep its `OFL.txt` license file beside the font files.
+
 ## Bundled Font Examples
 
 These examples mirror the Google Fonts snippets for the bundled families.

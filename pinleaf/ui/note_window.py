@@ -8,7 +8,12 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Adw, GLib, Gtk
 
-from pinleaf.appearance import font_css_classes, font_option_for, font_options
+from pinleaf.appearance import (
+    font_css_classes,
+    font_option_for,
+    font_options,
+    system_font_option_count,
+)
 from pinleaf.models import Note, NoteColor
 from pinleaf.services.autosave import Autosave, ScheduledCall
 from pinleaf.services.note_service import NoteService
@@ -170,10 +175,21 @@ class NoteWindow(Adw.ApplicationWindow):
         box.set_margin_start(8)
         box.set_margin_end(8)
 
-        for option in font_options():
-            button = Gtk.Button(label=option.label)
+        for index, option in enumerate(font_options()):
+            label = Gtk.Label(label=option.label)
+            label.add_css_class("note-font-sample")
+            label.set_xalign(0.0)
+            if option.css_class is not None:
+                label.add_css_class(option.css_class)
+
+            button = Gtk.Button()
+            button.add_css_class("note-font-choice-button")
+            button.set_tooltip_text(option.label)
+            button.set_child(label)
             button.connect("clicked", lambda _, selected=option.value: self._set_font_family(selected))
             box.append(button)
+            if index + 1 == system_font_option_count():
+                box.append(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL))
 
         popover.set_child(box)
         return popover

@@ -144,6 +144,27 @@ Install the generated package from the parent directory:
 sudo apt install ../pinleaf_*.deb
 ```
 
+## Release
+
+Maintainers publish downloadable Debian package artifacts through GitHub
+Releases.
+
+After merging the release changes into `main`, create and push a version tag:
+
+```bash
+git switch main
+git pull
+git tag v0.5.0
+git push origin v0.5.0
+```
+
+The release workflow runs on `v*` tags. It runs tests, builds the local Debian
+package, creates or updates the matching GitHub Release, and uploads:
+
+- `pinleaf_*.deb`
+- `pinleaf_*.buildinfo`
+- `pinleaf_*.changes`
+
 ## Test
 
 ```bash

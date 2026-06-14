@@ -1,0 +1,80 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  debian-package:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            debhelper \
+            dpkg-dev \
+            python3-gi \
+            gir1.2-gtk-4.0 \
+            gir1.2-adw-1 \
+            gir1.2-ayatanaappindicator3-0.1 \
+            libayatana-appindicator3-1 \
+            libfontconfig1
+
+      - name: Run unit tests
+        run: /usr/bin/python3 -m unittest discover -s tests
+
+      - name: Compile Python modules
+        run: /usr/bin/python3 -m compileall pinleaf tests
+
+      - name: Build Debian package
+        run: dpkg-buildpackage -us -uc -b
+
+      - name: Collect release artifacts
+        run: |
+          mkdir -p release-artifacts
+          cp ../pinleaf_*.deb ../pinleaf_*.buildinfo ../pinleaf_*.changes release-artifacts/
+          ls -l release-artifacts
+
+      - name: Inspect Debian package
+        run: |
+          dpkg-deb -I release-artifacts/pinleaf_*.deb
+          dpkg-deb -c release-artifacts/pinleaf_*.deb | grep -E 'usr/bin/pinleaf|usr/share/applications/dev.pinleaf.Pinleaf.desktop|usr/share/icons/hicolor/256x256/apps/pinleaf.png'
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: debian-package
+          path: release-artifacts/*
+
+      - name: Generate release notes
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          awk -v version="$version" '
+            index($0, "## [" version "]") == 1 { capture = 1; next }
+            /^## \[/ && capture { exit }
+            capture { print }
+          ' CHANGELOG.md > release-notes.md
+          if [ ! -s release-notes.md ]; then
+            printf 'Pinleaf %s\n' "$GITHUB_REF_NAME" > release-notes.md
+          fi
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release edit "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file release-notes.md
+          else
+            gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file release-notes.md --verify-tag
+          fi
+          gh release upload "$GITHUB_REF_NAME" release-artifacts/* --clobber

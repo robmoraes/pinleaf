@@ -15,10 +15,6 @@ FONT_OPTIONS: tuple[FontOption, ...] = (
     FontOption("cursive", "Cursive", "note-font-cursive"),
     FontOption("sans-serif", "Sans Serif", "note-font-sans-serif"),
     FontOption("Dancing Script", "Dancing Script", "note-font-dancing-script"),
-    FontOption("Cedarville Cursive", "Cedarville Cursive", "note-font-cedarville-cursive"),
-    FontOption("League Script", "League Script", "note-font-league-script"),
-    FontOption("Tangerine", "Tangerine", "note-font-tangerine"),
-    FontOption("Updock", "Updock", "note-font-updock"),
 )
 
 

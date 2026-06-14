@@ -67,6 +67,8 @@ reliably automated should be recorded in the relevant spec `tasks.md`.
 This repository uses trunk-based development. Keep `main` releasable and use
 short-lived branches such as `feat/about-help` or `fix/tray-icon`.
 
+Create GitHub issues in English.
+
 The current commit style is concise imperative summaries, for example:
 
 ```text

@@ -80,7 +80,7 @@ class SQLiteStoreTests(unittest.TestCase):
 
         updated = self.store.update_font_family(
             "note-1",
-            "Updock",
+            "Dancing Script",
             now="2026-06-12T01:00:00+00:00",
         )
         reset = self.store.update_font_family(
@@ -89,7 +89,7 @@ class SQLiteStoreTests(unittest.TestCase):
             now="2026-06-12T02:00:00+00:00",
         )
 
-        self.assertEqual(updated.font_family, "Updock")
+        self.assertEqual(updated.font_family, "Dancing Script")
         self.assertIsNone(reset.font_family)
 
     def test_update_window_state(self) -> None:

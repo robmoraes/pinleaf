@@ -1,6 +1,6 @@
 [project]
 name = "pinleaf"
-version = "0.1.0"
+version = "0.1.1"
 description = "Desktop sticky notes built with Python and GTK/libadwaita."
 requires-python = ">=3.11"
 dependencies = []

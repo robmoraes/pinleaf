@@ -68,21 +68,15 @@ class NoteWindow(Adw.ApplicationWindow):
 
         toolbar = Adw.ToolbarView()
         self.header = Adw.HeaderBar()
+        self.header.set_show_title(False)
+        self.header.set_show_start_title_buttons(False)
+        self.header.set_show_end_title_buttons(False)
         toolbar.add_top_bar(self.header)
-        self.header_controls: list[Gtk.Widget] = []
-
-        color_button = Gtk.MenuButton(label="Color")
-        color_button.set_popover(self._build_color_popover())
-        self.header.pack_end(color_button)
-        self.header_controls.append(color_button)
-
-        font_button = Gtk.MenuButton(label="Font")
-        font_button.set_popover(self._build_font_popover())
-        self.header.pack_end(font_button)
-        self.header_controls.append(font_button)
+        self.header.pack_end(self._build_color_menu_button())
+        self.header.pack_end(self._build_font_menu_button())
 
         self.text_view = Gtk.TextView()
-        self.text_view.set_wrap_mode(Gtk.WrapMode.WORD_CHAR)
+        self.text_view.set_wrap_mode(Gtk.WrapMode.NONE)
         self.text_view.set_vexpand(True)
         self.text_view.set_hexpand(True)
         self.text_view.add_css_class("note-editor")
@@ -95,13 +89,12 @@ class NoteWindow(Adw.ApplicationWindow):
         buffer.connect("changed", self._on_text_changed)
 
         scroller = Gtk.ScrolledWindow()
-        scroller.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scroller.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         scroller.set_child(self.text_view)
         toolbar.set_content(scroller)
         self.set_content(toolbar)
 
         self.connect("close-request", self._on_close_request)
-        self.connect("notify::is-active", self._on_active_changed)
 
     def flush_pending_changes(self) -> bool:
         saved = self.autosave.flush()
@@ -119,16 +112,50 @@ class NoteWindow(Adw.ApplicationWindow):
             position_y=geometry.position_y,
         )
 
+    def _build_color_menu_button(self) -> Gtk.MenuButton:
+        button = Gtk.MenuButton()
+        button.add_css_class("flat")
+        button.add_css_class("note-tool-button")
+        button.set_tooltip_text("Change note color")
+        button.set_popover(self._build_color_popover())
+
+        self.color_dot = Gtk.Box()
+        self.color_dot.add_css_class("note-color-dot")
+        self._sync_color_dot(self.note.color)
+        button.set_child(self.color_dot)
+        return button
+
+    def _build_font_menu_button(self) -> Gtk.MenuButton:
+        button = Gtk.MenuButton()
+        button.add_css_class("flat")
+        button.add_css_class("note-tool-button")
+        button.set_tooltip_text("Change note font")
+        button.set_popover(self._build_font_popover())
+
+        self.font_label = Gtk.Label(label="A")
+        self.font_label.add_css_class("note-font-icon")
+        button.set_child(self.font_label)
+        return button
+
     def _build_color_popover(self) -> Gtk.Popover:
         popover = Gtk.Popover()
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         box.set_margin_top(8)
         box.set_margin_bottom(8)
         box.set_margin_start(8)
         box.set_margin_end(8)
 
         for color in NoteColor:
-            button = Gtk.Button(label=color.value.title())
+            dot = Gtk.Box()
+            dot.add_css_class("note-color-dot")
+            dot.add_css_class("note-color-choice-dot")
+            dot.add_css_class(f"note-{color.value}")
+
+            button = Gtk.Button()
+            button.add_css_class("flat")
+            button.add_css_class("note-color-choice-button")
+            button.set_tooltip_text(color.value.title())
+            button.set_child(dot)
             button.connect("clicked", lambda _, selected=color: self._set_color(selected))
             box.append(button)
 
@@ -163,6 +190,7 @@ class NoteWindow(Adw.ApplicationWindow):
 
         self.remove_css_class(f"note-{previous.value}")
         self.add_css_class(f"note-{color.value}")
+        self._sync_color_dot(color, previous=previous)
         self.on_changed()
 
     def _set_font_family(self, font_family: str | None) -> None:
@@ -179,11 +207,21 @@ class NoteWindow(Adw.ApplicationWindow):
         self.on_changed()
 
     def _apply_font_class(self, font_family: str | None) -> None:
+        font_label = getattr(self, "font_label", None)
         for css_class in font_css_classes():
             self.text_view.remove_css_class(css_class)
+            if font_label is not None:
+                font_label.remove_css_class(css_class)
         option = font_option_for(font_family)
         if option.css_class is not None:
             self.text_view.add_css_class(option.css_class)
+            if font_label is not None:
+                font_label.add_css_class(option.css_class)
+
+    def _sync_color_dot(self, color: NoteColor, previous: NoteColor | None = None) -> None:
+        if previous is not None:
+            self.color_dot.remove_css_class(f"note-{previous.value}")
+        self.color_dot.add_css_class(f"note-{color.value}")
 
     def _on_text_changed(self, buffer: Gtk.TextBuffer) -> None:
         if self._loading_buffer:
@@ -196,17 +234,6 @@ class NoteWindow(Adw.ApplicationWindow):
     def _save_content(self, note_id: str, content: str) -> None:
         self.note = self.note_service.update_content(note_id, content)
         self.on_changed()
-
-    def _on_active_changed(self, *_: object) -> None:
-        self._sync_header_visibility()
-
-    def _sync_header_visibility(self) -> None:
-        is_active = self.is_active()
-        self.header.set_show_title(is_active)
-        self.header.set_show_start_title_buttons(is_active)
-        self.header.set_show_end_title_buttons(is_active)
-        for control in self.header_controls:
-            control.set_visible(is_active)
 
     def _on_close_request(self, _: Gtk.Window) -> bool:
         self.flush_pending_changes()

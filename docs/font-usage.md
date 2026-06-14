@@ -32,38 +32,8 @@ These examples mirror the Google Fonts snippets for the bundled families.
 They are documentation examples, not app CSS classes.
 
 ```css
-.tangerine-regular {
-  font-family: "Tangerine", cursive;
-  font-weight: 400;
-  font-style: normal;
-}
-
-.tangerine-bold {
-  font-family: "Tangerine", cursive;
-  font-weight: 700;
-  font-style: normal;
-}
-
-.league-script-regular {
-  font-family: "League Script", cursive;
-  font-weight: 400;
-  font-style: normal;
-}
-
 .dancing-script-400 {
   font-family: "Dancing Script", cursive;
-  font-weight: 400;
-  font-style: normal;
-}
-
-.updock-regular {
-  font-family: "Updock", cursive;
-  font-weight: 400;
-  font-style: normal;
-}
-
-.cedarville-cursive-regular {
-  font-family: "Cedarville Cursive", cursive;
   font-weight: 400;
   font-style: normal;
 }

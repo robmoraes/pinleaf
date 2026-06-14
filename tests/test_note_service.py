@@ -56,10 +56,10 @@ class NoteServiceTests(unittest.TestCase):
     def test_update_font_family(self) -> None:
         note = self.service.create_note()
 
-        updated = self.service.update_font_family(note.id, "Cedarville Cursive")
+        updated = self.service.update_font_family(note.id, "Dancing Script")
         reset = self.service.update_font_family(note.id, None)
 
-        self.assertEqual(updated.font_family, "Cedarville Cursive")
+        self.assertEqual(updated.font_family, "Dancing Script")
         self.assertIsNone(reset.font_family)
 
     def test_save_open_note_window_preserves_open_state_and_geometry(self) -> None:

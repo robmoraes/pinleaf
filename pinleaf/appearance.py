@@ -14,12 +14,22 @@ FONT_OPTIONS: tuple[FontOption, ...] = (
     FontOption(None, "Default", None),
     FontOption("cursive", "Cursive", "note-font-cursive"),
     FontOption("sans-serif", "Sans Serif", "note-font-sans-serif"),
+    FontOption("monospace", "Monospace", "note-font-monospace"),
     FontOption("Dancing Script", "Dancing Script", "note-font-dancing-script"),
+    FontOption("Kavoon", "Kavoon", "note-font-kavoon"),
+    FontOption("Londrina Shadow", "Londrina Shadow", "note-font-londrina-shadow"),
+    FontOption("Nabla", "Nabla", "note-font-nabla"),
+    FontOption("Press Start 2P", "Press Start 2P", "note-font-press-start-2p"),
+    FontOption("Style Script", "Style Script", "note-font-style-script"),
 )
 
 
 def font_options() -> tuple[FontOption, ...]:
     return FONT_OPTIONS
+
+
+def system_font_option_count() -> int:
+    return 4
 
 
 def font_css_classes() -> tuple[str, ...]:

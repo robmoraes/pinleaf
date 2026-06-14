@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Pinleaf
+Comment=Desktop sticky notes
+Exec=pinleaf
+Icon=pinleaf
+Terminal=false
+Categories=Utility;Office;
+StartupWMClass=dev.pinleaf.Pinleaf

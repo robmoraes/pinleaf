@@ -1,0 +1,19 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	/usr/bin/python3 -m compileall pinleaf
+
+override_dh_auto_install:
+	install -d debian/pinleaf/usr/lib/python3/dist-packages
+	cp -a pinleaf debian/pinleaf/usr/lib/python3/dist-packages/
+	find debian/pinleaf/usr/lib/python3/dist-packages/pinleaf -type d -name __pycache__ -prune -exec rm -rf {} +
+	install -D -m 0755 debian/pinleaf-wrapper debian/pinleaf/usr/bin/pinleaf
+	install -D -m 0644 debian/dev.pinleaf.Pinleaf.desktop debian/pinleaf/usr/share/applications/dev.pinleaf.Pinleaf.desktop
+	install -D -m 0644 pinleaf/resources/icons/pinleaf-16.png debian/pinleaf/usr/share/icons/hicolor/16x16/apps/pinleaf.png
+	install -D -m 0644 pinleaf/resources/icons/pinleaf-32.png debian/pinleaf/usr/share/icons/hicolor/32x32/apps/pinleaf.png
+	install -D -m 0644 pinleaf/resources/icons/pinleaf-64.png debian/pinleaf/usr/share/icons/hicolor/64x64/apps/pinleaf.png
+	install -D -m 0644 pinleaf/resources/icons/pinleaf-256.png debian/pinleaf/usr/share/icons/hicolor/256x256/apps/pinleaf.png
+	install -D -m 0644 pinleaf/resources/icons/pinleaf.svg debian/pinleaf/usr/share/icons/hicolor/scalable/apps/pinleaf.svg

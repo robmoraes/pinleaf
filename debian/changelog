@@ -1,0 +1,5 @@
+pinleaf (0.4.0) unstable; urgency=medium
+
+  * Add initial Debian packaging for local .deb installation.
+
+ -- Carlos R Moraes <carlos.moraes.as@gmail.com>  Sun, 14 Jun 2026 17:30:00 -0300

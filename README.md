@@ -17,7 +17,43 @@ The current MVP supports:
 - an AppIndicator status menu for quick actions;
 - an About dialog with maintainer, license and font credits;
 - bundled handwriting-style fonts;
-- bundled app/tray icon assets.
+- bundled app/tray icon assets;
+- local Debian package installation.
+
+## Install
+
+### Debian/Ubuntu Local Package
+
+Download the `pinleaf_*.deb` package from the release artifacts, then install it
+with `apt`:
+
+```bash
+sudo apt install ./pinleaf_*.deb
+```
+
+This installs:
+
+- `/usr/bin/pinleaf`
+- `/usr/share/applications/dev.pinleaf.Pinleaf.desktop`
+- Pinleaf icons under `/usr/share/icons/hicolor`
+- Pinleaf Python package files and bundled resources
+
+Remove the package:
+
+```bash
+sudo apt remove pinleaf
+```
+
+Removing the package does not remove note data under `~/.local/share/pinleaf`.
+
+If `apt` reports that the local package download is performed unsandboxed
+because the `_apt` user cannot access the `.deb`, move or copy the package to a
+world-readable directory such as `/tmp` and install it from there:
+
+```bash
+cp pinleaf_*.deb /tmp/
+sudo apt install /tmp/pinleaf_*.deb
+```
 
 ## Development Setup
 
@@ -85,6 +121,28 @@ scripts/uninstall-local
 ```
 
 Uninstalling does not remove note data.
+
+## Local Debian Package
+
+Maintainers can build the local Debian package from the repository root.
+
+Install packaging tools:
+
+```bash
+sudo apt install build-essential debhelper dpkg-dev
+```
+
+Build the package from the repository root:
+
+```bash
+dpkg-buildpackage -us -uc
+```
+
+Install the generated package from the parent directory:
+
+```bash
+sudo apt install ../pinleaf_*.deb
+```
 
 ## Test
 

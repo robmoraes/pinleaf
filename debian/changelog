@@ -1,5 +1,5 @@
-pinleaf (0.5.0) unstable; urgency=medium
+pinleaf (0.6.0) noble; urgency=medium
 
-  * Add GitHub Releases workflow for Debian package artifacts.
+  * Publish Pinleaf through the maintainer Ubuntu PPA.
 
- -- Carlos R Moraes <carlos.moraes.as@gmail.com>  Sun, 14 Jun 2026 17:30:00 -0300
+ -- Carlos R Moraes <carlos.moraes.as@gmail.com>  Mon, 15 Jun 2026 10:00:00 -0300

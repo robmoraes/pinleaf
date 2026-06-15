@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-06-15
+
+### Added
+
+- Added Ubuntu PPA publication support for installing Pinleaf with
+  `add-apt-repository` and `apt install`.
+- Added source package upload documentation for the maintainer Launchpad PPA.
+
+### Changed
+
+- Updated package version metadata to `0.6.0`.
+- Updated Debian source-package metadata for Ubuntu 24.04 LTS (`noble`) PPA
+  uploads.
+
 ## [0.5.0] - 2026-06-14
 
 ### Added
@@ -106,7 +120,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added GitHub Pages project page with screenshots.
 - Added repository contributor guidelines.
 
-[Unreleased]: https://github.com/robmoraes/pinleaf/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/robmoraes/pinleaf/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/robmoraes/pinleaf/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/robmoraes/pinleaf/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/robmoraes/pinleaf/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/robmoraes/pinleaf/compare/v0.2.1...v0.3.0

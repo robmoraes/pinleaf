@@ -4,17 +4,17 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Pinleaf</title>
-    <meta name="description" content="Pinleaf is a local-first desktop sticky notes app for Linux.">
+    <meta name="description" content="Pinleaf is a local-first desktop sticky notes app for Ubuntu-first, GNOME-style Linux desktops.">
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
     <header class="hero">
       <div class="hero-copy">
-        <p class="eyebrow">Linux desktop sticky notes</p>
+        <p class="eyebrow">Ubuntu-first GTK sticky notes</p>
         <h1>Pinleaf</h1>
         <p class="lead">
-          A local-first GTK/libadwaita app for quick notes, reminders and
-          lightweight desktop scratch space.
+          A local-first GTK/libadwaita app for Ubuntu 24.04 and GNOME-style
+          Linux desktops.
         </p>
         <div class="actions">
           <a href="https://github.com/robmoraes/pinleaf">GitHub Repository</a>
@@ -27,6 +27,17 @@
 
     <main>
       <section>
+        <h2>Supported platform</h2>
+        <ul class="features">
+          <li>Primary target: Ubuntu 24.04 LTS with GNOME or GNOME-style desktop sessions.</li>
+          <li>Supported install path: Launchpad PPA with apt.</li>
+          <li>Runtime stack: Python 3, GTK 4, libadwaita, PyGObject and Ayatana AppIndicator.</li>
+          <li>Best-effort: other Debian/Ubuntu-compatible systems with the same dependencies.</li>
+          <li>Not validated: Fedora, Arch, openSUSE, KDE, Xfce, LXQt, Flatpak, Snap, AppImage, macOS or Windows.</li>
+        </ul>
+      </section>
+
+      <section>
         <h2>What it does</h2>
         <ul class="features">
           <li>Independent post-it-style note windows.</li>
@@ -34,7 +45,7 @@
           <li>Four note colors with curated bundled and system font choices.</li>
           <li>Main panel with previews of existing notes.</li>
           <li>AppIndicator menu for quick create, show and quit actions.</li>
-          <li>Local Debian package installation with apt.</li>
+          <li>Ubuntu PPA and local Debian package installation with apt.</li>
         </ul>
       </section>
 
@@ -63,9 +74,15 @@
       <section id="install">
         <h2>Install</h2>
         <p>
-          Download the Debian package from
-          <a href="https://github.com/robmoraes/pinleaf/releases/latest">GitHub Releases</a>
-          and install it:
+          Add the Pinleaf PPA on Ubuntu 24.04 and install with apt:
+        </p>
+        <pre><code>sudo add-apt-repository ppa:robmoraes/pinleaf
+sudo apt update
+sudo apt install pinleaf</code></pre>
+
+        <p>
+          Or download the Debian package from
+          <a href="https://github.com/robmoraes/pinleaf/releases/latest">GitHub Releases</a>:
         </p>
         <pre><code>sudo apt install ./pinleaf_*.deb</code></pre>
 
@@ -111,8 +128,8 @@ cd pinleaf
       <section>
         <h2>Current status</h2>
         <p>
-          Pinleaf is preparing <code>v0.5.0</code> with downloadable Debian
-          package artifacts on GitHub Releases. Known limitations include
+          Pinleaf is preparing <code>v0.6.0</code> with Ubuntu PPA publication
+          and downloadable Debian package artifacts. Known limitations include
           best-effort window positioning and desktop-environment-specific
           AppIndicator behavior.
         </p>

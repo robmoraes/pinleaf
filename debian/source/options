@@ -1,0 +1,17 @@
+tar-ignore = .git
+tar-ignore = .gitignore
+tar-ignore = .github
+tar-ignore = .agents
+tar-ignore = .codex
+tar-ignore = AGENTS.md
+tar-ignore = .pytest_cache
+tar-ignore = __pycache__
+tar-ignore = *.pyc
+tar-ignore = *.pyo
+tar-ignore = *.sqlite3
+tar-ignore = tmp
+tar-ignore = debian/.debhelper
+tar-ignore = debian/debhelper-build-stamp
+tar-ignore = debian/files
+tar-ignore = debian/*.substvars
+tar-ignore = debian/pinleaf

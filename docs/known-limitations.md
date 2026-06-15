@@ -2,6 +2,30 @@
 
 Pinleaf is currently an MVP.
 
+## Supported Platform
+
+The primary target is Ubuntu 24.04 LTS with GNOME or GNOME-style desktop
+sessions.
+
+The supported packaged install path is:
+
+```bash
+sudo add-apt-repository ppa:robmoraes/pinleaf
+sudo apt update
+sudo apt install pinleaf
+```
+
+Pinleaf may work on other Debian/Ubuntu-compatible systems where the same
+runtime dependencies are available, but those systems are currently
+best-effort.
+
+The following targets are not currently validated:
+
+- Fedora, Arch, openSUSE or other non-Debian distributions;
+- KDE, Xfce, LXQt or other non-GNOME desktop behavior;
+- Flatpak, Snap or AppImage packaging;
+- macOS or Windows.
+
 ## Window Position
 
 Note window size and open state are persisted. Exact window position capture and
@@ -36,11 +60,15 @@ acceptable for the MVP and should be revisited in a lifecycle polish pass.
 
 ## Packaging
 
-The supported development run path is currently:
+The supported packaged install path is Ubuntu 24.04 LTS through the Launchpad
+PPA.
+
+The supported development run path is:
 
 ```bash
 /usr/bin/python3 -m pinleaf
 ```
 
-Flatpak, distro packages, desktop files and local install scripts are future
-packaging work.
+GitHub Release `.deb` artifacts and local Debian package builds are maintained
+as alternative installation paths. Flatpak, Snap and AppImage packages are not
+currently provided.

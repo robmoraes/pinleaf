@@ -1,11 +1,44 @@
 # Pinleaf
 
-Pinleaf is a local-first desktop sticky notes app for Linux, built with Python,
-GTK 4 and libadwaita.
+Pinleaf is a local-first desktop sticky notes app for Ubuntu-first,
+GNOME-style Linux desktops, built with Python, GTK 4 and libadwaita.
 
 Project page: [https://robmoraes.github.io/pinleaf/](https://robmoraes.github.io/pinleaf/)
 
 ![Pinleaf desktop overview](docs/site/assets/screenshots/overview.png)
+
+## Supported Platform
+
+Primary target:
+
+- Ubuntu 24.04 LTS with GNOME or GNOME-style desktop sessions.
+
+Supported install path:
+
+- Ubuntu 24.04 through the Launchpad PPA `ppa:robmoraes/pinleaf`.
+
+Expected runtime requirements:
+
+- Python 3;
+- GTK 4;
+- libadwaita;
+- PyGObject;
+- Ayatana AppIndicator support.
+
+Best-effort:
+
+- other Debian/Ubuntu-compatible systems where the same dependencies are
+  available.
+
+Not currently validated:
+
+- Fedora, Arch, openSUSE or other non-Debian distributions;
+- KDE, Xfce, LXQt or other non-GNOME desktop behavior;
+- Flatpak, Snap or AppImage packaging;
+- macOS or Windows.
+
+See [Known Limitations](docs/known-limitations.md) for desktop-environment and
+packaging notes.
 
 The current MVP supports:
 
@@ -18,11 +51,36 @@ The current MVP supports:
 - an About dialog with maintainer, license and font credits;
 - bundled handwriting-style fonts;
 - bundled app/tray icon assets;
-- local Debian package installation.
+- Ubuntu PPA and local Debian package installation.
 
 ## Install
 
-### Debian/Ubuntu Local Package
+### Ubuntu PPA
+
+On Ubuntu 24.04, add the Pinleaf PPA and install with `apt`:
+
+```bash
+sudo add-apt-repository ppa:robmoraes/pinleaf
+sudo apt update
+sudo apt install pinleaf
+```
+
+After installation, updates are handled by the normal system update flow:
+
+```bash
+sudo apt update
+sudo apt upgrade
+```
+
+Remove the package:
+
+```bash
+sudo apt remove pinleaf
+```
+
+Removing the package does not remove note data under `~/.local/share/pinleaf`.
+
+### Debian/Ubuntu Release Package
 
 Download the `pinleaf_*.deb` package from the release artifacts, then install it
 with `apt`:
@@ -147,15 +205,15 @@ sudo apt install ../pinleaf_*.deb
 ## Release
 
 Maintainers publish downloadable Debian package artifacts through GitHub
-Releases.
+Releases and publish Ubuntu packages through the Launchpad PPA.
 
 After merging the release changes into `main`, create and push a version tag:
 
 ```bash
 git switch main
 git pull
-git tag v0.5.0
-git push origin v0.5.0
+git tag v0.6.0
+git push origin v0.6.0
 ```
 
 The release workflow runs on `v*` tags. It runs tests, builds the local Debian
@@ -164,6 +222,21 @@ package, creates or updates the matching GitHub Release, and uploads:
 - `pinleaf_*.deb`
 - `pinleaf_*.buildinfo`
 - `pinleaf_*.changes`
+
+### Ubuntu PPA Upload
+
+Maintainers publish the PPA package by uploading a signed source package to
+Launchpad:
+
+```bash
+debuild -S -kC8F3D9976DEDB74C5C31BFC87854367646319599
+dput ppa:robmoraes/pinleaf ../pinleaf_0.6.0_source.changes
+```
+
+The PPA target for the first upload is Ubuntu 24.04 LTS (`noble`).
+
+See [Manual Launchpad PPA Publication](docs/release/launchpad-ppa.md) for the
+full maintainer terminal workflow.
 
 ## Test
 

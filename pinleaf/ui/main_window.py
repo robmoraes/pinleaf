@@ -197,12 +197,14 @@ class MainWindow(Adw.ApplicationWindow):
         preview = Gtk.Label(label=_preview(note))
         preview.set_xalign(0)
         preview.set_ellipsize(Pango.EllipsizeMode.END)
+        _apply_hidden_text_style(preview, note)
         text.append(preview)
 
         updated = Gtk.Label(label=f"Updated {_format_timestamp(note.updated_at)}")
         updated.add_css_class("dim-label")
         updated.set_xalign(0)
         updated.set_ellipsize(Pango.EllipsizeMode.END)
+        _apply_hidden_text_style(updated, note)
         text.append(updated)
         container.append(text)
 
@@ -237,6 +239,14 @@ def _preview(note: Note) -> str:
     if not text:
         return "Empty note"
     return text if len(text) <= 100 else f"{text[:97]}..."
+
+
+def _apply_hidden_text_style(label: Gtk.Label, note: Note) -> None:
+    if note.is_open:
+        return
+    attributes = Pango.AttrList()
+    attributes.insert(Pango.attr_strikethrough_new(True))
+    label.set_attributes(attributes)
 
 
 def _format_timestamp(value: str, local_tz: tzinfo | None = None) -> str:

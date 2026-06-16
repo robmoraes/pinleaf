@@ -17,7 +17,7 @@ from pinleaf.appearance import (
 from pinleaf.models import Note, NoteColor
 from pinleaf.services.autosave import Autosave, ScheduledCall
 from pinleaf.services.note_service import NoteService
-from pinleaf.ui.dialogs import show_error
+from pinleaf.ui.dialogs import choose_note_action, show_error
 from pinleaf.ui.geometry import (
     WindowGeometry,
     apply_window_geometry,
@@ -64,6 +64,8 @@ class NoteWindow(Adw.ApplicationWindow):
         self.autosave = Autosave(self._save_content, scheduler=schedule_on_main_loop)
         self._loading_buffer = False
         self.text_appearance_window: TextAppearanceWindow | None = None
+        self.note_action_dialog: Adw.MessageDialog | None = None
+        self._skip_close_save = False
         self._text_css_class = f"note-text-{_css_identifier(note.id)}"
         self._text_css_provider = Gtk.CssProvider()
 
@@ -104,6 +106,11 @@ class NoteWindow(Adw.ApplicationWindow):
         scroller.set_child(self.text_view)
         toolbar.set_content(scroller)
         self.set_content(toolbar)
+
+        key_controller = Gtk.EventControllerKey()
+        key_controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+        key_controller.connect("key-pressed", self._on_key_pressed)
+        self.add_controller(key_controller)
 
         self.connect("close-request", self._on_close_request)
 
@@ -293,7 +300,48 @@ class NoteWindow(Adw.ApplicationWindow):
         self.note = self.note_service.update_content(note_id, content)
         self.on_changed()
 
+    def _on_key_pressed(
+        self,
+        _: Gtk.EventControllerKey,
+        keyval: int,
+        _keycode: int,
+        _state: Gdk.ModifierType,
+    ) -> bool:
+        if not _is_escape_key(keyval):
+            return False
+        self._show_note_action_dialog()
+        return True
+
+    def _show_note_action_dialog(self) -> None:
+        if self.note_action_dialog is not None:
+            self.note_action_dialog.present()
+            return
+        self.note_action_dialog = choose_note_action(
+            self,
+            on_hide=self.close,
+            on_delete=self._delete_note,
+            on_finished=self._on_note_action_dialog_finished,
+        )
+
+    def _on_note_action_dialog_finished(self) -> None:
+        self.note_action_dialog = None
+
+    def _delete_note(self) -> None:
+        if not self.flush_pending_changes():
+            return
+        try:
+            self.note_service.delete_note(self.note.id)
+        except Exception:
+            show_error(self, "Could not delete note", "The note may not have been deleted.")
+            return
+
+        self._skip_close_save = True
+        self.on_closed(self.note.id)
+        self.close()
+
     def _on_close_request(self, _: Gtk.Window) -> bool:
+        if self._skip_close_save:
+            return False
         self.flush_pending_changes()
         geometry = self._capture_geometry()
         self.note = self.note_service.close_note(
@@ -322,3 +370,7 @@ def _text_left_margin_for(font_family: str | None) -> int:
     if font_family == "Dancing Script":
         return 4
     return 0
+
+
+def _is_escape_key(keyval: int) -> bool:
+    return keyval == Gdk.KEY_Escape

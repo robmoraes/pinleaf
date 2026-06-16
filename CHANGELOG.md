@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   default font family, font size and text color persistence for new notes.
 - Added per-note text appearance settings for font family, font size and text
   color.
+- Added an Escape-key note action dialog for hiding or deleting focused sticky
+  notes.
 
 ### Changed
 
@@ -23,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed Nabla and Style Script from new font selections while keeping them
   supported for existing notes.
 - Updated the bundled Pinleaf icon assets.
+- Changed hidden notes in the main panel to render with struck-through preview
+  text and timestamps.
 
 ### Fixed
 

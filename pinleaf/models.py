@@ -49,6 +49,7 @@ class Note:
         note_id: str,
         now: str | None = None,
         color: str | NoteColor = NoteColor.YELLOW,
+        font_family: str | None = None,
     ) -> "Note":
         timestamp = now or utc_now_iso()
         return cls(
@@ -59,7 +60,7 @@ class Note:
             height=DEFAULT_HEIGHT,
             position_x=None,
             position_y=None,
-            font_family=None,
+            font_family=font_family,
             is_open=True,
             created_at=timestamp,
             updated_at=timestamp,

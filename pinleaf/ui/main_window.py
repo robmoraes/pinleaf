@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from datetime import datetime, tzinfo
 
 import gi
 
@@ -12,6 +13,7 @@ from pinleaf.models import Note
 from pinleaf.services.note_service import NoteService
 from pinleaf.ui.about import show_about
 from pinleaf.ui.dialogs import confirm_delete
+from pinleaf.ui.text_appearance_window import TextAppearanceWindow
 
 
 class MainWindow(Adw.ApplicationWindow):
@@ -29,6 +31,7 @@ class MainWindow(Adw.ApplicationWindow):
         self.on_create_note = on_create_note
         self.on_open_note = on_open_note
         self.on_delete_note = on_delete_note
+        self.text_appearance_window: TextAppearanceWindow | None = None
 
         self.set_title("Pinleaf")
         self.set_default_size(460, 560)
@@ -88,13 +91,50 @@ class MainWindow(Adw.ApplicationWindow):
         box.set_margin_start(8)
         box.set_margin_end(8)
 
+        text_appearance = Gtk.Button()
+        text_appearance.add_css_class("flat")
+        text_appearance.set_tooltip_text("Configure default text appearance for new notes")
+        text_appearance.connect("clicked", lambda _: self._show_text_appearance_window())
+
+        self.text_appearance_label = Gtk.Label()
+        text_appearance.set_child(self.text_appearance_label)
+        box.append(text_appearance)
+
+        box.append(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL))
+
         about = Gtk.Button(label="About Pinleaf")
         about.add_css_class("flat")
         about.connect("clicked", lambda _: show_about(self))
         box.append(about)
 
+        self._sync_text_appearance_label()
         popover.set_child(box)
         return popover
+
+    def _show_text_appearance_window(self) -> None:
+        if self.text_appearance_window is not None:
+            self.text_appearance_window.present()
+            return
+        self.text_appearance_window = TextAppearanceWindow(
+            parent=self,
+            note_service=self.note_service,
+            on_saved=self._sync_text_appearance_label,
+        )
+        self.text_appearance_window.connect(
+            "close-request",
+            self._on_text_appearance_window_closed,
+        )
+        self.text_appearance_window.present()
+
+    def _on_text_appearance_window_closed(self, _: Gtk.Window) -> bool:
+        self.text_appearance_window = None
+        return False
+
+    def _sync_text_appearance_label(self) -> None:
+        label = getattr(self, "text_appearance_label", None)
+        if label is None:
+            return
+        label.set_text("Text Settings")
 
     def refresh(self) -> None:
         notes = self.note_service.list_notes()
@@ -148,7 +188,7 @@ class MainWindow(Adw.ApplicationWindow):
         preview.set_ellipsize(Pango.EllipsizeMode.END)
         text.append(preview)
 
-        updated = Gtk.Label(label=f"Updated {note.updated_at}")
+        updated = Gtk.Label(label=f"Updated {_format_timestamp(note.updated_at)}")
         updated.add_css_class("dim-label")
         updated.set_xalign(0)
         updated.set_ellipsize(Pango.EllipsizeMode.END)
@@ -186,3 +226,14 @@ def _preview(note: Note) -> str:
     if not text:
         return "Empty note"
     return text if len(text) <= 100 else f"{text[:97]}..."
+
+
+def _format_timestamp(value: str, local_tz: tzinfo | None = None) -> str:
+    try:
+        timestamp = datetime.fromisoformat(value)
+    except ValueError:
+        return value
+    if timestamp.tzinfo is None:
+        timestamp = timestamp.astimezone()
+    local = timestamp.astimezone(local_tz)
+    return local.strftime("%b %-d, %Y %-I:%M %p %Z")

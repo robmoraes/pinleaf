@@ -3,6 +3,7 @@ from __future__ import annotations
 import unittest
 from unittest.mock import patch
 
+from pinleaf.tray_host import tray_icon_theme_path
 from pinleaf.ui.tray import TrayController, _socket_path
 
 
@@ -31,6 +32,12 @@ class TrayControllerTests(unittest.TestCase):
                 path = _socket_path()
 
         self.assertEqual(path.parent.name, "tmp")
+
+    def test_tray_icon_uses_local_resource_directory(self) -> None:
+        path = tray_icon_theme_path()
+
+        self.assertEqual(path.name, "icons")
+        self.assertTrue((path / "pinleaf.png").exists())
 
 
 if __name__ == "__main__":

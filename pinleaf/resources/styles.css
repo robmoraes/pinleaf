@@ -74,13 +74,13 @@ tooltip.background label {
   line-height: 1;
 }
 
-.note-window .note-font-choice-button {
+.note-font-choice-button {
   min-width: 188px;
   min-height: 34px;
   padding: 4px 10px;
 }
 
-.note-window .note-font-sample {
+.note-font-sample {
   color: #1f1f1f;
   font-size: 13pt;
 }

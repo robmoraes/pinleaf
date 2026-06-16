@@ -4,7 +4,16 @@ import socket
 import sys
 from pathlib import Path
 
-from pinleaf.config import icon_path, icon_svg_path
+from pinleaf.config import icon_path
+
+
+INDICATOR_ID = "pinleaf"
+INDICATOR_ICON = "pinleaf"
+INDICATOR_ICON_DESCRIPTION = "Pinleaf"
+
+
+def tray_icon_theme_path() -> Path:
+    return icon_path().parent
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -25,11 +34,12 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     indicator = AyatanaAppIndicator3.Indicator.new(
-        "pinleaf",
-        str(icon_svg_path()),
+        INDICATOR_ID,
+        INDICATOR_ICON,
         AyatanaAppIndicator3.IndicatorCategory.APPLICATION_STATUS,
     )
-    indicator.set_icon_full(str(icon_svg_path()), "Pinleaf")
+    indicator.set_icon_theme_path(str(tray_icon_theme_path()))
+    indicator.set_icon_full(INDICATOR_ICON, INDICATOR_ICON_DESCRIPTION)
     indicator.set_status(AyatanaAppIndicator3.IndicatorStatus.ACTIVE)
     indicator.set_menu(_build_menu(Gtk, socket_path))
     Gtk.main()

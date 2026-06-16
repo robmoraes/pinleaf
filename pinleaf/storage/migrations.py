@@ -3,7 +3,7 @@ from __future__ import annotations
 import sqlite3
 
 
-CURRENT_SCHEMA_VERSION = 2
+CURRENT_SCHEMA_VERSION = 3
 
 
 def migrate(connection: sqlite3.Connection) -> None:
@@ -19,6 +19,7 @@ def migrate(connection: sqlite3.Connection) -> None:
     if existing is None:
         _create_v1(connection)
         _migrate_v1_to_v2(connection)
+        _migrate_v2_to_v3(connection)
         connection.execute("INSERT INTO schema_version (version) VALUES (?)", (CURRENT_SCHEMA_VERSION,))
         connection.commit()
         return
@@ -32,6 +33,9 @@ def migrate(connection: sqlite3.Connection) -> None:
     if version < 2:
         _migrate_v1_to_v2(connection)
         version = 2
+    if version < 3:
+        _migrate_v2_to_v3(connection)
+        version = 3
     if version < CURRENT_SCHEMA_VERSION:
         raise RuntimeError(f"No migration path from schema version {version}.")
     connection.execute("UPDATE schema_version SET version = ?", (CURRENT_SCHEMA_VERSION,))
@@ -69,5 +73,16 @@ def _migrate_v1_to_v2(connection: sqlite3.Connection) -> None:
         """
         CREATE INDEX IF NOT EXISTS idx_notes_deleted_updated
           ON notes (deleted_at, updated_at)
+        """
+    )
+
+
+def _migrate_v2_to_v3(connection: sqlite3.Connection) -> None:
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS app_settings (
+          key TEXT PRIMARY KEY,
+          value TEXT
+        )
         """
     )

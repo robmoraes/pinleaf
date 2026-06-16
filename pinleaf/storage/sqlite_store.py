@@ -3,9 +3,14 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
-from pinleaf.appearance import normalize_font_family
+from pinleaf.appearance import TextAppearance, normalize_font_family, normalize_text_appearance
 from pinleaf.models import Note, NoteColor, utc_now_iso, validate_color
 from pinleaf.storage.migrations import migrate
+
+
+DEFAULT_FONT_SETTING = "default_font_family"
+DEFAULT_FONT_SIZE_SETTING = "default_font_size"
+DEFAULT_TEXT_COLOR_SETTING = "default_text_color"
 
 
 class NoteStore:
@@ -44,10 +49,65 @@ class NoteStore:
             """
             SELECT * FROM notes
             WHERE deleted_at IS NULL
-            ORDER BY updated_at DESC, created_at DESC
+            ORDER BY created_at DESC, id DESC
             """
         ).fetchall()
         return [_from_row(row) for row in rows]
+
+    def get_default_font_family(self) -> str | None:
+        return self.get_default_text_appearance().font_family
+
+    def set_default_font_family(self, font_family: str | None) -> str | None:
+        appearance = self.set_default_text_appearance(font_family=font_family)
+        return appearance.font_family
+
+    def get_default_text_appearance(self) -> TextAppearance:
+        values = self._get_settings(
+            DEFAULT_FONT_SETTING,
+            DEFAULT_FONT_SIZE_SETTING,
+            DEFAULT_TEXT_COLOR_SETTING,
+        )
+        return normalize_text_appearance(
+            font_family=values.get(DEFAULT_FONT_SETTING),
+            font_size=values.get(DEFAULT_FONT_SIZE_SETTING),
+            text_color=values.get(DEFAULT_TEXT_COLOR_SETTING),
+        )
+
+    def set_default_text_appearance(
+        self,
+        *,
+        font_family: str | None,
+        font_size: int | str | None = None,
+        text_color: str | None = None,
+    ) -> TextAppearance:
+        current = self.get_default_text_appearance()
+        appearance = normalize_text_appearance(
+            font_family=font_family,
+            font_size=font_size if font_size is not None else current.font_size,
+            text_color=text_color if text_color is not None else current.text_color,
+        )
+        self.connection.executemany(
+            """
+            INSERT INTO app_settings (key, value)
+            VALUES (?, ?)
+            ON CONFLICT(key) DO UPDATE SET value = excluded.value
+            """,
+            (
+                (DEFAULT_FONT_SETTING, appearance.font_family),
+                (DEFAULT_FONT_SIZE_SETTING, str(appearance.font_size)),
+                (DEFAULT_TEXT_COLOR_SETTING, appearance.text_color),
+            ),
+        )
+        self.connection.commit()
+        return appearance
+
+    def _get_settings(self, *keys: str) -> dict[str, str | None]:
+        placeholders = ", ".join("?" for _ in keys)
+        rows = self.connection.execute(
+            f"SELECT key, value FROM app_settings WHERE key IN ({placeholders})",
+            keys,
+        ).fetchall()
+        return {row["key"]: row["value"] for row in rows}
 
     def update_content(self, note_id: str, content: str, now: str | None = None) -> Note:
         timestamp = now or utc_now_iso()

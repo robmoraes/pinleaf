@@ -62,6 +62,41 @@ class NoteServiceTests(unittest.TestCase):
         self.assertEqual(updated.font_family, "Dancing Script")
         self.assertIsNone(reset.font_family)
 
+    def test_create_note_uses_default_font_family(self) -> None:
+        self.service.set_default_font_family("Kavoon")
+
+        note = self.service.create_note()
+
+        self.assertEqual(note.font_family, "Kavoon")
+
+    def test_default_text_appearance_stores_size_and_color_without_applying_them(self) -> None:
+        self.service.set_default_text_appearance(
+            font_family="Kavoon",
+            font_size=24,
+            text_color="#123abc",
+        )
+
+        note = self.service.create_note()
+        appearance = self.service.get_default_text_appearance()
+
+        self.assertEqual(note.font_family, "Kavoon")
+        self.assertEqual(appearance.font_size, 24)
+        self.assertEqual(appearance.text_color, "#123ABC")
+
+    def test_individual_note_font_is_independent_from_default_font(self) -> None:
+        self.service.set_default_font_family("Dancing Script")
+        note = self.service.create_note()
+
+        updated = self.service.update_font_family(note.id, "monospace")
+        self.service.set_default_font_family("Kavoon")
+
+        current = self.service.get_note(note.id)
+        self.assertEqual(updated.font_family, "monospace")
+        self.assertIsNotNone(current)
+        assert current is not None
+        self.assertEqual(current.font_family, "monospace")
+        self.assertEqual(self.service.get_default_font_family(), "Kavoon")
+
     def test_save_open_note_window_preserves_open_state_and_geometry(self) -> None:
         note = self.service.create_note()
 

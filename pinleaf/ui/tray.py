@@ -43,6 +43,11 @@ class TrayController:
                 stderr=subprocess.PIPE,
                 text=True,
             )
+            threading.Thread(
+                target=self._log_helper_errors,
+                name="pinleaf-tray-helper-stderr",
+                daemon=True,
+            ).start()
         except OSError as exc:
             print(f"Pinleaf tray disabled: could not start tray helper: {exc}", file=sys.stderr)
             self.stop()
@@ -79,6 +84,13 @@ class TrayController:
     def _handle_payload(self, payload: str) -> None:
         if payload in {"new-note", "show-main", "quit"}:
             self.on_action(payload)
+
+    def _log_helper_errors(self) -> None:
+        process = self._process
+        if process is None or process.stderr is None:
+            return
+        for line in process.stderr:
+            print(line.rstrip(), file=sys.stderr)
 
 
 def _socket_path() -> Path:

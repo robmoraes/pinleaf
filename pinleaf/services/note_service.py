@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from uuid import uuid4
 
+from pinleaf.appearance import TextAppearance
 from pinleaf.models import Note, NoteColor, utc_now_iso
 from pinleaf.storage.sqlite_store import NoteStore
 
@@ -20,7 +21,13 @@ class NoteService:
         self.clock = clock or utc_now_iso
 
     def create_note(self) -> Note:
-        return self.store.create(Note.new(self.id_factory(), now=self.clock()))
+        return self.store.create(
+            Note.new(
+                self.id_factory(),
+                now=self.clock(),
+                font_family=self.store.get_default_font_family(),
+            )
+        )
 
     def list_notes(self) -> list[Note]:
         return self.store.list_notes()
@@ -36,6 +43,28 @@ class NoteService:
 
     def update_font_family(self, note_id: str, font_family: str | None) -> Note:
         return self.store.update_font_family(note_id, font_family, now=self.clock())
+
+    def get_default_font_family(self) -> str | None:
+        return self.store.get_default_font_family()
+
+    def set_default_font_family(self, font_family: str | None) -> str | None:
+        return self.store.set_default_font_family(font_family)
+
+    def get_default_text_appearance(self) -> TextAppearance:
+        return self.store.get_default_text_appearance()
+
+    def set_default_text_appearance(
+        self,
+        *,
+        font_family: str | None,
+        font_size: int | str | None,
+        text_color: str | None,
+    ) -> TextAppearance:
+        return self.store.set_default_text_appearance(
+            font_family=font_family,
+            font_size=font_size,
+            text_color=text_color,
+        )
 
     def close_note(
         self,

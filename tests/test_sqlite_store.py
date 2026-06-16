@@ -45,6 +45,7 @@ class SQLiteStoreTests(unittest.TestCase):
 
         self.assertIn("schema_version", tables)
         self.assertIn("notes", tables)
+        self.assertIn("app_settings", tables)
         self.assertIn("idx_notes_deleted_updated", indexes)
         self.assertIn("font_family", columns)
         self.assertEqual(version, CURRENT_SCHEMA_VERSION)
@@ -56,6 +57,23 @@ class SQLiteStoreTests(unittest.TestCase):
 
         self.assertEqual(self.store.get("note-1"), note)
         self.assertEqual(self.store.list_notes(), [note])
+
+    def test_list_notes_orders_by_created_at_descending(self) -> None:
+        older = Note.new("note-1", now="2026-06-12T00:00:00+00:00")
+        newer = Note.new("note-2", now="2026-06-12T01:00:00+00:00")
+        self.store.create(older)
+        self.store.create(newer)
+
+        self.store.update_content(
+            older.id,
+            "Updated after newer note was created",
+            now="2026-06-12T02:00:00+00:00",
+        )
+
+        self.assertEqual(
+            [note.id for note in self.store.list_notes()],
+            ["note-2", "note-1"],
+        )
 
     def test_update_content_and_color(self) -> None:
         self.store.create(Note.new("note-1", now="2026-06-12T00:00:00+00:00"))
@@ -91,6 +109,53 @@ class SQLiteStoreTests(unittest.TestCase):
 
         self.assertEqual(updated.font_family, "Dancing Script")
         self.assertIsNone(reset.font_family)
+
+    def test_default_font_family_persists_supported_font(self) -> None:
+        saved = self.store.set_default_font_family("Kavoon")
+
+        self.assertEqual(saved, "Kavoon")
+        self.assertEqual(self.store.get_default_font_family(), "Kavoon")
+
+        self.store.close()
+        self.store = NoteStore(self.database_path)
+
+        self.assertEqual(self.store.get_default_font_family(), "Kavoon")
+
+    def test_default_font_family_normalizes_unsupported_font(self) -> None:
+        saved = self.store.set_default_font_family("Unsupported Font")
+
+        self.assertIsNone(saved)
+        self.assertIsNone(self.store.get_default_font_family())
+
+    def test_default_text_appearance_persists_all_fields(self) -> None:
+        saved = self.store.set_default_text_appearance(
+            font_family="Kavoon",
+            font_size=24,
+            text_color="#123abc",
+        )
+
+        self.assertEqual(saved.font_family, "Kavoon")
+        self.assertEqual(saved.font_size, 24)
+        self.assertEqual(saved.text_color, "#123ABC")
+
+        self.store.close()
+        self.store = NoteStore(self.database_path)
+
+        loaded = self.store.get_default_text_appearance()
+        self.assertEqual(loaded.font_family, "Kavoon")
+        self.assertEqual(loaded.font_size, 24)
+        self.assertEqual(loaded.text_color, "#123ABC")
+
+    def test_default_text_appearance_normalizes_unsupported_values(self) -> None:
+        saved = self.store.set_default_text_appearance(
+            font_family="Unsupported Font",
+            font_size=100,
+            text_color="blue",
+        )
+
+        self.assertIsNone(saved.font_family)
+        self.assertEqual(saved.font_size, 72)
+        self.assertEqual(saved.text_color, "#005BAC")
 
     def test_update_window_state(self) -> None:
         self.store.create(Note.new("note-1", now="2026-06-12T00:00:00+00:00"))
@@ -182,7 +247,15 @@ class SQLiteStoreTests(unittest.TestCase):
         self.assertIsNotNone(note)
         assert note is not None
         self.assertIsNone(note.font_family)
-        self.assertEqual(self.store.connection.execute("SELECT version FROM schema_version").fetchone()[0], CURRENT_SCHEMA_VERSION)
+        tables = {
+            row[0]
+            for row in self.store.connection.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'table'"
+            )
+        }
+        self.assertIn("app_settings", tables)
+        version = self.store.connection.execute("SELECT version FROM schema_version").fetchone()[0]
+        self.assertEqual(version, CURRENT_SCHEMA_VERSION)
 
 
 if __name__ == "__main__":

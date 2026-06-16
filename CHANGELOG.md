@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added main panel text settings for default note text appearance, including
+  default font family, font size and text color persistence for new notes.
+
+### Changed
+
+- Changed the main panel note list to stay ordered by note creation time, newest
+  first, instead of moving notes after edits.
+- Changed note timestamps in the main panel to display in the operating
+  system's local timezone with a friendlier format.
+- Updated the bundled Pinleaf icon assets.
+
+### Fixed
+
+- Fixed the tray helper icon registration after local installs by publishing the
+  Pinleaf icon name with the bundled icon theme path.
+
 ## [0.6.0] - 2026-06-15
 
 ### Added

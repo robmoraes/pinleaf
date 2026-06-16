@@ -4,10 +4,15 @@ import unittest
 from pathlib import Path
 
 from pinleaf.appearance import (
+    DEFAULT_FONT_SIZE,
+    DEFAULT_TEXT_COLOR,
     font_css_classes,
     font_option_for,
     font_options,
+    normalize_font_size,
     normalize_font_family,
+    normalize_text_appearance,
+    normalize_text_color,
     system_font_option_count,
 )
 
@@ -56,6 +61,29 @@ class AppearanceTests(unittest.TestCase):
         self.assertIsNone(normalize_font_family(None))
         self.assertIsNone(normalize_font_family(""))
         self.assertIsNone(normalize_font_family("Unknown Font"))
+
+    def test_normalize_font_size_bounds_values(self) -> None:
+        self.assertEqual(normalize_font_size(24), 24)
+        self.assertEqual(normalize_font_size("30"), 30)
+        self.assertEqual(normalize_font_size(1), 8)
+        self.assertEqual(normalize_font_size(100), 72)
+        self.assertEqual(normalize_font_size("large"), DEFAULT_FONT_SIZE)
+
+    def test_normalize_text_color_accepts_hex_values(self) -> None:
+        self.assertEqual(normalize_text_color("#123abc"), "#123ABC")
+        self.assertEqual(normalize_text_color("#0fa"), "#00FFAA")
+        self.assertEqual(normalize_text_color("blue"), DEFAULT_TEXT_COLOR)
+
+    def test_normalize_text_appearance_normalizes_all_fields(self) -> None:
+        appearance = normalize_text_appearance(
+            font_family="Kavoon",
+            font_size="28",
+            text_color="#abc",
+        )
+
+        self.assertEqual(appearance.font_family, "Kavoon")
+        self.assertEqual(appearance.font_size, 28)
+        self.assertEqual(appearance.text_color, "#AABBCC")
 
     def test_font_option_for_returns_default_for_invalid_font(self) -> None:
         self.assertIsNone(font_option_for("Unknown Font").value)

@@ -3,7 +3,12 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
-from pinleaf.appearance import TextAppearance, normalize_font_family, normalize_text_appearance
+from pinleaf.appearance import (
+    TextAppearance,
+    normalize_font_family,
+    normalize_selectable_text_appearance,
+    normalize_text_appearance,
+)
 from pinleaf.models import Note, NoteColor, utc_now_iso, validate_color
 from pinleaf.storage.migrations import migrate
 
@@ -28,9 +33,10 @@ class NoteStore:
             """
             INSERT INTO notes (
               id, content, color, width, height, position_x, position_y,
-              font_family, is_open, created_at, updated_at, deleted_at
+              font_family, font_size, text_color, is_open, created_at,
+              updated_at, deleted_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             _to_row_values(note),
         )
@@ -67,7 +73,7 @@ class NoteStore:
             DEFAULT_FONT_SIZE_SETTING,
             DEFAULT_TEXT_COLOR_SETTING,
         )
-        return normalize_text_appearance(
+        return normalize_selectable_text_appearance(
             font_family=values.get(DEFAULT_FONT_SETTING),
             font_size=values.get(DEFAULT_FONT_SIZE_SETTING),
             text_color=values.get(DEFAULT_TEXT_COLOR_SETTING),
@@ -81,7 +87,7 @@ class NoteStore:
         text_color: str | None = None,
     ) -> TextAppearance:
         current = self.get_default_text_appearance()
-        appearance = normalize_text_appearance(
+        appearance = normalize_selectable_text_appearance(
             font_family=font_family,
             font_size=font_size if font_size is not None else current.font_size,
             text_color=text_color if text_color is not None else current.text_color,
@@ -160,6 +166,38 @@ class NoteStore:
         self.connection.commit()
         return self._require(note_id)
 
+    def update_text_appearance(
+        self,
+        note_id: str,
+        *,
+        font_family: str | None,
+        font_size: int | str | None,
+        text_color: str | None,
+        now: str | None = None,
+    ) -> Note:
+        timestamp = now or utc_now_iso()
+        appearance = normalize_text_appearance(
+            font_family=font_family,
+            font_size=font_size,
+            text_color=text_color,
+        )
+        self.connection.execute(
+            """
+            UPDATE notes
+            SET font_family = ?, font_size = ?, text_color = ?, updated_at = ?
+            WHERE id = ? AND deleted_at IS NULL
+            """,
+            (
+                appearance.font_family,
+                appearance.font_size,
+                appearance.text_color,
+                timestamp,
+                note_id,
+            ),
+        )
+        self.connection.commit()
+        return self._require(note_id)
+
     def update_window_state(
         self,
         note_id: str,
@@ -213,6 +251,8 @@ def _to_row_values(note: Note) -> tuple[object, ...]:
         note.position_x,
         note.position_y,
         normalize_font_family(note.font_family),
+        note.font_size,
+        note.text_color,
         int(note.is_open),
         note.created_at,
         note.updated_at,
@@ -221,6 +261,11 @@ def _to_row_values(note: Note) -> tuple[object, ...]:
 
 
 def _from_row(row: sqlite3.Row) -> Note:
+    appearance = normalize_text_appearance(
+        font_family=row["font_family"],
+        font_size=row["font_size"],
+        text_color=row["text_color"],
+    )
     return Note(
         id=row["id"],
         content=row["content"],
@@ -229,7 +274,9 @@ def _from_row(row: sqlite3.Row) -> Note:
         height=row["height"],
         position_x=row["position_x"],
         position_y=row["position_y"],
-        font_family=normalize_font_family(row["font_family"]),
+        font_family=appearance.font_family,
+        font_size=appearance.font_size,
+        text_color=appearance.text_color,
         is_open=bool(row["is_open"]),
         created_at=row["created_at"],
         updated_at=row["updated_at"],

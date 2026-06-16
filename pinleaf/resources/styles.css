@@ -92,7 +92,7 @@ tooltip.background label {
   font-weight: 400;
   font-style: normal;
   font-size: 17pt;
-  padding: 14px;
+  padding: 14px 14px 14px 14px;
 }
 
 .note-editor text {

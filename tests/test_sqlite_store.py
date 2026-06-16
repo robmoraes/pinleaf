@@ -48,6 +48,8 @@ class SQLiteStoreTests(unittest.TestCase):
         self.assertIn("app_settings", tables)
         self.assertIn("idx_notes_deleted_updated", indexes)
         self.assertIn("font_family", columns)
+        self.assertIn("font_size", columns)
+        self.assertIn("text_color", columns)
         self.assertEqual(version, CURRENT_SCHEMA_VERSION)
 
     def test_create_get_and_list_note(self) -> None:
@@ -110,6 +112,31 @@ class SQLiteStoreTests(unittest.TestCase):
         self.assertEqual(updated.font_family, "Dancing Script")
         self.assertIsNone(reset.font_family)
 
+    def test_update_text_appearance(self) -> None:
+        self.store.create(Note.new("note-1", now="2026-06-12T00:00:00+00:00"))
+
+        updated = self.store.update_text_appearance(
+            "note-1",
+            font_family="Kavoon",
+            font_size=24,
+            text_color="#123abc",
+            now="2026-06-12T01:00:00+00:00",
+        )
+        reset = self.store.update_text_appearance(
+            "note-1",
+            font_family="Unsupported Font",
+            font_size=100,
+            text_color="blue",
+            now="2026-06-12T02:00:00+00:00",
+        )
+
+        self.assertEqual(updated.font_family, "Kavoon")
+        self.assertEqual(updated.font_size, 24)
+        self.assertEqual(updated.text_color, "#123ABC")
+        self.assertIsNone(reset.font_family)
+        self.assertEqual(reset.font_size, 72)
+        self.assertEqual(reset.text_color, "#005BAC")
+
     def test_default_font_family_persists_supported_font(self) -> None:
         saved = self.store.set_default_font_family("Kavoon")
 
@@ -126,6 +153,14 @@ class SQLiteStoreTests(unittest.TestCase):
 
         self.assertIsNone(saved)
         self.assertIsNone(self.store.get_default_font_family())
+
+    def test_default_font_family_normalizes_legacy_fonts_to_default(self) -> None:
+        for family in ("Nabla", "Style Script"):
+            with self.subTest(family=family):
+                saved = self.store.set_default_font_family(family)
+
+                self.assertIsNone(saved)
+                self.assertIsNone(self.store.get_default_font_family())
 
     def test_default_text_appearance_persists_all_fields(self) -> None:
         saved = self.store.set_default_text_appearance(
@@ -156,6 +191,19 @@ class SQLiteStoreTests(unittest.TestCase):
         self.assertIsNone(saved.font_family)
         self.assertEqual(saved.font_size, 72)
         self.assertEqual(saved.text_color, "#005BAC")
+
+    def test_default_text_appearance_normalizes_legacy_fonts_to_default(self) -> None:
+        for family in ("Nabla", "Style Script"):
+            with self.subTest(family=family):
+                saved = self.store.set_default_text_appearance(
+                    font_family=family,
+                    font_size=24,
+                    text_color="#123abc",
+                )
+
+                self.assertIsNone(saved.font_family)
+                self.assertEqual(saved.font_size, 24)
+                self.assertEqual(saved.text_color, "#123ABC")
 
     def test_update_window_state(self) -> None:
         self.store.create(Note.new("note-1", now="2026-06-12T00:00:00+00:00"))
@@ -247,6 +295,8 @@ class SQLiteStoreTests(unittest.TestCase):
         self.assertIsNotNone(note)
         assert note is not None
         self.assertIsNone(note.font_family)
+        self.assertEqual(note.font_size, 17)
+        self.assertEqual(note.text_color, "#005BAC")
         tables = {
             row[0]
             for row in self.store.connection.execute(
@@ -254,6 +304,12 @@ class SQLiteStoreTests(unittest.TestCase):
             )
         }
         self.assertIn("app_settings", tables)
+        columns = {
+            row[1]
+            for row in self.store.connection.execute("PRAGMA table_info(notes)").fetchall()
+        }
+        self.assertIn("font_size", columns)
+        self.assertIn("text_color", columns)
         version = self.store.connection.execute("SELECT version FROM schema_version").fetchone()[0]
         self.assertEqual(version, CURRENT_SCHEMA_VERSION)
 

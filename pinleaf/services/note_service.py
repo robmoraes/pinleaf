@@ -21,11 +21,14 @@ class NoteService:
         self.clock = clock or utc_now_iso
 
     def create_note(self) -> Note:
+        appearance = self.store.get_default_text_appearance()
         return self.store.create(
             Note.new(
                 self.id_factory(),
                 now=self.clock(),
-                font_family=self.store.get_default_font_family(),
+                font_family=appearance.font_family,
+                font_size=appearance.font_size,
+                text_color=appearance.text_color,
             )
         )
 
@@ -43,6 +46,22 @@ class NoteService:
 
     def update_font_family(self, note_id: str, font_family: str | None) -> Note:
         return self.store.update_font_family(note_id, font_family, now=self.clock())
+
+    def update_text_appearance(
+        self,
+        note_id: str,
+        *,
+        font_family: str | None,
+        font_size: int | str | None,
+        text_color: str | None,
+    ) -> Note:
+        return self.store.update_text_appearance(
+            note_id,
+            font_family=font_family,
+            font_size=font_size,
+            text_color=text_color,
+            now=self.clock(),
+        )
 
     def get_default_font_family(self) -> str | None:
         return self.store.get_default_font_family()

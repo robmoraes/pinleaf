@@ -9,6 +9,7 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Adw, Gtk, Pango
 
+from pinleaf.appearance import TextAppearance
 from pinleaf.models import Note
 from pinleaf.services.note_service import NoteService
 from pinleaf.ui.about import show_about
@@ -117,7 +118,10 @@ class MainWindow(Adw.ApplicationWindow):
             return
         self.text_appearance_window = TextAppearanceWindow(
             parent=self,
-            note_service=self.note_service,
+            appearance=self.note_service.get_default_text_appearance(),
+            on_save=self._save_default_text_appearance,
+            error_heading="Could not save text settings",
+            error_body="New notes may keep using the previous text settings.",
             on_saved=self._sync_text_appearance_label,
         )
         self.text_appearance_window.connect(
@@ -135,6 +139,13 @@ class MainWindow(Adw.ApplicationWindow):
         if label is None:
             return
         label.set_text("Text Settings")
+
+    def _save_default_text_appearance(self, appearance: TextAppearance) -> None:
+        self.note_service.set_default_text_appearance(
+            font_family=appearance.font_family,
+            font_size=appearance.font_size,
+            text_color=appearance.text_color,
+        )
 
     def refresh(self) -> None:
         notes = self.note_service.list_notes()

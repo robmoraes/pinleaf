@@ -9,8 +9,11 @@ from pinleaf.appearance import (
     font_css_classes,
     font_option_for,
     font_options,
+    legacy_font_options,
     normalize_font_size,
     normalize_font_family,
+    normalize_selectable_font_family,
+    normalize_selectable_text_appearance,
     normalize_text_appearance,
     normalize_text_color,
     system_font_option_count,
@@ -24,10 +27,10 @@ CURATED_FONT_FAMILIES = (
     "Dancing Script",
     "Kavoon",
     "Londrina Shadow",
-    "Nabla",
     "Press Start 2P",
-    "Style Script",
 )
+
+LEGACY_FONT_FAMILIES = ("Nabla", "Style Script")
 
 SYSTEM_FONT_VALUES = (None, "cursive", "sans-serif", "monospace")
 
@@ -50,12 +53,29 @@ class AppearanceTests(unittest.TestCase):
         for family in CURATED_FONT_FAMILIES:
             self.assertIn(family, values)
 
+    def test_font_options_exclude_legacy_fonts(self) -> None:
+        values = tuple(option.value for option in font_options())
+
+        for family in LEGACY_FONT_FAMILIES:
+            self.assertNotIn(family, values)
+
+    def test_legacy_font_options_include_retired_fonts_for_existing_notes(self) -> None:
+        values = tuple(option.value for option in legacy_font_options())
+
+        for family in LEGACY_FONT_FAMILIES:
+            self.assertIn(family, values)
+
     def test_normalize_font_family_accepts_supported_font(self) -> None:
-        for family in CURATED_FONT_FAMILIES:
+        for family in (*CURATED_FONT_FAMILIES, *LEGACY_FONT_FAMILIES):
             self.assertEqual(normalize_font_family(family), family)
         self.assertEqual(normalize_font_family("cursive"), "cursive")
         self.assertEqual(normalize_font_family("sans-serif"), "sans-serif")
         self.assertEqual(normalize_font_family("monospace"), "monospace")
+
+    def test_normalize_selectable_font_family_rejects_legacy_font(self) -> None:
+        for family in LEGACY_FONT_FAMILIES:
+            self.assertIsNone(normalize_selectable_font_family(family))
+        self.assertEqual(normalize_selectable_font_family("Kavoon"), "Kavoon")
 
     def test_normalize_font_family_returns_none_for_default_or_invalid_font(self) -> None:
         self.assertIsNone(normalize_font_family(None))
@@ -85,11 +105,22 @@ class AppearanceTests(unittest.TestCase):
         self.assertEqual(appearance.font_size, 28)
         self.assertEqual(appearance.text_color, "#AABBCC")
 
+    def test_normalize_selectable_text_appearance_rejects_legacy_font(self) -> None:
+        appearance = normalize_selectable_text_appearance(
+            font_family="Nabla",
+            font_size="28",
+            text_color="#abc",
+        )
+
+        self.assertIsNone(appearance.font_family)
+        self.assertEqual(appearance.font_size, 28)
+        self.assertEqual(appearance.text_color, "#AABBCC")
+
     def test_font_option_for_returns_default_for_invalid_font(self) -> None:
         self.assertIsNone(font_option_for("Unknown Font").value)
 
     def test_font_option_for_curated_fonts_returns_label_and_css_class(self) -> None:
-        for family in CURATED_FONT_FAMILIES:
+        for family in (*CURATED_FONT_FAMILIES, *LEGACY_FONT_FAMILIES):
             option = font_option_for(family)
 
             self.assertEqual(option.value, family)

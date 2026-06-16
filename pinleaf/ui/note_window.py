@@ -6,13 +6,13 @@ import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw, GLib, Gtk
+from gi.repository import Adw, Gdk, GLib, Gtk
 
 from pinleaf.appearance import (
+    TextAppearance,
     font_css_classes,
     font_option_for,
-    font_options,
-    system_font_option_count,
+    normalize_text_appearance,
 )
 from pinleaf.models import Note, NoteColor
 from pinleaf.services.autosave import Autosave, ScheduledCall
@@ -24,6 +24,7 @@ from pinleaf.ui.geometry import (
     capture_window_geometry,
     normalize_geometry,
 )
+from pinleaf.ui.text_appearance_window import TextAppearanceWindow
 
 
 class GLibScheduledCall:
@@ -62,6 +63,9 @@ class NoteWindow(Adw.ApplicationWindow):
         self.on_changed = on_changed
         self.autosave = Autosave(self._save_content, scheduler=schedule_on_main_loop)
         self._loading_buffer = False
+        self.text_appearance_window: TextAppearanceWindow | None = None
+        self._text_css_class = f"note-text-{_css_identifier(note.id)}"
+        self._text_css_provider = Gtk.CssProvider()
 
         self.set_title("Pinleaf Note")
         apply_window_geometry(
@@ -78,14 +82,16 @@ class NoteWindow(Adw.ApplicationWindow):
         self.header.set_show_end_title_buttons(False)
         toolbar.add_top_bar(self.header)
         self.header.pack_end(self._build_color_menu_button())
-        self.header.pack_end(self._build_font_menu_button())
+        self.header.pack_end(self._build_text_appearance_button())
 
         self.text_view = Gtk.TextView()
         self.text_view.set_wrap_mode(Gtk.WrapMode.NONE)
         self.text_view.set_vexpand(True)
         self.text_view.set_hexpand(True)
         self.text_view.add_css_class("note-editor")
-        self._apply_font_class(note.font_family)
+        self.text_view.add_css_class(self._text_css_class)
+        self._install_text_css_provider()
+        self._apply_text_appearance(self._note_text_appearance())
 
         buffer = self.text_view.get_buffer()
         self._loading_buffer = True
@@ -130,12 +136,12 @@ class NoteWindow(Adw.ApplicationWindow):
         button.set_child(self.color_dot)
         return button
 
-    def _build_font_menu_button(self) -> Gtk.MenuButton:
-        button = Gtk.MenuButton()
+    def _build_text_appearance_button(self) -> Gtk.Button:
+        button = Gtk.Button()
         button.add_css_class("flat")
         button.add_css_class("note-tool-button")
-        button.set_tooltip_text("Change note font")
-        button.set_popover(self._build_font_popover())
+        button.set_tooltip_text("Change text appearance")
+        button.connect("clicked", lambda _: self._show_text_appearance_window())
 
         self.font_label = Gtk.Label(label="A")
         self.font_label.add_css_class("note-font-icon")
@@ -167,33 +173,6 @@ class NoteWindow(Adw.ApplicationWindow):
         popover.set_child(box)
         return popover
 
-    def _build_font_popover(self) -> Gtk.Popover:
-        popover = Gtk.Popover()
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-        box.set_margin_top(8)
-        box.set_margin_bottom(8)
-        box.set_margin_start(8)
-        box.set_margin_end(8)
-
-        for index, option in enumerate(font_options()):
-            label = Gtk.Label(label=option.label)
-            label.add_css_class("note-font-sample")
-            label.set_xalign(0.0)
-            if option.css_class is not None:
-                label.add_css_class(option.css_class)
-
-            button = Gtk.Button()
-            button.add_css_class("note-font-choice-button")
-            button.set_tooltip_text(option.label)
-            button.set_child(label)
-            button.connect("clicked", lambda _, selected=option.value: self._set_font_family(selected))
-            box.append(button)
-            if index + 1 == system_font_option_count():
-                box.append(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL))
-
-        popover.set_child(box)
-        return popover
-
     def _set_color(self, color: NoteColor) -> None:
         previous = self.note.color
         if previous == color:
@@ -221,6 +200,69 @@ class NoteWindow(Adw.ApplicationWindow):
 
         self._apply_font_class(self.note.font_family)
         self.on_changed()
+
+    def _show_text_appearance_window(self) -> None:
+        if self.text_appearance_window is not None:
+            self.text_appearance_window.present()
+            return
+        self.text_appearance_window = TextAppearanceWindow(
+            parent=self,
+            appearance=self._note_text_appearance(),
+            on_save=self._set_text_appearance,
+            error_heading="Could not save text appearance",
+            error_body="The selected note text appearance may not have been saved.",
+        )
+        self.text_appearance_window.connect(
+            "close-request",
+            self._on_text_appearance_window_closed,
+        )
+        self.text_appearance_window.present()
+
+    def _on_text_appearance_window_closed(self, _: Gtk.Window) -> bool:
+        self.text_appearance_window = None
+        return False
+
+    def _set_text_appearance(self, appearance: TextAppearance) -> None:
+        current = self._note_text_appearance()
+        if current == appearance:
+            return
+        self.note = self.note_service.update_text_appearance(
+            self.note.id,
+            font_family=appearance.font_family,
+            font_size=appearance.font_size,
+            text_color=appearance.text_color,
+        )
+        self._apply_text_appearance(self._note_text_appearance())
+        self.on_changed()
+
+    def _note_text_appearance(self) -> TextAppearance:
+        return normalize_text_appearance(
+            font_family=self.note.font_family,
+            font_size=self.note.font_size,
+            text_color=self.note.text_color,
+        )
+
+    def _apply_text_appearance(self, appearance: TextAppearance) -> None:
+        self._apply_font_class(appearance.font_family)
+        self.text_view.set_left_margin(_text_left_margin_for(appearance.font_family))
+        css = f"""
+        .note-editor.{self._text_css_class},
+        .note-editor.{self._text_css_class} text {{
+          color: {appearance.text_color};
+          font-size: {appearance.font_size}pt;
+        }}
+        """
+        self._text_css_provider.load_from_data(css.encode("utf-8"))
+
+    def _install_text_css_provider(self) -> None:
+        display = Gdk.Display.get_default()
+        if display is None:
+            return
+        Gtk.StyleContext.add_provider_for_display(
+            display,
+            self._text_css_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION + 1,
+        )
 
     def _apply_font_class(self, font_family: str | None) -> None:
         font_label = getattr(self, "font_label", None)
@@ -270,3 +312,13 @@ class NoteWindow(Adw.ApplicationWindow):
             fallback_position_x=self.note.position_x,
             fallback_position_y=self.note.position_y,
         )
+
+
+def _css_identifier(value: str) -> str:
+    return "".join(character.lower() if character.isalnum() else "-" for character in value)
+
+
+def _text_left_margin_for(font_family: str | None) -> int:
+    if font_family == "Dancing Script":
+        return 4
+    return 0

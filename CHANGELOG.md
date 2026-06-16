@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added main panel text settings for default note text appearance, including
   default font family, font size and text color persistence for new notes.
+- Added per-note text appearance settings for font family, font size and text
+  color.
 
 ### Changed
 
@@ -18,12 +20,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   first, instead of moving notes after edits.
 - Changed note timestamps in the main panel to display in the operating
   system's local timezone with a friendlier format.
+- Removed Nabla and Style Script from new font selections while keeping them
+  supported for existing notes.
 - Updated the bundled Pinleaf icon assets.
 
 ### Fixed
 
 - Fixed the tray helper icon registration after local installs by publishing the
   Pinleaf icon name with the bundled icon theme path.
+- Fixed Dancing Script text clipping at the left edge of sticky notes.
 
 ## [0.6.0] - 2026-06-15
 

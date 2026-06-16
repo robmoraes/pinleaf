@@ -4,6 +4,8 @@ from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from enum import StrEnum
 
+from pinleaf.appearance import normalize_text_appearance
+
 
 DEFAULT_WIDTH = 320
 DEFAULT_HEIGHT = 280
@@ -38,6 +40,8 @@ class Note:
     position_x: int | None
     position_y: int | None
     font_family: str | None
+    font_size: int
+    text_color: str
     is_open: bool
     created_at: str
     updated_at: str
@@ -50,8 +54,15 @@ class Note:
         now: str | None = None,
         color: str | NoteColor = NoteColor.YELLOW,
         font_family: str | None = None,
+        font_size: int | str | None = None,
+        text_color: str | None = None,
     ) -> "Note":
         timestamp = now or utc_now_iso()
+        appearance = normalize_text_appearance(
+            font_family=font_family,
+            font_size=font_size,
+            text_color=text_color,
+        )
         return cls(
             id=note_id,
             content="",
@@ -60,7 +71,9 @@ class Note:
             height=DEFAULT_HEIGHT,
             position_x=None,
             position_y=None,
-            font_family=font_family,
+            font_family=appearance.font_family,
+            font_size=appearance.font_size,
+            text_color=appearance.text_color,
             is_open=True,
             created_at=timestamp,
             updated_at=timestamp,

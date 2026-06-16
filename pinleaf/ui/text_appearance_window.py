@@ -12,11 +12,13 @@ from pinleaf.appearance import (
     MAX_FONT_SIZE,
     MIN_FONT_SIZE,
     TextAppearance,
+    font_css_classes,
     font_option_for,
     font_options,
+    normalize_text_appearance,
     normalize_text_color,
+    system_font_option_count,
 )
-from pinleaf.services.note_service import NoteService
 from pinleaf.ui.dialogs import show_error
 
 
@@ -25,12 +27,17 @@ class TextAppearanceWindow(Adw.Window):
         self,
         *,
         parent: Gtk.Window,
-        note_service: NoteService,
-        on_saved: Callable[[], None],
+        appearance: TextAppearance,
+        on_save: Callable[[TextAppearance], None],
+        error_heading: str,
+        error_body: str,
+        on_saved: Callable[[], None] | None = None,
     ) -> None:
         super().__init__()
-        self.note_service = note_service
+        self.on_save = on_save
         self.on_saved = on_saved
+        self.error_heading = error_heading
+        self.error_body = error_body
         self._font_options = font_options()
 
         self.set_title("Text Appearance")
@@ -42,7 +49,6 @@ class TextAppearanceWindow(Adw.Window):
         header = Adw.HeaderBar()
         toolbar.add_top_bar(header)
 
-        appearance = note_service.get_default_text_appearance()
         toolbar.set_content(self._build_content(appearance))
         self.set_content(toolbar)
 
@@ -75,15 +81,61 @@ class TextAppearanceWindow(Adw.Window):
         return content
 
     def _build_font_row(self, appearance: TextAppearance) -> Gtk.Widget:
-        self.font_combo = Gtk.ComboBoxText()
-        selected_index = 0
-        selected = font_option_for(appearance.font_family).value
+        self.selected_font_family = font_option_for(appearance.font_family).value
+        self.font_button = Gtk.MenuButton()
+        self.font_button.set_popover(self._build_font_popover())
+
+        self.font_choice_label = Gtk.Label()
+        self.font_choice_label.add_css_class("note-font-sample")
+        self.font_choice_label.set_xalign(0.0)
+        self.font_button.set_child(self.font_choice_label)
+        self._sync_font_choice_label()
+        return _form_row("Font family", self.font_button)
+
+    def _build_font_popover(self) -> Gtk.Popover:
+        popover = Gtk.Popover()
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        box.set_margin_top(8)
+        box.set_margin_bottom(8)
+        box.set_margin_start(8)
+        box.set_margin_end(8)
+
         for index, option in enumerate(self._font_options):
-            self.font_combo.append(str(index), option.label)
-            if option.value == selected:
-                selected_index = index
-        self.font_combo.set_active(selected_index)
-        return _form_row("Font family", self.font_combo)
+            label = Gtk.Label(label=option.label)
+            label.add_css_class("note-font-sample")
+            label.set_xalign(0.0)
+            if option.css_class is not None:
+                label.add_css_class(option.css_class)
+
+            button = Gtk.Button()
+            button.add_css_class("note-font-choice-button")
+            button.set_tooltip_text(option.label)
+            button.set_child(label)
+            button.connect(
+                "clicked",
+                lambda _, selected=option.value: self._select_font_family(selected),
+            )
+            box.append(button)
+            if index + 1 == system_font_option_count():
+                box.append(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL))
+
+        popover.set_child(box)
+        return popover
+
+    def _select_font_family(self, font_family: str | None) -> None:
+        self.selected_font_family = font_option_for(font_family).value
+        self._sync_font_choice_label()
+        popover = self.font_button.get_popover()
+        if popover is not None:
+            popover.popdown()
+
+    def _sync_font_choice_label(self) -> None:
+        option = font_option_for(self.selected_font_family)
+        for css_class in font_css_classes():
+            self.font_choice_label.remove_css_class(css_class)
+        if option.css_class is not None:
+            self.font_choice_label.add_css_class(option.css_class)
+        self.font_choice_label.set_text(option.label)
 
     def _build_size_row(self, appearance: TextAppearance) -> Gtk.Widget:
         adjustment = Gtk.Adjustment(
@@ -105,23 +157,22 @@ class TextAppearanceWindow(Adw.Window):
         return _form_row("Text color", self.color_button)
 
     def _save(self) -> None:
-        active_id = self.font_combo.get_active_id()
-        selected_index = int(active_id) if active_id is not None else 0
-        font_family = self._font_options[selected_index].value
+        appearance = normalize_text_appearance(
+            font_family=self.selected_font_family,
+            font_size=self.size_spin.get_value_as_int(),
+            text_color=_rgba_to_hex(self.color_button.get_rgba()),
+        )
         try:
-            self.note_service.set_default_text_appearance(
-                font_family=font_family,
-                font_size=self.size_spin.get_value_as_int(),
-                text_color=_rgba_to_hex(self.color_button.get_rgba()),
-            )
+            self.on_save(appearance)
         except Exception:
             show_error(
                 self,
-                "Could not save text appearance",
-                "New notes may keep using the previous text appearance.",
+                self.error_heading,
+                self.error_body,
             )
             return
-        self.on_saved()
+        if self.on_saved is not None:
+            self.on_saved()
         self.close()
 
 

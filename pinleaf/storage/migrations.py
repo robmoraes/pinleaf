@@ -3,7 +3,7 @@ from __future__ import annotations
 import sqlite3
 
 
-CURRENT_SCHEMA_VERSION = 3
+CURRENT_SCHEMA_VERSION = 4
 
 
 def migrate(connection: sqlite3.Connection) -> None:
@@ -20,6 +20,7 @@ def migrate(connection: sqlite3.Connection) -> None:
         _create_v1(connection)
         _migrate_v1_to_v2(connection)
         _migrate_v2_to_v3(connection)
+        _migrate_v3_to_v4(connection)
         connection.execute("INSERT INTO schema_version (version) VALUES (?)", (CURRENT_SCHEMA_VERSION,))
         connection.commit()
         return
@@ -36,6 +37,9 @@ def migrate(connection: sqlite3.Connection) -> None:
     if version < 3:
         _migrate_v2_to_v3(connection)
         version = 3
+    if version < 4:
+        _migrate_v3_to_v4(connection)
+        version = 4
     if version < CURRENT_SCHEMA_VERSION:
         raise RuntimeError(f"No migration path from schema version {version}.")
     connection.execute("UPDATE schema_version SET version = ?", (CURRENT_SCHEMA_VERSION,))
@@ -86,3 +90,14 @@ def _migrate_v2_to_v3(connection: sqlite3.Connection) -> None:
         )
         """
     )
+
+
+def _migrate_v3_to_v4(connection: sqlite3.Connection) -> None:
+    columns = {
+        row[1]
+        for row in connection.execute("PRAGMA table_info(notes)").fetchall()
+    }
+    if "font_size" not in columns:
+        connection.execute("ALTER TABLE notes ADD COLUMN font_size INTEGER")
+    if "text_color" not in columns:
+        connection.execute("ALTER TABLE notes ADD COLUMN text_color TEXT")

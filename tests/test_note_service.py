@@ -69,7 +69,7 @@ class NoteServiceTests(unittest.TestCase):
 
         self.assertEqual(note.font_family, "Kavoon")
 
-    def test_default_text_appearance_stores_size_and_color_without_applying_them(self) -> None:
+    def test_create_note_uses_default_text_appearance(self) -> None:
         self.service.set_default_text_appearance(
             font_family="Kavoon",
             font_size=24,
@@ -80,8 +80,24 @@ class NoteServiceTests(unittest.TestCase):
         appearance = self.service.get_default_text_appearance()
 
         self.assertEqual(note.font_family, "Kavoon")
+        self.assertEqual(note.font_size, 24)
+        self.assertEqual(note.text_color, "#123ABC")
         self.assertEqual(appearance.font_size, 24)
         self.assertEqual(appearance.text_color, "#123ABC")
+
+    def test_update_text_appearance(self) -> None:
+        note = self.service.create_note()
+
+        updated = self.service.update_text_appearance(
+            note.id,
+            font_family="Kavoon",
+            font_size=24,
+            text_color="#123abc",
+        )
+
+        self.assertEqual(updated.font_family, "Kavoon")
+        self.assertEqual(updated.font_size, 24)
+        self.assertEqual(updated.text_color, "#123ABC")
 
     def test_individual_note_font_is_independent_from_default_font(self) -> None:
         self.service.set_default_font_family("Dancing Script")

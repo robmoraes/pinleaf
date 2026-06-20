@@ -1,5 +1,5 @@
-pinleaf (0.6.0) noble; urgency=medium
+pinleaf (0.7.0) noble; urgency=medium
 
-  * Publish Pinleaf through the maintainer Ubuntu PPA.
+  * Release Pinleaf 0.7.0.
 
- -- Carlos R Moraes <carlos.moraes.as@gmail.com>  Mon, 15 Jun 2026 10:00:00 -0300
+ -- Carlos R Moraes <carlos.moraes.as@gmail.com>  Fri, 19 Jun 2026 10:00:00 -0300

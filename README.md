@@ -212,8 +212,8 @@ After merging the release changes into `main`, create and push a version tag:
 ```bash
 git switch main
 git pull
-git tag v0.6.0
-git push origin v0.6.0
+git tag v0.7.0
+git push origin v0.7.0
 ```
 
 The release workflow runs on `v*` tags. It runs tests, builds the local Debian
@@ -230,7 +230,7 @@ Launchpad:
 
 ```bash
 debuild -S -kC8F3D9976DEDB74C5C31BFC87854367646319599
-dput ppa:robmoraes/pinleaf ../pinleaf_0.6.0_source.changes
+dput ppa:robmoraes/pinleaf ../pinleaf_0.7.0_source.changes
 ```
 
 The PPA target for the first upload is Ubuntu 24.04 LTS (`noble`).

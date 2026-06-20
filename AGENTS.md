@@ -83,6 +83,48 @@ Pull requests should include:
 - screenshots or notes for GTK UI changes;
 - known limitations or follow-up work.
 
+## Release Preparation Requirements
+
+Prepare releases on a short-lived branch named `release/x.y.z`.
+
+For every new release, update all version and release references that apply:
+
+- `CHANGELOG.md`: promote `[Unreleased]` to `[x.y.z] - YYYY-MM-DD`, keep a new
+  empty `[Unreleased]` section, and update comparison links.
+- `pyproject.toml`: update the project `version`.
+- `pinleaf/__init__.py`: update `__version__`.
+- `pinleaf/metadata.py`: update `APP_VERSION` and `BUILD_DATE`.
+- `debian/changelog`: update the Debian package version, Ubuntu series
+  (`noble` while Ubuntu 24.04 is the target), summary, maintainer line, and
+  date.
+- `README.md`: update release tag and package upload examples when they include
+  the version.
+- `docs/release/launchpad-ppa.md`: update operational examples for branch name,
+  package artifact names, `lintian`, signature verification and `dput`.
+- `docs/site/index.html`: update the public GitHub Pages status and feature
+  summary when the release changes user-visible behavior.
+
+Launchpad requires a package version that has never been uploaded to the same
+PPA before. Do not reuse a rejected or already-published version; bump the
+version again if a new upload is required.
+
+Before opening a release PR, run:
+
+```bash
+/usr/bin/python3 -m unittest discover -s tests
+/usr/bin/python3 -m compileall pinleaf tests
+git diff --check
+```
+
+For GitHub Releases, merge the release PR to `main`, create and push the
+matching `vX.Y.Z` tag, then confirm the release workflow publishes the Debian
+artifacts.
+
+For Launchpad PPA releases, build and sign a source package with the maintainer
+GPG key, verify the generated signatures, run `lintian` on the source upload,
+simulate the upload with `dput -s`, upload the `*_source.changes` file, and
+confirm Launchpad builds and publishes the package.
+
 ## Security & Configuration Tips
 
 Do not add network calls or telemetry without a spec. Notes are local SQLite

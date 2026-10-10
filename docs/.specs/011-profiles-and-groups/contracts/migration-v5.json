@@ -1,0 +1,121 @@
+{
+  "contract_format_version": 1,
+  "status": "implemented-local-verification",
+  "spec": "../spec.md",
+  "plan": "../plan.md",
+  "source_schema_versions": [1, 2, 3, 4],
+  "target_schema_version": 5,
+  "fresh_database_supported": true,
+  "nonempty_unversioned_database_policy": "reject-without-mutation",
+  "newer_schema_policy": "reject-without-mutation",
+  "initial_context": {
+    "profile_name_by_locale": {"default": "Personal", "pt-BR": "Pessoal"},
+    "profile_name_stored_once_and_renameable": true,
+    "group_canonical_name": "General",
+    "group_label_by_locale": {"default": "General", "pt-BR": "Geral"},
+    "general_identity_field": "is_general",
+    "membership_population": "every-existing-note-including-soft-deleted",
+    "active_group": "initial-general",
+    "seed_example_profiles": false
+  },
+  "schema": {
+    "profiles": {
+      "required_columns": ["id", "name", "name_key", "deleted_at"],
+      "primary_key": ["id"],
+      "live_unique_key": ["name_key"]
+    },
+    "groups": {
+      "required_columns": ["id", "profile_id", "name", "name_key", "is_general", "deleted_at"],
+      "primary_key": ["id"],
+      "foreign_keys": [
+        {"columns": ["profile_id"], "references": "profiles", "reference_columns": ["id"], "on_delete": "RESTRICT"}
+      ],
+      "unique_keys": [["id", "profile_id"]],
+      "live_unique_key": ["profile_id", "name_key"],
+      "live_general_unique_key": ["profile_id"]
+    },
+    "profile_context": {
+      "required_columns": ["profile_id", "last_group_id"],
+      "primary_key": ["profile_id"],
+      "foreign_keys": [
+        {"columns": ["profile_id"], "references": "profiles", "reference_columns": ["id"], "on_delete": "RESTRICT"},
+        {"columns": ["last_group_id", "profile_id"], "references": "groups", "reference_columns": ["id", "profile_id"], "on_delete": "RESTRICT"}
+      ]
+    },
+    "active_context": {
+      "required_columns": ["singleton_id", "group_id"],
+      "primary_key": ["singleton_id"],
+      "singleton_id": 1,
+      "foreign_keys": [
+        {"columns": ["group_id"], "references": "groups", "reference_columns": ["id"], "on_delete": "RESTRICT"}
+      ]
+    },
+    "notes": {
+      "added_columns": [{"name": "group_id", "sqlite_type": "TEXT", "nullable": false}],
+      "foreign_keys": [
+        {"columns": ["group_id"], "references": "groups", "reference_columns": ["id"], "on_delete": "RESTRICT"}
+      ],
+      "existing_index_to_preserve": "idx_notes_deleted_updated",
+      "live_membership_order_index": ["group_id", "created_at DESC", "id DESC"]
+    }
+  },
+  "preservation": {
+    "note_ids_and_row_count": "unchanged",
+    "existing_note_columns": [
+      "id", "content", "color", "width", "height", "position_x", "position_y",
+      "font_family", "font_size", "text_color", "is_open", "created_at", "updated_at", "deleted_at"
+    ],
+    "column_value_policy": "exact-for-columns-existing-in-source-schema",
+    "legacy_missing_appearance_columns": "existing-v1-to-v4-upgrade-defaults",
+    "app_settings": "unchanged",
+    "context_switch_changes_is_open": false
+  },
+  "backup": {
+    "required_before_existing_database_upgrade": true,
+    "mechanism": "sqlite3.Connection.backup",
+    "directory": "backups-under-configured-data-directory",
+    "directory_mode_octal": "0700",
+    "file_mode_octal": "0600",
+    "validation": ["source-schema-version", "integrity-check", "source-still-matches-under-write-lock"],
+    "failure_policy": "abort-before-schema-mutation",
+    "automatic_pruning": false
+  },
+  "migration": {
+    "transaction_count": 1,
+    "intermediate_commits": false,
+    "schema_version_updated_last": true,
+    "validation_before_commit": [
+      "note-preservation", "foreign-key-check", "integrity-check",
+      "every-note-has-membership", "one-live-general-per-live-profile",
+      "one-live-active-context", "valid-last-group-per-live-profile"
+    ],
+    "failure_policy": "rollback-to-source-schema-and-data",
+    "repeat_version_5_startup": "validate-without-reseeding",
+    "down_migration_supported": false,
+    "rollback": "restore-validated-snapshot-with-app-stopped-and-preserve-newer-recovery-set"
+  },
+  "container_deletion": {
+    "choices": ["move-notes", "delete-all-notes"],
+    "initial_choice": "move-notes",
+    "target": "one-existing-live-group-outside-source-subtree",
+    "transfer_population": "all-retained-notes-including-soft-deleted",
+    "transfer_preserves": "all-existing-note-columns",
+    "delete_all_semantics": "existing-note-soft-delete-without-reviving-or-retimestamping-deleted-notes",
+    "container_retention": "deleted_at-tombstones",
+    "empty_container_definition": "no-non-deleted-notes",
+    "empty_container_retained_note_policy": "remain-soft-deleted-in-tombstoned-source-without-transfer-destination",
+    "independent_general_deletion": false,
+    "minimum_live_profiles": 1,
+    "preview_revalidated_in_transaction": true,
+    "context_and_membership_atomic": true,
+    "active_group_removal_context": "same-profile-general",
+    "active_profile_transfer_context": "destination-group",
+    "active_profile_delete_all_or_empty_context": "explicit-remaining-profile-last-valid-group-or-general",
+    "inactive_container_removal_context": "unchanged"
+  },
+  "traceability": [
+    "CTX-01", "CTX-02", "CTX-04", "CTX-05", "CTX-06", "CTX-07", "CTX-09", "CTX-10",
+    "FLOW-03", "FLOW-04", "DEL-01", "DEL-02", "DEL-03", "DEL-04", "DEL-05", "DEL-06", "DEL-07",
+    "AC-01", "AC-05", "AC-09", "AC-10", "AC-11", "AC-13", "AC-14", "AC-15", "AC-16"
+  ]
+}

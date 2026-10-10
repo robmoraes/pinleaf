@@ -31,6 +31,9 @@ The following targets are not currently validated:
 Note window size and open state are persisted. Exact window position capture and
 restore are best-effort. GTK 4 on Wayland does not expose a reliable public API
 for application-controlled window coordinates; the compositor decides placement.
+On the tested X11 build, the current GTK 4 adapter also lacks the generic
+`get_position`/`move` methods: saved fallback coordinates remain stored, while
+the compositor places the windows. Automated resizing and size restoration pass.
 
 ## AppIndicator Behavior
 
@@ -54,9 +57,34 @@ When the main panel is minimized, choosing `Show Pinleaf` from the indicator may
 show Ubuntu's `"Pinleaf" is ready` notification before the window is focused.
 This behavior is accepted for the MVP.
 
-When the panel has been closed and is shown again through the indicator, GTK may
-warn that a destroyed window is being shown. The user-visible behavior is still
-acceptable for the MVP and should be revisited in a lifecycle polish pass.
+Closing the panel now hides it for reuse through the indicator or launcher.
+It preserves the active context and individually hidden notes.
+
+## Profiles and Groups in Development
+
+Schema 5 cannot be opened by a schema-4 binary. Returning to an older version
+requires a deliberate [snapshot restore](organization-and-recovery.md) with
+Pinleaf stopped. Later edits remain only in the separately preserved newer
+recovery set. Backups are local and are not automatically pruned.
+
+Feature QA covers GTK widget tests, an isolated nested X11 session and a manual
+real X11 desktop pass with disposable data. Context switching, search, movement,
+group transfer, profile deletion, real AppIndicator actions, restart and explicit
+hidden-note opening passed on X11. Additional automation passes actual keyboard
+events, visible save-error/retry, size restoration and profile deletion/transfer
+including hidden notes. A separate client verifies names/states exported over
+a private AT-SPI bus. Wayland and human Orca speech/usability remain unqualified;
+the shared desktop's accessibility service advertises a missing socket. The
+existing positioning limitation above remains.
+
+After batch focus and lazy-menu improvements, the real X11 desktop starts 100
+128-character notes with 75 open windows in a median 1.52 seconds (maximum 1.68).
+With all 100 open, the median is 1.94 seconds and maximum 2.001 seconds; the
+strict stress boundary has little margin. These local first-idle measurements
+exclude interpreter startup, fixture generation and shutdown. See the
+[final qualification evidence](.specs/011-profiles-and-groups/automation-2026-10-10.md)
+for every sample, the earlier nested baseline and nonfatal private-bus tray
+diagnostics. They do not guarantee the same timings on every desktop.
 
 ## Packaging
 

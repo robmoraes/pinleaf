@@ -120,6 +120,30 @@ class NoteWindow(Adw.ApplicationWindow):
             show_error(self, "Could not save note", "The latest change may not have been saved.")
         return saved
 
+    def flush_for_transition(self) -> bool:
+        return self.autosave.flush()
+
+    def capture_state(self) -> dict:
+        geometry = self._capture_geometry()
+        return dict(width=geometry.width, height=geometry.height,
+                    position_x=geometry.position_x, position_y=geometry.position_y)
+
+    def sync_note(self, note: Note) -> None:
+        # Pending buffer text belongs to the editor; a refresh never replaces it.
+        self.note = note
+
+    def show_for_context(self) -> None:
+        self.set_visible(True)
+
+    def dispose_for_context(self) -> None:
+        self._skip_close_save = True
+        self.autosave.cancel()
+        for child in (self.text_appearance_window, self.note_action_dialog):
+            if child is not None:
+                child.destroy()
+        self.text_view.get_style_context().remove_provider(self._text_css_provider)
+        self.destroy()
+
     def save_window_state(self) -> None:
         geometry = self._capture_geometry()
         self.note = self.note_service.save_open_note_window(
@@ -135,7 +159,7 @@ class NoteWindow(Adw.ApplicationWindow):
         button.add_css_class("flat")
         button.add_css_class("note-tool-button")
         button.set_tooltip_text("Change note color")
-        button.set_popover(self._build_color_popover())
+        button.set_create_popup_func(lambda *_: button.set_popover(self._build_color_popover()))
 
         self.color_dot = Gtk.Box()
         self.color_dot.add_css_class("note-color-dot")
@@ -262,11 +286,7 @@ class NoteWindow(Adw.ApplicationWindow):
         self._text_css_provider.load_from_data(css.encode("utf-8"))
 
     def _install_text_css_provider(self) -> None:
-        display = Gdk.Display.get_default()
-        if display is None:
-            return
-        Gtk.StyleContext.add_provider_for_display(
-            display,
+        self.text_view.get_style_context().add_provider(
             self._text_css_provider,
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION + 1,
         )
@@ -342,15 +362,20 @@ class NoteWindow(Adw.ApplicationWindow):
     def _on_close_request(self, _: Gtk.Window) -> bool:
         if self._skip_close_save:
             return False
-        self.flush_pending_changes()
+        if not self.flush_pending_changes():
+            return True
         geometry = self._capture_geometry()
-        self.note = self.note_service.close_note(
-            self.note.id,
-            width=geometry.width,
-            height=geometry.height,
-            position_x=geometry.position_x,
-            position_y=geometry.position_y,
-        )
+        try:
+            self.note = self.note_service.close_note(
+                self.note.id,
+                width=geometry.width,
+                height=geometry.height,
+                position_x=geometry.position_x,
+                position_y=geometry.position_y,
+            )
+        except Exception:
+            show_error(self, "Could not hide note", "The note remains open. Try again after checking storage availability.")
+            return True
         self.on_closed(self.note.id)
         return False
 

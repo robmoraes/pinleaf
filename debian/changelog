@@ -1,3 +1,10 @@
+pinleaf (0.8.0) noble; urgency=medium
+
+  * Release Pinleaf 0.8.0 with live note text search.
+  * Search open and hidden notes, ignoring case and accents.
+
+ -- Carlos R Moraes <carlos.moraes.as@gmail.com>  Sat, 10 Oct 2026 03:45:50 -0300
+
 pinleaf (0.7.0) noble; urgency=medium
 
   * Release Pinleaf 0.7.0.

@@ -18,6 +18,33 @@ class NoteColor(StrEnum):
     PINK = "pink"
 
 
+class SearchScope(StrEnum):
+    ACTIVE_GROUP = "active-group"
+    CURRENT_PROFILE = "current-profile"
+    ALL_PROFILES = "all-profiles"
+
+
+@dataclass(frozen=True)
+class Profile:
+    id: str
+    name: str
+
+
+@dataclass(frozen=True)
+class Group:
+    id: str
+    profile_id: str
+    name: str
+    is_general: bool
+    note_count: int = 0
+
+
+@dataclass(frozen=True)
+class ActiveContext:
+    profile: Profile
+    group: Group
+
+
 def utc_now_iso() -> str:
     return datetime.now(UTC).replace(microsecond=0).isoformat()
 
@@ -33,6 +60,7 @@ def validate_color(value: str | NoteColor) -> NoteColor:
 @dataclass(frozen=True)
 class Note:
     id: str
+    group_id: str
     content: str
     color: NoteColor
     width: int
@@ -51,6 +79,8 @@ class Note:
     def new(
         cls,
         note_id: str,
+        *,
+        group_id: str,
         now: str | None = None,
         color: str | NoteColor = NoteColor.YELLOW,
         font_family: str | None = None,
@@ -65,6 +95,7 @@ class Note:
         )
         return cls(
             id=note_id,
+            group_id=group_id,
             content="",
             color=validate_color(color),
             width=DEFAULT_WIDTH,

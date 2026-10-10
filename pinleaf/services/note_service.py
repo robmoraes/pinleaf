@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from unicodedata import combining, normalize
 from uuid import uuid4
 
 from pinleaf.appearance import TextAppearance
-from pinleaf.models import Note, NoteColor, utc_now_iso
+from pinleaf.models import Note, NoteColor, SearchScope, utc_now_iso
+from pinleaf.services.organization_service import OrganizationService
 from pinleaf.storage.sqlite_store import NoteStore
 
 
@@ -17,6 +19,7 @@ class NoteService:
         clock: Callable[[], str] | None = None,
     ) -> None:
         self.store = store
+        self.organization = OrganizationService(store)
         self.id_factory = id_factory or (lambda: str(uuid4()))
         self.clock = clock or utc_now_iso
 
@@ -25,6 +28,7 @@ class NoteService:
         return self.store.create(
             Note.new(
                 self.id_factory(),
+                group_id=self.organization.context.group.id,
                 now=self.clock(),
                 font_family=appearance.font_family,
                 font_size=appearance.font_size,
@@ -32,8 +36,22 @@ class NoteService:
             )
         )
 
-    def list_notes(self) -> list[Note]:
-        return self.store.list_notes()
+    def list_notes(self, query: str = "", *, scope: SearchScope = SearchScope.ACTIVE_GROUP) -> list[Note]:
+        """List notes by creation time, optionally matching their full text."""
+        scope = SearchScope(scope)
+        context = self.organization.context
+        notes = self.store.list_notes(
+            group_id=context.group.id if scope == SearchScope.ACTIVE_GROUP else None,
+            profile_id=context.profile.id if scope == SearchScope.CURRENT_PROFILE else None,
+        )
+        search_text = _normalize_search_text(query)
+        if not search_text:
+            return notes
+        return [
+            note
+            for note in notes
+            if search_text in _normalize_search_text(note.content)
+        ]
 
     def get_note(self, note_id: str) -> Note | None:
         return self.store.get(note_id)
@@ -139,3 +157,9 @@ class NoteService:
 
     def delete_note(self, note_id: str) -> None:
         self.store.soft_delete(note_id, now=self.clock())
+
+
+def _normalize_search_text(value: str) -> str:
+    folded = normalize("NFD", value.casefold())
+    unaccented = "".join(character for character in folded if not combining(character))
+    return " ".join(unaccented.split())

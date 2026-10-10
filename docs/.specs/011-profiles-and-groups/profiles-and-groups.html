@@ -1,0 +1,362 @@
+<div id="pl-context-ux" aria-label="Pinleaf: perfis, grupos e contexto do desktop">
+  <style>
+    #pl-context-ux {
+      --pl-window: light-dark(#fafafa, #242424);
+      --pl-header: light-dark(#ebebeb, #303030);
+      --pl-row: light-dark(#ffffff, #383838);
+      --pl-popover: light-dark(#ffffff, #383838);
+      --pl-text: light-dark(#202020, #f2f2f2);
+      --pl-secondary: light-dark(#595959, #bdbdbd);
+      --pl-border: light-dark(#d4d4d4, #505050);
+      --pl-button: light-dark(#e7e7e7, #4a4a4a);
+      --pl-selected: light-dark(#dceafb, #293e58);
+      --pl-selected-ink: light-dark(#174b83, #b6d6ff);
+      --pl-desktop: light-dark(#edf0f2, #1b2025);
+      --pl-error: light-dark(#a51d2d, #ffb3ba);
+      --pl-paper-yellow: light-dark(#f6e27f, #f6e27f);
+      --pl-paper-green: light-dark(#b8e986, #b8e986);
+      --pl-paper-blue: light-dark(#9fd3ff, #9fd3ff);
+      --pl-paper-pink: light-dark(#f4a7c5, #f4a7c5);
+      --pl-paper-ink: light-dark(#005bac, #005bac);
+      color: var(--pl-text);
+      font-family: Cantarell, system-ui, sans-serif;
+    }
+    #pl-context-ux * { box-sizing: border-box; }
+    #pl-context-ux [hidden] { display: none !important; }
+    #pl-context-ux button, #pl-context-ux input, #pl-context-ux select { font: inherit; color: inherit; }
+    #pl-context-ux button { cursor: pointer; }
+    #pl-context-ux button:disabled { opacity: .5; cursor: default; }
+    #pl-context-ux .pl-layout { display: grid; grid-template-columns: minmax(0, 470px) minmax(0, 1fr); gap: 20px; align-items: start; }
+    #pl-context-ux .pl-window { background: var(--pl-window); border: 1px solid var(--pl-border); border-radius: 12px; position: relative; min-width: 0; }
+    #pl-context-ux .pl-header { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px; background: var(--pl-header); border-radius: 12px 12px 0 0; }
+    #pl-context-ux .pl-button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 10px; border: 1px solid var(--pl-border); border-radius: 6px; background: var(--pl-button); }
+    #pl-context-ux .pl-flat { border-color: transparent; background: transparent; }
+    #pl-context-ux .pl-icon { padding: 8px; }
+    #pl-context-ux .pl-title { text-align: center; min-width: 0; }
+    #pl-context-ux .pl-profile { max-width: 100%; font-weight: 500; }
+    #pl-context-ux .pl-profile span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #pl-context-ux .pl-subtitle { color: var(--pl-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #pl-context-ux .pl-content { padding: 14px; min-width: 0; }
+    #pl-context-ux .pl-search { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border: 1px solid var(--pl-border); border-radius: 7px; background: var(--pl-row); }
+    #pl-context-ux .pl-search input { background: transparent; border: 0; min-width: 0; width: 100%; }
+    #pl-context-ux .pl-scope { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+    #pl-context-ux .pl-scope select, #pl-context-ux .pl-field { background: var(--pl-row); border: 1px solid var(--pl-border); border-radius: 6px; padding: 8px; min-width: 0; max-width: 100%; }
+    #pl-context-ux .pl-list-title { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; margin: 14px 0 10px; }
+    #pl-context-ux .pl-group { margin-bottom: 10px; background: var(--pl-row); border: 1px solid var(--pl-border); border-radius: 9px; position: relative; }
+    #pl-context-ux .pl-group-head { display: flex; align-items: center; gap: 4px; padding: 8px; position: relative; }
+    #pl-context-ux .pl-disclose { display: flex; flex: 1; gap: 8px; align-items: center; text-align: start; padding: 5px 2px; border: 0; background: transparent; min-width: 0; }
+    #pl-context-ux .pl-group-info { display: grid; min-width: 0; overflow-wrap: anywhere; }
+    #pl-context-ux .pl-name { font-weight: 500; }
+    #pl-context-ux .pl-muted { color: var(--pl-secondary); }
+    #pl-context-ux .pl-active { display: inline-flex; align-items: center; gap: 4px; padding: 5px 7px; color: var(--pl-selected-ink); background: var(--pl-selected); border-radius: 6px; white-space: nowrap; }
+    #pl-context-ux .pl-notes { border-top: 1px solid var(--pl-border); }
+    #pl-context-ux .pl-note-row { display: flex; align-items: center; gap: 8px; padding: 10px; position: relative; }
+    #pl-context-ux .pl-note-row + .pl-note-row { border-top: 1px solid var(--pl-border); }
+    #pl-context-ux .pl-note-main { flex: 1; min-width: 0; text-align: start; border: 0; background: transparent; padding: 0; display: grid; gap: 4px; }
+    #pl-context-ux .pl-preview { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #pl-context-ux .pl-hidden .pl-preview, #pl-context-ux .pl-hidden .pl-updated { text-decoration: line-through; }
+    #pl-context-ux .pl-dot { width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0; }
+    #pl-context-ux .pl-empty { display: grid; justify-items: center; gap: 12px; padding: 22px 12px; text-align: center; }
+    #pl-context-ux .pl-popover { position: absolute; z-index: 30; background: var(--pl-popover); color: var(--pl-text); border: 1px solid var(--pl-border); border-radius: 9px; padding: 6px; box-shadow: 0 6px 20px light-dark(#00000022, #00000055); }
+    #pl-context-ux .pl-profile-menu { top: 67px; left: 12px; right: 12px; max-width: 290px; margin-inline: auto; }
+    #pl-context-ux .pl-menu { top: calc(100% - 2px); right: 8px; min-width: 190px; max-width: calc(100% - 16px); }
+    #pl-context-ux .pl-menu-item { display: flex; align-items: center; gap: 8px; text-align: start; width: 100%; padding: 9px; background: transparent; border: 0; border-radius: 5px; overflow-wrap: anywhere; }
+    #pl-context-ux .pl-menu-item[aria-pressed="true"] { background: var(--pl-selected); color: var(--pl-selected-ink); }
+    #pl-context-ux .pl-separator { border: 0; border-top: 1px solid var(--pl-border); margin: 6px 2px; }
+    #pl-context-ux .pl-desktop-heading { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    #pl-context-ux .pl-desktop { padding: 16px; border-radius: 10px; background: var(--pl-desktop); min-height: 300px; }
+    #pl-context-ux .pl-paper-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); gap: 14px; align-items: start; }
+    #pl-context-ux .pl-paper { min-height: 170px; padding: 18px; border-radius: 6px; color: var(--pl-paper-ink); font-family: cursive; white-space: pre-wrap; overflow-wrap: anywhere; }
+    #pl-context-ux .pl-modal-layer { position: absolute; inset: 0; z-index: 50; background: light-dark(#00000033, #00000066); border-radius: 12px; display: grid; place-items: start center; padding: 60px 12px 16px; }
+    #pl-context-ux .pl-dialog { padding: 20px; background: var(--pl-popover); border: 1px solid var(--pl-border); border-radius: 12px; width: 100%; max-width: 350px; }
+    #pl-context-ux .pl-dialog-title { font-weight: 500; margin-bottom: 16px; }
+    #pl-context-ux .pl-dialog form, #pl-context-ux .pl-dialog label { display: grid; gap: 8px; }
+    #pl-context-ux .pl-dialog label { margin-bottom: 8px; }
+    #pl-context-ux .pl-dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+    #pl-context-ux .pl-error { color: var(--pl-error); }
+    #pl-context-ux .pl-toast { padding: 8px 14px 12px; color: var(--pl-selected-ink); overflow-wrap: anywhere; }
+    @media (max-width: 780px) { #pl-context-ux .pl-layout { grid-template-columns: minmax(0, 1fr); } }
+    @media (max-width: 380px) {
+      #pl-context-ux .pl-header { gap: 4px; }
+      #pl-context-ux .pl-content { padding: 10px; }
+      #pl-context-ux .pl-group-head { flex-wrap: wrap; }
+      #pl-context-ux .pl-disclose { flex-basis: calc(100% - 40px); }
+    }
+    @media (pointer: coarse) { #pl-context-ux button { min-height: 44px; } #pl-context-ux input, #pl-context-ux select { min-height: 44px; } }
+  </style>
+  <div class="pl-layout">
+    <section class="pl-window" aria-label="Painel do Pinleaf">
+      <header class="pl-header">
+        <button type="button" class="pl-button" data-action="new-note"><i data-lucide="plus" aria-hidden="true"></i>Nova</button>
+        <div class="pl-title">
+          <button type="button" class="pl-button pl-flat pl-profile" data-action="profiles" aria-haspopup="dialog" aria-expanded="false"><span data-profile-name>Seventh</span><i data-lucide="chevron-down" aria-hidden="true"></i></button>
+          <div class="pl-subtitle" data-active-group>LGPD</div>
+        </div>
+        <button type="button" class="pl-button pl-flat pl-icon" data-action="manage" aria-label="Gerenciar perfis"><i data-lucide="settings-2" aria-hidden="true"></i></button>
+      </header>
+      <div class="pl-profile-menu pl-popover" data-profile-menu role="dialog" aria-label="Escolher perfil" hidden></div>
+      <div class="pl-content">
+        <div class="pl-search"><i data-lucide="search" aria-hidden="true"></i><input type="search" aria-label="Buscar notas" placeholder="Buscar notas…" data-search></div>
+        <label class="pl-scope" data-scope-row hidden>Buscar em <select data-scope aria-label="Escopo da busca"><option value="group">Grupo ativo</option><option value="profile">Perfil atual</option><option value="all">Todos os perfis</option></select></label>
+        <div class="pl-list-title"><span class="pl-name" data-list-label>Grupos</span><button type="button" class="pl-button pl-flat" data-action="new-group"><i data-lucide="folder-plus" aria-hidden="true"></i>Novo grupo</button></div>
+        <div data-groups></div>
+      </div>
+      <div class="pl-toast" data-toast role="status" aria-live="polite" hidden></div>
+      <div class="pl-modal-layer" data-modal hidden></div>
+    </section>
+    <section aria-label="Notas exibidas no desktop">
+      <div class="pl-desktop-heading"><span class="pl-name" data-desktop-title>Desktop · Seventh / LGPD</span><span class="pl-muted" data-desktop-count aria-live="polite"></span></div>
+      <div class="pl-desktop"><div class="pl-paper-list" data-papers></div></div>
+    </section>
+  </div>
+  <script>
+    (() => {
+      const root = document.getElementById('pl-context-ux');
+      const find = selector => root.querySelector(selector);
+      const profiles = [
+        { id: 'seventh', name: 'Seventh', last: 'lgpd' },
+        { id: 'freelancer', name: 'Freelancer', last: 'devops' },
+        { id: 'personal', name: 'Pessoal', last: 'finance' }
+      ];
+      const groups = [
+        { id: 'general-s', profile: 'seventh', name: 'Geral', general: true },
+        { id: 'billing', profile: 'seventh', name: 'DGC Billing' },
+        { id: 'lgpd', profile: 'seventh', name: 'LGPD' },
+        { id: 'agenda', profile: 'seventh', name: 'Agenda' },
+        { id: 'general-f', profile: 'freelancer', name: 'Geral', general: true },
+        { id: 'radar', profile: 'freelancer', name: 'Freelance Radar' },
+        { id: 'devops', profile: 'freelancer', name: 'Empresa X - DevOps' },
+        { id: 'general-p', profile: 'personal', name: 'Geral', general: true },
+        { id: 'diet', profile: 'personal', name: 'Dieta' },
+        { id: 'exercise', profile: 'personal', name: 'Exercícios' },
+        { id: 'finance', profile: 'personal', name: 'Financeiro' }
+      ];
+      const notes = [
+        { id: 'n1', group: 'lgpd', text: 'Revisar a política de retenção\nConfirmar prazo com o jurídico.', open: true, color: 'yellow' },
+        { id: 'n2', group: 'lgpd', text: 'Café com o jurídico\nAlinhar o inventário de dados.', open: true, color: 'green' },
+        { id: 'n3', group: 'lgpd', text: 'Referências da revisão anterior', open: false, color: 'pink' },
+        { id: 'n4', group: 'billing', text: 'Fechar a conciliação de setembro', open: true, color: 'yellow' },
+        { id: 'n5', group: 'agenda', text: 'Planejamento da semana\nQuinta, 10h', open: true, color: 'blue' },
+        { id: 'n6', group: 'radar', text: 'Responder à proposta do novo cliente', open: true, color: 'yellow' },
+        { id: 'n7', group: 'devops', text: 'Revisar o pipeline de produção', open: true, color: 'green' },
+        { id: 'n8', group: 'diet', text: 'Preparar as refeições da semana', open: true, color: 'yellow' },
+        { id: 'n9', group: 'exercise', text: 'Retomar o treino de terça', open: false, color: 'blue' },
+        { id: 'n10', group: 'finance', text: 'Pagar o cartão até sexta', open: true, color: 'yellow' },
+        { id: 'n11', group: 'finance', text: 'Rever assinaturas mensais', open: false, color: 'pink' }
+      ];
+      const state = { active: 'lgpd', query: '', scope: 'group', expanded: new Set(['lgpd']), searchCollapsed: new Set(), profileMenu: false, menu: null, modal: null, sequence: 20 };
+      const design = { activation: 'explicit', expansion: 'multiple' };
+      const esc = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+      const normalized = value => value.toLocaleLowerCase('pt-BR').normalize('NFD').replace(/\p{M}/gu, '').trim().replace(/\s+/g, ' ');
+      const groupById = id => groups.find(group => group.id === id);
+      const active = () => groupById(state.active);
+      const profileById = id => profiles.find(profile => profile.id === id);
+      const owner = group => profileById(group.profile);
+      const path = group => `${owner(group).name} / ${group.name}`;
+      const byProfile = id => groups.filter(group => group.profile === id).sort((a, b) => Number(Boolean(b.general)) - Number(Boolean(a.general)) || a.name.localeCompare(b.name, 'pt-BR'));
+      const icon = name => `<i data-lucide="${name}" aria-hidden="true"></i>`;
+      const button = (action, text, id = '', classes = '') => `<button type="button" class="pl-button ${classes}" data-action="${action}" data-id="${esc(id)}">${text}</button>`;
+      function toast(message) { const el = find('[data-toast]'); el.textContent = message; el.hidden = false; }
+      function setActive(id) {
+        state.active = id;
+        owner(active()).last = id;
+        if (design.expansion === 'single') state.expanded.clear();
+        state.expanded.add(id);
+        state.searchCollapsed.clear();
+        state.query = '';
+        state.scope = 'group';
+        state.menu = null;
+        find('[data-search]').value = '';
+        toast(`Contexto ativo: ${path(active())}`);
+      }
+      function noteMenu(note, isActive) {
+        if (state.menu !== `note:${note.id}`) return '';
+        return `<div class="pl-popover pl-menu" aria-label="Ações da nota">
+          ${button('open-note', isActive ? 'Abrir' : 'Ativar e abrir', note.id, 'pl-menu-item')}
+          ${isActive && note.open ? button('hide-note', 'Ocultar', note.id, 'pl-menu-item') : ''}
+          ${button('move-note', 'Mover para…', note.id, 'pl-menu-item')}
+          ${button('delete-note', 'Excluir…', note.id, 'pl-menu-item')}
+        </div>`;
+      }
+      function noteRow(note, group, globalResult = false) {
+        const isActive = group.id === state.active;
+        const text = `<span class="pl-preview">${esc(note.text.replace(/\s+/g, ' ') || 'Nota vazia')}</span><span class="pl-muted pl-updated">${globalResult ? esc(path(group)) : 'Atualizada hoje'}${note.open ? '' : ' · Oculta'}</span>`;
+        const content = isActive ? `<button type="button" class="pl-note-main" data-action="open-note" data-id="${note.id}" aria-label="Abrir nota${note.open ? '' : ' oculta'}">${text}</button>` : `<div class="pl-note-main">${text}</div>`;
+        return `<div class="pl-note-row ${note.open ? '' : 'pl-hidden'}"><span class="pl-dot" style="background:var(--pl-paper-${note.color})" aria-hidden="true"></span>${content}<button type="button" class="pl-button pl-flat pl-icon" data-action="note-menu" data-id="${note.id}" aria-label="Ações da nota, ${esc(path(group))}" aria-expanded="${state.menu === `note:${note.id}`}">${icon('ellipsis')}</button>${noteMenu(note, isActive)}</div>`;
+      }
+      function renderGroups() {
+        const query = normalized(state.query);
+        find('[data-scope-row]').hidden = !query;
+        find('[data-scope]').value = state.scope;
+        find('[data-list-label]').textContent = query ? 'Resultados' : 'Grupos';
+        if (query && state.scope === 'all') {
+          const matches = notes.filter(note => normalized(note.text).includes(query)).slice().reverse();
+          find('[data-groups]').innerHTML = matches.length ? `<div class="pl-group">${matches.map(note => noteRow(note, groupById(note.group), true)).join('')}</div>` : emptyResults();
+          return;
+        }
+        let visibleGroups = byProfile(active().profile);
+        if (query && state.scope === 'group') visibleGroups = visibleGroups.filter(group => group.id === state.active);
+        if (query) visibleGroups = visibleGroups.filter(group => notes.some(note => note.group === group.id && normalized(note.text).includes(query)));
+        find('[data-groups]').innerHTML = visibleGroups.length ? visibleGroups.map(group => {
+          const allNotes = notes.filter(note => note.group === group.id);
+          const listed = allNotes.filter(note => !query || normalized(note.text).includes(query)).reverse();
+          const expanded = query ? !state.searchCollapsed.has(group.id) : state.expanded.has(group.id);
+          const isActive = group.id === state.active;
+          const activation = isActive ? `<span class="pl-active">${icon('check')}Ativo</span>` : button('activate', 'Ativar', group.id);
+          const menu = state.menu === `group:${group.id}` ? `<div class="pl-popover pl-menu">${group.general ? '<div class="pl-menu-item pl-muted">Grupo permanente</div>' : button('rename-group', 'Renomear grupo…', group.id, 'pl-menu-item')}</div>` : '';
+          return `<section class="pl-group" aria-label="Grupo ${esc(group.name)}${isActive ? ', ativo' : ''}"><div class="pl-group-head"><button type="button" class="pl-disclose" data-action="expand" data-id="${group.id}" aria-expanded="${expanded}" aria-controls="pl-notes-${group.id}">${icon(expanded ? 'chevron-down' : 'chevron-right')}<span class="pl-group-info"><span class="pl-name">${esc(group.name)}</span><span class="pl-muted">${allNotes.length} notas · ${allNotes.filter(note => note.open).length} abertas</span></span></button>${activation}<button type="button" class="pl-button pl-flat pl-icon" data-action="group-menu" data-id="${group.id}" aria-label="Ações do grupo ${esc(group.name)}">${icon('ellipsis')}</button>${menu}</div><div class="pl-notes" id="pl-notes-${group.id}" ${expanded ? '' : 'hidden'}>${listed.length ? listed.map(note => noteRow(note, group)).join('') : `<div class="pl-empty"><span class="pl-muted">Nenhuma nota neste grupo</span>${isActive ? button('new-note', 'Criar nota') : ''}</div>`}</div></section>`;
+        }).join('') : emptyResults();
+      }
+      function emptyResults() { return `<div class="pl-empty"><span class="pl-name">Nenhuma nota encontrada</span>${button('clear-search', 'Limpar busca')}</div>`; }
+      function renderProfiles() {
+        find('[data-profile-name]').textContent = owner(active()).name;
+        find('[data-active-group]').textContent = active().name;
+        find('[data-action="profiles"]').setAttribute('aria-expanded', String(state.profileMenu));
+        find('[data-action="profiles"]').setAttribute('aria-label', `Trocar perfil, ${owner(active()).name}`);
+        const menu = find('[data-profile-menu]');
+        menu.hidden = !state.profileMenu;
+        menu.innerHTML = profiles.map(profile => `<button type="button" class="pl-menu-item" data-action="select-profile" data-id="${profile.id}" aria-pressed="${profile.id === active().profile}">${icon(profile.id === active().profile ? 'check' : 'briefcase-business')}${esc(profile.name)}</button>`).join('') + `<hr class="pl-separator">${button('new-profile', 'Novo perfil…', '', 'pl-menu-item')}${button('manage', 'Gerenciar perfis…', '', 'pl-menu-item')}`;
+      }
+      function renderDesktop() {
+        const shown = notes.filter(note => note.group === state.active && note.open).slice().reverse();
+        find('[data-desktop-title]').textContent = `Desktop · ${path(active())}`;
+        find('[data-desktop-count]').textContent = `${shown.length} ${shown.length === 1 ? 'nota exibida' : 'notas exibidas'}`;
+        find('[data-papers]').innerHTML = shown.length ? shown.map(note => `<div class="pl-paper" style="background:var(--pl-paper-${note.color})">${esc(note.text || 'Nova nota')}</div>`).join('') : '<div class="pl-muted">Nenhuma nota aberta neste grupo</div>';
+      }
+      function showModal(modal) {
+        state.modal = modal;
+        state.menu = null;
+        state.profileMenu = false;
+        render();
+        const field = find('[data-modal] input, [data-modal] select, [data-modal] button');
+        if (field) field.focus();
+      }
+      function renderModal() {
+        const layer = find('[data-modal]');
+        layer.hidden = !state.modal;
+        if (!state.modal) { layer.innerHTML = ''; return; }
+        const modal = state.modal;
+        if (modal.type === 'manage') {
+          layer.innerHTML = `<div class="pl-dialog" role="dialog" aria-modal="true" aria-label="Gerenciar perfis"><div class="pl-dialog-title">Gerenciar perfis</div>${profiles.map(profile => `<div class="pl-list-title"><span>${esc(profile.name)}</span>${button('rename-profile', 'Renomear', profile.id)}</div>`).join('')}<div class="pl-dialog-actions">${button('new-profile', 'Novo perfil…')}${button('cancel-modal', 'Concluir')}</div></div>`;
+          return;
+        }
+        const isMove = modal.type === 'move';
+        const isDelete = modal.type === 'delete';
+        const titles = { 'new-profile': 'Novo perfil', 'new-group': 'Novo grupo', 'rename-profile': 'Renomear perfil', 'rename-group': 'Renomear grupo', move: 'Mover nota', delete: 'Excluir nota?' };
+        let fields = '';
+        if (isMove) {
+          const destinationGroups = byProfile(modal.profile);
+          fields = `<label>Perfil<select class="pl-field" name="profile" data-move-profile>${profiles.map(profile => `<option value="${profile.id}" ${profile.id === modal.profile ? 'selected' : ''}>${esc(profile.name)}</option>`).join('')}</select></label><label>Grupo<select class="pl-field" name="group" data-move-group>${destinationGroups.map(group => `<option value="${group.id}" ${group.id === modal.group ? 'selected' : ''}>${esc(group.name)}</option>`).join('')}</select></label><div class="pl-muted" data-destination>Destino: ${esc(path(groupById(modal.group)))}</div>`;
+        } else if (isDelete) {
+          fields = `<div>${esc(notes.find(note => note.id === modal.id).text)}</div>`;
+        } else {
+          const value = modal.type === 'rename-profile' ? profileById(modal.id).name : modal.type === 'rename-group' ? groupById(modal.id).name : '';
+          fields = `<label>Nome<input class="pl-field" name="name" required maxlength="80" value="${esc(value)}" autocomplete="off"></label>`;
+        }
+        const label = isMove ? 'Mover' : isDelete ? 'Excluir' : modal.type.startsWith('rename') ? 'Salvar' : 'Criar e ativar';
+        const sameDestination = isMove && notes.find(note => note.id === modal.id).group === modal.group;
+        layer.innerHTML = `<div class="pl-dialog" role="dialog" aria-modal="true" aria-label="${titles[modal.type]}"><div class="pl-dialog-title">${titles[modal.type]}</div><form data-modal-form>${fields}<div class="pl-error" role="alert" data-form-error></div><div class="pl-dialog-actions">${button('cancel-modal', 'Cancelar')}<button type="submit" class="pl-button" ${sameDestination ? 'disabled' : ''}>${label}</button></div></form></div>`;
+      }
+      function render() {
+        renderProfiles(); renderGroups(); renderDesktop(); renderModal();
+        if (globalThis.lucide) lucide.createIcons({ attrs: { width: 16, height: 16 } });
+      }
+      root.addEventListener('click', event => {
+        const target = event.target.closest('button[data-action]');
+        if (!target || !root.contains(target)) return;
+        const action = target.dataset.action, id = target.dataset.id;
+        if (action === 'profiles') state.profileMenu = !state.profileMenu;
+        else if (action === 'select-profile') { setActive(profileById(id).last); state.profileMenu = false; }
+        else if (action === 'activate') setActive(id);
+        else if (action === 'expand') {
+          if (normalized(state.query)) {
+            if (state.searchCollapsed.has(id)) {
+              state.searchCollapsed.delete(id);
+              if (design.activation === 'expand') setActive(id);
+            } else state.searchCollapsed.add(id);
+          } else if (state.expanded.has(id)) state.expanded.delete(id);
+          else {
+            if (design.expansion === 'single') state.expanded.clear();
+            state.expanded.add(id);
+            if (design.activation === 'expand') setActive(id);
+          }
+        } else if (action === 'group-menu' || action === 'note-menu') {
+          const key = `${action === 'group-menu' ? 'group' : 'note'}:${id}`;
+          state.menu = state.menu === key ? null : key;
+        } else if (action === 'open-note') {
+          const note = notes.find(note => note.id === id);
+          if (note.group !== state.active) setActive(note.group);
+          note.open = true; state.menu = null;
+        } else if (action === 'hide-note') { notes.find(note => note.id === id).open = false; state.menu = null; }
+        else if (action === 'new-note') {
+          notes.push({ id: `n${++state.sequence}`, group: state.active, text: 'Nova nota', open: true, color: 'yellow' });
+          state.expanded.add(state.active);
+          toast(`Nota criada em ${path(active())}`);
+        } else if (action === 'clear-search') { state.query = ''; find('[data-search]').value = ''; }
+        else if (action === 'move-note') { const note = notes.find(note => note.id === id), group = groupById(note.group); showModal({ type: 'move', id, profile: group.profile, group: group.id }); return; }
+        else if (action === 'delete-note') { showModal({ type: 'delete', id }); return; }
+        else if (action === 'manage') { showModal({ type: 'manage' }); return; }
+        else if (['new-profile', 'new-group', 'rename-profile', 'rename-group'].includes(action)) { showModal({ type: action, id }); return; }
+        else if (action === 'cancel-modal') state.modal = null;
+        render();
+      });
+      root.addEventListener('input', event => {
+        if (!event.target.matches('[data-search]')) return;
+        state.query = event.target.value; state.menu = null;
+        state.searchCollapsed.clear();
+        renderGroups();
+        if (globalThis.lucide) lucide.createIcons({ attrs: { width: 16, height: 16 } });
+      });
+      root.addEventListener('change', event => {
+        if (event.target.matches('[data-scope]')) { state.scope = event.target.value; state.searchCollapsed.clear(); render(); }
+        if (event.target.matches('[data-move-profile]')) { state.modal.profile = event.target.value; state.modal.group = byProfile(event.target.value)[0].id; renderModal(); }
+        if (event.target.matches('[data-move-group]')) { state.modal.group = event.target.value; renderModal(); }
+      });
+      root.addEventListener('submit', event => {
+        if (!event.target.matches('[data-modal-form]')) return;
+        event.preventDefault();
+        const modal = state.modal;
+        if (modal.type === 'move') {
+          notes.find(note => note.id === modal.id).group = modal.group;
+          toast(`Nota movida para ${path(groupById(modal.group))}`);
+        } else if (modal.type === 'delete') {
+          notes.splice(notes.findIndex(note => note.id === modal.id), 1);
+        } else {
+          const name = String(new FormData(event.target).get('name') || '').trim();
+          const isProfile = modal.type.endsWith('profile');
+          const candidates = isProfile ? profiles : byProfile(active().profile);
+          const comparison = value => value.normalize('NFC').toLocaleLowerCase('pt-BR');
+          if (!name || [...name].length > 80 || candidates.some(item => item.id !== modal.id && comparison(item.name) === comparison(name)) || (!isProfile && ['geral', 'general'].includes(comparison(name)))) {
+            find('[data-form-error]').textContent = 'Escolha um nome disponível de 1 a 80 caracteres.'; return;
+          }
+          if (modal.type === 'new-profile') {
+            const profileId = `p${++state.sequence}`, groupId = `g${++state.sequence}`;
+            profiles.push({ id: profileId, name, last: groupId });
+            groups.push({ id: groupId, profile: profileId, name: 'Geral', general: true });
+            setActive(groupId);
+          } else if (modal.type === 'new-group') {
+            const groupId = `g${++state.sequence}`;
+            groups.push({ id: groupId, profile: active().profile, name }); setActive(groupId);
+          } else if (isProfile) profileById(modal.id).name = name;
+          else groupById(modal.id).name = name;
+        }
+        state.modal = null; render();
+      });
+      root.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+          if (state.modal) state.modal = null;
+          else if (state.profileMenu || state.menu) { state.profileMenu = false; state.menu = null; }
+          else { state.query = ''; find('[data-search]').value = ''; }
+          render();
+        }
+        if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'f') { event.preventDefault(); find('[data-search]').focus(); find('[data-search]').select(); }
+      });
+      render();
+      if (globalThis.Tweak) {
+        const tweak = new Tweak({ container: root, onChange: render });
+        tweak.addSelect(design, 'activation', { label: 'Ativação do grupo', options: [{ label: 'Botão Ativar separado', value: 'explicit' }, { label: 'Ativar ao expandir', value: 'expand' }] });
+        tweak.addSelect(design, 'expansion', { label: 'Seções expandidas', options: [{ label: 'Várias ao mesmo tempo', value: 'multiple' }, { label: 'Uma por vez', value: 'single' }] });
+      }
+    })();
+  </script>
+</div>

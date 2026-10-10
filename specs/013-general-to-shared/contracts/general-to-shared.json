@@ -1,0 +1,70 @@
+{
+  "contract_format_version": 1,
+  "contract_kind": "migration-outcomes",
+  "status": "draft-for-product-review",
+  "spec": "../spec.md",
+  "scope": "convert-live-profile-general-to-shared",
+  "source_schema_versions": [1, 2, 3, 4, 5],
+  "target_schema_policy": "newer-than-5; exact-version-and-schema-defined-in-plan",
+  "schema_5_conversion": {
+    "population": "one-built-in-General-per-live-profile",
+    "profile_ids": "unchanged",
+    "converted_group_ids": "unchanged",
+    "converted_role": "shared",
+    "labels": {"default": "Shared", "pt-BR": "Compartilhado"},
+    "note_memberships": "unchanged",
+    "create_extra_ordinary_group": false,
+    "preserve_active_profile": true,
+    "valid_ordinary_context": "unchanged",
+    "general_context_references": "no-active-ordinary-group",
+    "deleted_profiles_and_tombstoned_groups": "unchanged"
+  },
+  "note_preservation": {
+    "population": "every-retained-note-including-soft-deleted",
+    "ids_and_row_count": "unchanged",
+    "exact_schema_5_columns": [
+      "id", "group_id", "content", "color", "width", "height",
+      "position_x", "position_y", "font_family", "font_size", "text_color",
+      "is_open", "created_at", "updated_at", "deleted_at"
+    ],
+    "legacy_missing_fields": "existing-supported-upgrade-defaults",
+    "app_settings": "unchanged"
+  },
+  "ordinary_name_collisions": {
+    "reserved_keys": ["shared", "compartilhado"],
+    "normalization": "trim-and-NFC-casefold",
+    "rename": "original-name-plus-first-available-numeric-suffix",
+    "suffix_format": " (N)",
+    "first_suffix": 2,
+    "preserve_group_ids_and_memberships": true,
+    "merge_notes": false,
+    "report_renames": true
+  },
+  "fresh_and_legacy_libraries": {
+    "initial_profile_label": {"default": "Personal", "pt-BR": "Pessoal"},
+    "initial_group_role": "shared",
+    "initial_ordinary_group": null,
+    "legacy_note_destination": "initial-profile-shared"
+  },
+  "invariants": {
+    "shared_per_live_profile": 1,
+    "note_memberships_per_note": 1,
+    "minimum_live_profiles": 1,
+    "shared_can_be_active_ordinary_group": false,
+    "ordinary_context_may_be_absent": true,
+    "profile_switch_changes_is_open": false
+  },
+  "recovery": {
+    "validated_private_snapshot_before_existing_library_upgrade": true,
+    "failure": "preserve-source-schema-data-and-context",
+    "schema_version_published_after_validation": true,
+    "repeat_startup": "validate-without-reseeding-renaming-or-retimestamping",
+    "older_binaries": "refuse-newer-schema",
+    "downgrade": "restore-validated-snapshot-with-app-stopped-preserving-newer-recovery-files"
+  },
+  "traceability": [
+    "SH-01", "SH-02", "SH-03", "SH-04", "CTX-01", "CTX-02", "CTX-03",
+    "MIG-01", "MIG-02", "MIG-03", "MIG-04", "MIG-05", "MIG-06", "MIG-07",
+    "AC-01", "AC-02", "AC-06", "AC-11", "AC-12"
+  ]
+}

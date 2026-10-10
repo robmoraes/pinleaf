@@ -6,10 +6,17 @@ PPA.
 It assumes the maintainer already has:
 
 - a Launchpad account;
-- SSH key configured in Launchpad;
 - OpenPGP/GPG key registered and verified in Launchpad;
 - the personal PPA created at `ppa:robmoraes/pinleaf`;
 - local terminal access on Ubuntu 24.04 or a compatible Ubuntu system.
+
+The standard `dput ppa:robmoraes/pinleaf` route uses FTP. Launchpad identifies
+the uploader through the source package's GPG signature. SSH setup is needed
+when choosing SFTP instead; see the
+[official upload guide](https://ubuntu.com/docs/launchpad/user/how-to/packaging/ppa-package-upload/).
+
+The examples target the planned 0.8.0 release. Version metadata and local source
+builds are preparation; the currently published GitHub/PPA version is 0.7.0.
 
 The current PPA target is Ubuntu 24.04 LTS:
 
@@ -49,11 +56,13 @@ Install the tools needed to build, sign and upload source packages:
 
 ```bash
 sudo apt update
-sudo apt install \
+sudo apt install --no-install-recommends \
   build-essential \
   debhelper \
+  dpkg-dev \
   devscripts \
   dput \
+  lintian \
   ubuntu-dev-tools
 ```
 
@@ -74,6 +83,96 @@ gpg --list-secret-keys --keyid-format=long
 ```
 
 The key list must include the Launchpad-registered fingerprint.
+
+## Recover GPG On A Replacement Computer
+
+Keep backups outside the repository. Import the public and private exports
+from their actual backup location; enter the private key's existing passphrase
+when GPG requests it:
+
+```bash
+gpg --import /path/to/backup/launchpad-public.asc
+gpg --import /path/to/backup/launchpad-private.asc
+gpg --list-secret-keys --fingerprint C8F3D9976DEDB74C5C31BFC87854367646319599
+```
+
+Compare the full fingerprint above with the key registered in the maintainer's
+[Launchpad account](https://launchpad.net/~robmoraes/+editpgpkeys). Restoring the
+same key preserves that registration. The current backup expires on 2028-06-14.
+
+Keep the `.rev` certificate for emergency revocation; do not import it during
+recovery. Retain a private copy under GPG's revocation directory:
+
+```bash
+install -d -m 0700 ~/.gnupg/openpgp-revocs.d
+install -m 0600 \
+  /path/to/backup/C8F3D9976DEDB74C5C31BFC87854367646319599.rev \
+  ~/.gnupg/openpgp-revocs.d/C8F3D9976DEDB74C5C31BFC87854367646319599.rev
+```
+
+For the maintainer's own recovered key, owner trust can be restored locally:
+
+```bash
+printf '%s:6:\n' C8F3D9976DEDB74C5C31BFC87854367646319599 | gpg --import-ownertrust
+```
+
+Test a local signature before discarding a temporary transfer copy:
+
+```bash
+launchpad_check_dir=$(mktemp -d)
+printf '%s\n' 'Local Launchpad signing recovery check' > "$launchpad_check_dir/check.txt"
+gpg --armor --local-user C8F3D9976DEDB74C5C31BFC87854367646319599 \
+  --output "$launchpad_check_dir/check.txt.asc" --detach-sign "$launchpad_check_dir/check.txt"
+gpg --verify "$launchpad_check_dir/check.txt.asc" "$launchpad_check_dir/check.txt"
+rm "$launchpad_check_dir/check.txt.asc" "$launchpad_check_dir/check.txt"
+rmdir "$launchpad_check_dir"
+```
+
+Keep the original offline backup. After recovery and validation, a temporary
+transfer directory can be removed. The operational key remains under
+`~/.gnupg`; future signing may request the same passphrase.
+
+## Configure User Signing And Uploads
+
+Merge this setting into `~/.gnupg/gpg.conf` to choose the default GPG signing key:
+
+```text
+default-key C8F3D9976DEDB74C5C31BFC87854367646319599
+```
+
+Merge this setting into `~/.devscripts` for `debsign`:
+
+```bash
+DEBSIGN_KEYID=C8F3D9976DEDB74C5C31BFC87854367646319599
+```
+
+The standard `ppa:robmoraes/pinleaf` target works with dput's supplied PPA
+configuration. To also provide the explicit alias used in the local setup,
+add this section to `~/.dput.cf`:
+
+```ini
+[pinleaf-ppa]
+fqdn = ppa.launchpad.net
+method = ftp
+incoming = ~robmoraes/ubuntu/pinleaf/
+login = anonymous
+allow_unsigned_uploads = 0
+```
+
+Protect the user configuration and verify that the signing key and upload alias
+are recognized:
+
+```bash
+chmod 0700 ~/.gnupg
+chmod 0600 ~/.gnupg/gpg.conf ~/.devscripts ~/.dput.cf
+debsign --help
+dput -H
+```
+
+On 2026-10-10 the replacement computer passed default-key signing, independent
+`gpgv` verification, encryption/decryption, and `debsign` verification of the
+`.dsc`, `.buildinfo` and `.changes` files. Both PPA targets passed `dput -s`.
+This was local setup validation; no source package was uploaded.
 
 ## Release Checklist
 
@@ -186,12 +285,15 @@ lintian ../pinleaf_0.8.0_source.changes
 
 The source upload should be clean before publishing.
 
+Run Lintian explicitly even if `debuild` exits successfully: `debuild` can report
+Lintian errors without failing the source-build command. Resolve those errors
+before continuing to a real upload.
+
 ## Check And Simulate The Upload
 
 Before uploading for real, run `dput` checks:
 
 ```bash
-dput -o ppa:robmoraes/pinleaf ../pinleaf_0.8.0_source.changes
 dput -s ppa:robmoraes/pinleaf ../pinleaf_0.8.0_source.changes
 ```
 
@@ -200,6 +302,17 @@ The simulation should show uploads to:
 ```text
 ppa.launchpad.net:~robmoraes/pinleaf
 ```
+
+With the optional local alias, the equivalent simulation is:
+
+```bash
+dput -s pinleaf-ppa ../pinleaf_0.8.0_source.changes
+```
+
+It resolves to `ppa.launchpad.net:~robmoraes/ubuntu/pinleaf/`. A successful
+simulation ends with `Simulated upload.` and sends no files. Simulation checks
+local signatures, hashes and destination selection; server acceptance and builds
+are checked only after an actual release upload.
 
 ## Upload To Launchpad
 

@@ -12,8 +12,9 @@ are maintained. Automated and native X11 checks are recorded in
 [automated desktop qualification](automation-2026-10-10.md). X11 keyboard,
 fault/retry, external AT-SPI names/states and normal startup qualification pass.
 Wayland, human Orca speech/usability and the documented stress/diagnostic
-follow-ups remain. The maintainer subsequently authorized a feature-branch commit
-and remote review. Release publication remains outside scope.
+follow-ups remain. The implementation was merged through
+[PR #24](https://github.com/robmoraes/pinleaf/pull/24), with successful CI and Pages
+workflows. Release publication remains outside scope.
 
 Source standard:
 `~/wspace/engineering-playbook/engineering-playbook/architecture/spec-driven-development.md`.

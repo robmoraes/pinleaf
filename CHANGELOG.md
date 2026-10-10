@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Keep the bundled UX prototype readable for source-package validation by Lintian.
 - Preserve individual hidden/open state and pending edits when switching groups.
 - Keep the panel reusable after closing it; retain note action focus on refresh.
 

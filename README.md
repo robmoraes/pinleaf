@@ -5,6 +5,12 @@ GNOME-style Linux desktops, built with Python, GTK 4 and libadwaita.
 
 Project page: [https://robmoraes.github.io/pinleaf/](https://robmoraes.github.io/pinleaf/)
 
+The latest published version is [0.7.0](https://github.com/robmoraes/pinleaf/releases/tag/v0.7.0),
+available through GitHub Releases and the Ubuntu PPA. The development branch
+targets **0.8.0** with profiles, groups and scoped text search. These features
+are available when [running from source](#development-setup); the usage below
+describes that development version.
+
 ![Pinleaf desktop overview](docs/site/assets/screenshots/overview.png)
 
 ## Supported Platform
@@ -40,7 +46,7 @@ Not currently validated:
 See [Known Limitations](docs/known-limitations.md) for desktop-environment and
 packaging notes.
 
-The current MVP supports:
+The development version includes:
 
 - independent post-it-style note windows;
 - local SQLite persistence;
@@ -273,13 +279,24 @@ Launchpad:
 
 ```bash
 debuild -S -kC8F3D9976DEDB74C5C31BFC87854367646319599
+lintian ../pinleaf_0.8.0_source.changes
+dput -s ppa:robmoraes/pinleaf ../pinleaf_0.8.0_source.changes
+```
+
+After the release is approved, signatures are verified and Lintian passes,
+publish the source package:
+
+```bash
 dput ppa:robmoraes/pinleaf ../pinleaf_0.8.0_source.changes
 ```
 
-The PPA target for the first upload is Ubuntu 24.04 LTS (`noble`).
+The PPA target is Ubuntu 24.04 LTS (`noble`).
 
-See [Manual Launchpad PPA Publication](docs/release/launchpad-ppa.md) for the
-full maintainer terminal workflow.
+See [Manual Launchpad PPA Publication](docs/release/launchpad-ppa.md) for tools,
+GPG recovery on a replacement computer, user signing/upload configuration,
+signature verification and the full publication workflow. The standard
+`dput ppa:robmoraes/pinleaf` route uses FTP with a GPG-signed source package;
+an SSH key is needed only when choosing SFTP.
 
 ## Test
 

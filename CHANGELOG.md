@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added live text search in the main panel across the full content of open and
+  hidden notes, ignoring case and accents, with Ctrl+F access and a clear action.
+- Added profiles and expandable note groups, a permanent General group per
+  profile, and restoration of each profile's last active desktop context.
+- Added create/rename, cross-profile note movement, and container deletion with
+  note transfer or existing soft-deletion behavior.
+- Added active-group, current-profile and all-profile search scopes with
+  explicit opening of external results and profile/group breadcrumbs.
+- Added atomic schema-5 migration of existing notes to Personal / General,
+  validated private pre-upgrade snapshots and documented downgrade recovery.
+
+### Fixed
+
+- Preserve individual hidden/open state and pending edits when switching groups.
+- Keep the panel reusable after closing it; retain note action focus on refresh.
+
 ## [0.7.0] - 2026-06-19
 
 ### Added

@@ -8,7 +8,7 @@ from pinleaf.models import DEFAULT_HEIGHT, DEFAULT_WIDTH, Note, NoteColor, valid
 
 class ModelTests(unittest.TestCase):
     def test_new_note_defaults(self) -> None:
-        note = Note.new("note-1", now="2026-06-12T00:00:00+00:00")
+        note = Note.new("note-1", group_id="fixture-group", now="2026-06-12T00:00:00+00:00")
 
         self.assertEqual(note.id, "note-1")
         self.assertEqual(note.content, "")
@@ -26,6 +26,7 @@ class ModelTests(unittest.TestCase):
     def test_new_note_normalizes_text_appearance(self) -> None:
         note = Note.new(
             "note-1",
+            group_id="fixture-group",
             now="2026-06-12T00:00:00+00:00",
             font_family="Kavoon",
             font_size=100,

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import sqlite3
+from contextlib import contextmanager
+from collections.abc import Iterator
 from pathlib import Path
 
 from pinleaf.appearance import (
@@ -23,42 +25,92 @@ class NoteStore:
         self.database_path = Path(database_path)
         self.connection = sqlite3.connect(self.database_path)
         self.connection.row_factory = sqlite3.Row
-        migrate(self.connection)
+        self._transaction_depth = 0
+        try:
+            migrate(self.connection)
+            from pinleaf.storage.organization_store import OrganizationStore
+            self.organization = OrganizationStore(self)
+            self.context_recovered = self.organization.repair_context()
+        except BaseException:
+            self.connection.close()
+            raise
+
+    @contextmanager
+    def transaction(self) -> Iterator[None]:
+        depth = self._transaction_depth
+        self.connection.execute("BEGIN IMMEDIATE" if depth == 0 else f"SAVEPOINT nested_{depth}")
+        self._transaction_depth += 1
+        try:
+            yield
+            if depth == 0:
+                self.connection.commit()
+            else:
+                self.connection.execute(f"RELEASE SAVEPOINT nested_{depth}")
+        except BaseException:
+            if depth == 0:
+                self.connection.rollback()
+            else:
+                self.connection.execute(f"ROLLBACK TO SAVEPOINT nested_{depth}")
+                self.connection.execute(f"RELEASE SAVEPOINT nested_{depth}")
+            raise
+        finally:
+            self._transaction_depth = depth
+
+    def _commit(self) -> None:
+        if self._transaction_depth == 0:
+            try:
+                self.connection.commit()
+            except BaseException:
+                self.connection.rollback()
+                raise
 
     def close(self) -> None:
         self.connection.close()
 
     def create(self, note: Note) -> Note:
+        self.organization.get_group(note.group_id)
         self.connection.execute(
             """
             INSERT INTO notes (
               id, content, color, width, height, position_x, position_y,
               font_family, font_size, text_color, is_open, created_at,
-              updated_at, deleted_at
+              updated_at, deleted_at, group_id
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             _to_row_values(note),
         )
-        self.connection.commit()
+        self._commit()
         return note
 
     def get(self, note_id: str) -> Note | None:
         row = self.connection.execute(
-            "SELECT * FROM notes WHERE id = ? AND deleted_at IS NULL",
+            """SELECT n.* FROM notes n JOIN groups g ON g.id=n.group_id
+                JOIN profiles p ON p.id=g.profile_id WHERE n.id=? AND n.deleted_at IS NULL
+                AND g.deleted_at IS NULL AND p.deleted_at IS NULL""",
             (note_id,),
         ).fetchone()
         return _from_row(row) if row is not None else None
 
-    def list_notes(self) -> list[Note]:
-        rows = self.connection.execute(
-            """
-            SELECT * FROM notes
-            WHERE deleted_at IS NULL
-            ORDER BY created_at DESC, id DESC
-            """
-        ).fetchall()
+    def list_notes(self, *, group_id: str | None = None, profile_id: str | None = None) -> list[Note]:
+        sql = """SELECT n.* FROM notes n JOIN groups g ON g.id=n.group_id
+            JOIN profiles p ON p.id=g.profile_id
+            WHERE n.deleted_at IS NULL AND g.deleted_at IS NULL AND p.deleted_at IS NULL"""
+        args = []
+        if group_id is not None:
+            sql += " AND n.group_id=?"
+            args.append(group_id)
+        if profile_id is not None:
+            sql += " AND g.profile_id=?"
+            args.append(profile_id)
+        rows = self.connection.execute(sql + " ORDER BY n.created_at DESC,n.id DESC", args).fetchall()
         return [_from_row(row) for row in rows]
+
+    def save_context_geometry(self, note_id: str, *, width: int, height: int,
+                              position_x: int | None, position_y: int | None) -> None:
+        self.connection.execute("""UPDATE notes SET width=?,height=?,position_x=?,position_y=?
+            WHERE id=? AND deleted_at IS NULL""", (width, height, position_x, position_y, note_id))
+        self._commit()
 
     def get_default_font_family(self) -> str | None:
         return self.get_default_text_appearance().font_family
@@ -104,7 +156,7 @@ class NoteStore:
                 (DEFAULT_TEXT_COLOR_SETTING, appearance.text_color),
             ),
         )
-        self.connection.commit()
+        self._commit()
         return appearance
 
     def _get_settings(self, *keys: str) -> dict[str, str | None]:
@@ -125,7 +177,7 @@ class NoteStore:
             """,
             (content, timestamp, note_id),
         )
-        self.connection.commit()
+        self._commit()
         return self._require(note_id)
 
     def update_color(
@@ -144,7 +196,7 @@ class NoteStore:
             """,
             (validated.value, timestamp, note_id),
         )
-        self.connection.commit()
+        self._commit()
         return self._require(note_id)
 
     def update_font_family(
@@ -163,7 +215,7 @@ class NoteStore:
             """,
             (normalized, timestamp, note_id),
         )
-        self.connection.commit()
+        self._commit()
         return self._require(note_id)
 
     def update_text_appearance(
@@ -195,7 +247,7 @@ class NoteStore:
                 note_id,
             ),
         )
-        self.connection.commit()
+        self._commit()
         return self._require(note_id)
 
     def update_window_state(
@@ -219,7 +271,7 @@ class NoteStore:
             """,
             (width, height, position_x, position_y, int(is_open), timestamp, note_id),
         )
-        self.connection.commit()
+        self._commit()
         return self._require(note_id)
 
     def soft_delete(self, note_id: str, now: str | None = None) -> None:
@@ -232,7 +284,7 @@ class NoteStore:
             """,
             (timestamp, timestamp, note_id),
         )
-        self.connection.commit()
+        self._commit()
 
     def _require(self, note_id: str) -> Note:
         note = self.get(note_id)
@@ -257,6 +309,7 @@ def _to_row_values(note: Note) -> tuple[object, ...]:
         note.created_at,
         note.updated_at,
         note.deleted_at,
+        note.group_id,
     )
 
 
@@ -268,6 +321,7 @@ def _from_row(row: sqlite3.Row) -> Note:
     )
     return Note(
         id=row["id"],
+        group_id=row["group_id"],
         content=row["content"],
         color=validate_color(row["color"]),
         width=row["width"],

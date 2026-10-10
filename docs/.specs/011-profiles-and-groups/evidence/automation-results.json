@@ -1,0 +1,215 @@
+{
+  "executed_at": "2026-10-10T08:52:30.374064-03:00",
+  "code_test_contract_sha256": "2d8c25d506cdfbf98449b5286b14a640e60a6c420f427ae084a42d2e74777792",
+  "unittest": {
+    "passed": 157,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 1.655
+  },
+  "commands": [
+    {
+      "label": "unittest",
+      "exit": 0,
+      "seconds": 2.07
+    },
+    {
+      "label": "desktop",
+      "exit": 0,
+      "seconds": 6.38
+    },
+    {
+      "label": "atspi",
+      "exit": 0,
+      "seconds": 3.24
+    },
+    {
+      "label": "lifecycle",
+      "exit": 0,
+      "seconds": 3.2
+    },
+    {
+      "label": "restart",
+      "exit": 0,
+      "seconds": 1.13
+    },
+    {
+      "label": "startup-error",
+      "exit": 0,
+      "seconds": 1.1
+    },
+    {
+      "label": "layout",
+      "exit": 0,
+      "seconds": 2.49
+    },
+    {
+      "label": "layout-dark",
+      "exit": 0,
+      "seconds": 2.48
+    },
+    {
+      "label": "scale",
+      "exit": 0,
+      "seconds": 6.76
+    },
+    {
+      "label": "startup-10-0",
+      "exit": 0,
+      "seconds": 1.32
+    },
+    {
+      "label": "startup-10-1",
+      "exit": 0,
+      "seconds": 1.32
+    },
+    {
+      "label": "startup-10-2",
+      "exit": 0,
+      "seconds": 1.4
+    },
+    {
+      "label": "startup-75-0",
+      "exit": 0,
+      "seconds": 1.87
+    },
+    {
+      "label": "startup-75-1",
+      "exit": 0,
+      "seconds": 1.91
+    },
+    {
+      "label": "startup-75-2",
+      "exit": 0,
+      "seconds": 2.06
+    },
+    {
+      "label": "startup-100-0",
+      "exit": 0,
+      "seconds": 2.27
+    },
+    {
+      "label": "startup-100-1",
+      "exit": 0,
+      "seconds": 2.44
+    },
+    {
+      "label": "startup-100-2",
+      "exit": 0,
+      "seconds": 2.37
+    },
+    {
+      "label": "compileall",
+      "exit": 0,
+      "seconds": 0.05
+    },
+    {
+      "label": "diff-check",
+      "exit": 0,
+      "seconds": 0.0
+    }
+  ],
+  "desktop": {
+    "visible_save_error_buffer_preservation_retry": "passed",
+    "coordinate_api": {
+      "capture": false,
+      "restore": false
+    },
+    "resize_context_restore": [
+      359,
+      239
+    ],
+    "xtest_ctrl_f_escape": "passed",
+    "xtest_expand_menu_rename_escape_focus": "passed",
+    "profile_delete_all_including_hidden": "passed",
+    "profile_transfer_across_groups_including_hidden": "passed"
+  },
+  "atspi": {
+    "atspi_phases": [
+      {
+        "phase": 0,
+        "node_count": 89
+      },
+      {
+        "phase": 1,
+        "node_count": 69
+      },
+      {
+        "phase": 2,
+        "node_count": 117
+      }
+    ],
+    "profile_hidden_expanded_long_name_scope_destination": "passed",
+    "orca_speech": "not tested"
+  },
+  "startup": [
+    {
+      "notes": 100,
+      "note_code_points": 128,
+      "open_notes": 10,
+      "samples_ms": [
+        1076.84,
+        1017.25,
+        1122.63
+      ],
+      "median_ms": 1076.84,
+      "max_ms": 1122.63
+    },
+    {
+      "notes": 100,
+      "note_code_points": 128,
+      "open_notes": 75,
+      "samples_ms": [
+        1459.6,
+        1515.36,
+        1682.05
+      ],
+      "median_ms": 1515.36,
+      "max_ms": 1682.05
+    },
+    {
+      "notes": 100,
+      "note_code_points": 128,
+      "open_notes": 100,
+      "samples_ms": [
+        1831.59,
+        2001.47,
+        1941.68
+      ],
+      "median_ms": 1941.68,
+      "max_ms": 2001.47
+    }
+  ],
+  "scale": {
+    "global_search_1000": {
+      "median_ms": 23.16,
+      "max_ms": 45.66
+    },
+    "global_search_panel_1000": {
+      "median_ms": 993.52,
+      "max_ms": 1280.46
+    },
+    "context_17_34_native_editors": {
+      "median_ms": 213.85,
+      "max_ms": 242.22
+    },
+    "fixture": {
+      "notes": 1000,
+      "groups": 30,
+      "profiles": 3,
+      "note_code_points": 128,
+      "hidden_notes": 250
+    },
+    "migration_v4_3_notes_with_backup": {
+      "median_ms": 8.03,
+      "max_ms": 8.03
+    },
+    "startup_100_open_notes_ms": 1692.36
+  },
+  "boundaries": {
+    "wayland": "Not run; no Wayland session available",
+    "orca_speech": "Not run; requires human speech/usability observation",
+    "exact_position": "Current GTK 4 adapter has neither get_position nor move; retained coordinates preserved as fallback",
+    "100_open_stress": "Median below 2000 ms; maximum 2001.47 ms, so not an all-runs-under-2s claim"
+  }
+}

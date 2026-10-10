@@ -88,7 +88,7 @@ git status -sb
 Create a short-lived release or packaging branch:
 
 ```bash
-git switch -c release/0.7.0
+git switch -c release/0.8.0
 ```
 
 Update version references:
@@ -103,11 +103,12 @@ Update version references:
 For the PPA upload, `debian/changelog` must use the target Ubuntu series:
 
 ```text
-pinleaf (0.7.0) noble; urgency=medium
+pinleaf (0.8.0) noble; urgency=medium
 
-  * Release Pinleaf 0.7.0.
+  * Release Pinleaf 0.8.0 with live note text search.
+  * Search open and hidden notes, ignoring case and accents.
 
- -- Carlos R Moraes <carlos.moraes.as@gmail.com>  Fri, 19 Jun 2026 10:00:00 -0300
+ -- Carlos R Moraes <carlos.moraes.as@gmail.com>  Sat, 10 Oct 2026 03:45:50 -0300
 ```
 
 Use a new version for every upload. Launchpad will reject uploading the same
@@ -131,14 +132,14 @@ dpkg-buildpackage -us -uc -b
 Inspect the package if needed:
 
 ```bash
-dpkg-deb -I ../pinleaf_0.7.0_all.deb
-dpkg-deb -c ../pinleaf_0.7.0_all.deb | less
+dpkg-deb -I ../pinleaf_0.8.0_all.deb
+dpkg-deb -c ../pinleaf_0.8.0_all.deb | less
 ```
 
 Run `lintian` on the binary build:
 
 ```bash
-lintian ../pinleaf_0.7.0_amd64.changes
+lintian ../pinleaf_0.8.0_amd64.changes
 ```
 
 The current accepted warning is:
@@ -161,18 +162,18 @@ debuild -S -kC8F3D9976DEDB74C5C31BFC87854367646319599
 This creates source artifacts in the parent directory:
 
 ```text
-../pinleaf_0.7.0.dsc
-../pinleaf_0.7.0.tar.xz
-../pinleaf_0.7.0_source.buildinfo
-../pinleaf_0.7.0_source.changes
+../pinleaf_0.8.0.dsc
+../pinleaf_0.8.0.tar.xz
+../pinleaf_0.8.0_source.buildinfo
+../pinleaf_0.8.0_source.changes
 ```
 
 Verify the signatures:
 
 ```bash
-gpg --verify ../pinleaf_0.7.0.dsc
-gpg --verify ../pinleaf_0.7.0_source.buildinfo
-gpg --verify ../pinleaf_0.7.0_source.changes
+gpg --verify ../pinleaf_0.8.0.dsc
+gpg --verify ../pinleaf_0.8.0_source.buildinfo
+gpg --verify ../pinleaf_0.8.0_source.changes
 ```
 
 The signature should be from the Launchpad-registered key.
@@ -180,7 +181,7 @@ The signature should be from the Launchpad-registered key.
 Run `lintian` on the source upload:
 
 ```bash
-lintian ../pinleaf_0.7.0_source.changes
+lintian ../pinleaf_0.8.0_source.changes
 ```
 
 The source upload should be clean before publishing.
@@ -190,8 +191,8 @@ The source upload should be clean before publishing.
 Before uploading for real, run `dput` checks:
 
 ```bash
-dput -o ppa:robmoraes/pinleaf ../pinleaf_0.7.0_source.changes
-dput -s ppa:robmoraes/pinleaf ../pinleaf_0.7.0_source.changes
+dput -o ppa:robmoraes/pinleaf ../pinleaf_0.8.0_source.changes
+dput -s ppa:robmoraes/pinleaf ../pinleaf_0.8.0_source.changes
 ```
 
 The simulation should show uploads to:
@@ -205,7 +206,7 @@ ppa.launchpad.net:~robmoraes/pinleaf
 Upload the signed source package:
 
 ```bash
-dput ppa:robmoraes/pinleaf ../pinleaf_0.7.0_source.changes
+dput ppa:robmoraes/pinleaf ../pinleaf_0.8.0_source.changes
 ```
 
 Expected result:

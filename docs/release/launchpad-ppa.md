@@ -15,8 +15,9 @@ the uploader through the source package's GPG signature. SSH setup is needed
 when choosing SFTP instead; see the
 [official upload guide](https://ubuntu.com/docs/launchpad/user/how-to/packaging/ppa-package-upload/).
 
-The examples target the planned 0.8.0 release. Version metadata and local source
-builds are preparation; the currently published GitHub/PPA version is 0.7.0.
+The examples target release 0.8.0, published through its GitHub tag. The PPA
+currently provides 0.7.0; its separate 0.8.0 source upload is pending. Confirm
+the current PPA version before uploading, since package versions cannot be reused.
 
 The current PPA target is Ubuntu 24.04 LTS:
 
@@ -204,10 +205,12 @@ For the PPA upload, `debian/changelog` must use the target Ubuntu series:
 ```text
 pinleaf (0.8.0) noble; urgency=medium
 
-  * Release Pinleaf 0.8.0 with live note text search.
-  * Search open and hidden notes, ignoring case and accents.
+  * Release Pinleaf 0.8.0 with profiles, groups and scoped text search.
+  * Preserve hidden notes and pending edits when switching desktop contexts.
+  * Add note transfer and container deletion with move/delete choices.
+  * Migrate existing notes to Personal / General with validated local backups.
 
- -- Carlos R Moraes <carlos.moraes.as@gmail.com>  Sat, 10 Oct 2026 03:45:50 -0300
+ -- Carlos R Moraes <carlos.moraes.as@gmail.com>  Sat, 10 Oct 2026 09:55:55 -0300
 ```
 
 Use a new version for every upload. Launchpad will reject uploading the same
@@ -448,15 +451,18 @@ debuild -S -kC8F3D9976DEDB74C5C31BFC87854367646319599
 
 ## Finish The Release
 
-After the PPA install test passes:
+Publish the two channels in this order:
 
-1. Update `CHANGELOG.md` with the released version.
-2. Update README and GitHub Pages if install instructions changed.
-3. Commit and open the PR.
-4. Merge to `main`.
-5. Create and push the GitHub version tag.
-6. Confirm the GitHub Release workflow publishes release artifacts.
-7. Confirm the PPA install path still works.
+1. Prepare `release/0.8.0`, promote `CHANGELOG.md`, and update package metadata,
+   README and GitHub Pages. Keep the actual PPA version explicit until it changes.
+2. Run local checks and open the release PR.
+3. Merge to `main`, then create and push `v0.8.0`.
+4. Confirm the GitHub Release workflow publishes the Debian artifacts.
+5. Build and sign the source package from the tagged commit, verify its
+   signatures, run Lintian and simulate the PPA upload with `dput -s`.
+6. Upload to Launchpad when publication is authorized, then confirm its build,
+   APT index and install test.
+7. Update README, this guide and GitHub Pages with the published PPA version.
 
 GitHub Release artifacts and Launchpad PPA publication are separate channels.
 The GitHub tag drives the GitHub Release workflow. The Launchpad PPA upload is

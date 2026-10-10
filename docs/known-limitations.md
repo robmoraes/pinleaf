@@ -60,7 +60,7 @@ This behavior is accepted for the MVP.
 Closing the panel now hides it for reuse through the indicator or launcher.
 It preserves the active context and individually hidden notes.
 
-## Profiles and Groups in Development
+## Profiles and Groups
 
 Schema 5 cannot be opened by a schema-4 binary. Returning to an older version
 requires a deliberate [snapshot restore](organization-and-recovery.md) with

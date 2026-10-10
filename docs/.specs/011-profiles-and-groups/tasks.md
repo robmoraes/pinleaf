@@ -4,8 +4,9 @@ Status: implementation merged in [PR #24](https://github.com/robmoraes/pinleaf/p
 T01..T15 and T17 have
 focused evidence; T16 and T18 retain desktop/performance qualification follow-ups.
 See [execution evidence](execution-2026-10-10.md) and the final
-[automated desktop qualification](automation-2026-10-10.md). Release
-publication remains outside scope; the 0.8.0 changes remain under Unreleased.
+[automated desktop qualification](automation-2026-10-10.md). The 0.8.0 changes
+are promoted in [CHANGELOG.md](../../../CHANGELOG.md); release preparation is
+handled separately on `release/0.8.0`, with the qualification follow-ups retained.
 
 ## Sources
 

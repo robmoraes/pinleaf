@@ -38,7 +38,7 @@
       </section>
 
       <section>
-        <h2>Available in 0.7.0</h2>
+        <h2>Available in 0.8.0</h2>
         <ul class="features">
           <li>Independent post-it-style note windows.</li>
           <li>Autosave and local SQLite persistence.</li>
@@ -51,13 +51,15 @@
         </ul>
       </section>
 
-      <section id="preview" class="development-preview">
-        <p class="eyebrow">Development preview</p>
+      <section id="preview" class="release-highlights">
+        <p class="eyebrow">New in 0.8.0</p>
         <h2>Organize your desktop in 0.8.0</h2>
         <p>
-          The development version adds profiles, groups and text search.
-          Published packages currently provide 0.7.0; try the preview by
-          <a href="#run">running from source</a>.
+          Profiles, groups and text search keep the notes for each project together.
+          Get 0.8.0 from
+          <a href="https://github.com/robmoraes/pinleaf/releases/tag/v0.8.0">GitHub Releases</a>
+          or <a href="#run">run from source</a>. The Ubuntu PPA still provides
+          0.7.0 while its separate 0.8.0 upload is pending.
         </p>
         <ul class="features">
           <li>Separate work, freelance and personal notes with profiles chosen in the panel header.</li>
@@ -67,14 +69,14 @@
           <li>Move notes between groups or profiles. When deleting a group or profile, transfer its notes or delete them.</li>
           <li>Existing notes start in Personal / General, with a permanent General group in every profile.</li>
         </ul>
-        <div class="gallery preview-gallery">
+        <div class="gallery release-gallery">
           <figure>
-            <img src="assets/screenshots/preview-groups.png" width="520" height="620" loading="lazy" alt="Pinleaf 0.8.0 development panel with a Personal profile selector, expandable groups and an explicit Activate action.">
-            <figcaption>Development preview: profiles and expandable groups</figcaption>
+            <img src="assets/screenshots/preview-groups.png" width="520" height="620" loading="lazy" alt="Pinleaf 0.8.0 panel with a Personal profile selector, expandable groups and an explicit Activate action.">
+            <figcaption>Profiles and expandable groups</figcaption>
           </figure>
           <figure>
-            <img src="assets/screenshots/preview-search.png" width="520" height="620" loading="lazy" alt="Pinleaf 0.8.0 development search across all profiles, with profile and group paths identifying each result.">
-            <figcaption>Development preview: search across profiles and groups</figcaption>
+            <img src="assets/screenshots/preview-search.png" width="520" height="620" loading="lazy" alt="Pinleaf 0.8.0 search across all profiles, with profile and group paths identifying each result.">
+            <figcaption>Search across profiles and groups</figcaption>
           </figure>
         </div>
         <p>
@@ -84,7 +86,7 @@
       </section>
 
       <section>
-        <h2>Released version screenshots</h2>
+        <h2>Notes and desktop integration</h2>
         <div class="gallery">
           <figure>
             <img src="assets/screenshots/panel.png" alt="Pinleaf main panel listing notes with color indicators, previews and timestamps.">
@@ -108,7 +110,8 @@
       <section id="install">
         <h2>Install</h2>
         <p>
-          Add the Pinleaf PPA on Ubuntu 24.04 and install with apt:
+          Add the Pinleaf PPA on Ubuntu 24.04 and install with apt. It currently
+          provides 0.7.0; the separate 0.8.0 upload is pending:
         </p>
         <pre><code>sudo add-apt-repository ppa:robmoraes/pinleaf
 sudo apt update
@@ -162,9 +165,10 @@ cd pinleaf
       <section>
         <h2>Current status</h2>
         <p>
-          The latest published version on GitHub and the Ubuntu PPA is
-          <a href="https://github.com/robmoraes/pinleaf/releases/tag/v0.7.0">v0.7.0</a>.
-          The <a href="#preview">0.8.0 development preview</a> is available from source.
+          The latest GitHub release is
+          <a href="https://github.com/robmoraes/pinleaf/releases/tag/v0.8.0">v0.8.0</a>,
+          with <a href="#preview">profiles, groups and scoped text search</a>.
+          The Ubuntu PPA currently provides 0.7.0; its 0.8.0 upload is pending.
           Known limitations include
           best-effort window positioning and desktop-environment-specific
           AppIndicator behavior.

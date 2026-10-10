@@ -5,11 +5,10 @@ GNOME-style Linux desktops, built with Python, GTK 4 and libadwaita.
 
 Project page: [https://robmoraes.github.io/pinleaf/](https://robmoraes.github.io/pinleaf/)
 
-The latest published version is [0.7.0](https://github.com/robmoraes/pinleaf/releases/tag/v0.7.0),
-available through GitHub Releases and the Ubuntu PPA. The development branch
-targets **0.8.0** with profiles, groups and scoped text search. These features
-are available when [running from source](#development-setup); the usage below
-describes that development version.
+The latest release is [0.8.0](https://github.com/robmoraes/pinleaf/releases/tag/v0.8.0),
+with profiles, groups and scoped text search. Download its Debian package from
+GitHub Releases or [run from source](#development-setup). The Ubuntu PPA
+currently provides **0.7.0**; the separate 0.8.0 PPA upload is pending.
 
 ![Pinleaf desktop overview](docs/site/assets/screenshots/overview.png)
 
@@ -46,7 +45,7 @@ Not currently validated:
 See [Known Limitations](docs/known-limitations.md) for desktop-environment and
 packaging notes.
 
-The development version includes:
+Pinleaf includes:
 
 - independent post-it-style note windows;
 - local SQLite persistence;
@@ -261,7 +260,7 @@ After merging the release changes into `main`, create and push a version tag:
 ```bash
 git switch main
 git pull
-git tag v0.8.0
+git tag -a v0.8.0 -m "Release Pinleaf 0.8.0"
 git push origin v0.8.0
 ```
 

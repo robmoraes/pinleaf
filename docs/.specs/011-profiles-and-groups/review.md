@@ -14,7 +14,8 @@ fault/retry, external AT-SPI names/states and normal startup qualification pass.
 Wayland, human Orca speech/usability and the documented stress/diagnostic
 follow-ups remain. The implementation was merged through
 [PR #24](https://github.com/robmoraes/pinleaf/pull/24), with successful CI and Pages
-workflows. Release publication remains outside scope.
+workflows. Release 0.8.0 preparation is handled separately on `release/0.8.0`;
+the remaining qualification follow-ups are retained.
 
 Source standard:
 `~/wspace/engineering-playbook/engineering-playbook/architecture/spec-driven-development.md`.

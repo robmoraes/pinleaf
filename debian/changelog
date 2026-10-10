@@ -1,9 +1,11 @@
 pinleaf (0.8.0) noble; urgency=medium
 
-  * Release Pinleaf 0.8.0 with live note text search.
-  * Search open and hidden notes, ignoring case and accents.
+  * Release Pinleaf 0.8.0 with profiles, groups and scoped text search.
+  * Preserve hidden notes and pending edits when switching desktop contexts.
+  * Add note transfer and container deletion with move/delete choices.
+  * Migrate existing notes to Personal / General with validated local backups.
 
- -- Carlos R Moraes <carlos.moraes.as@gmail.com>  Sat, 10 Oct 2026 03:45:50 -0300
+ -- Carlos R Moraes <carlos.moraes.as@gmail.com>  Sat, 10 Oct 2026 09:55:55 -0300
 
 pinleaf (0.7.0) noble; urgency=medium
 

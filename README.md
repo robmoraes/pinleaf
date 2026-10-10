@@ -6,9 +6,9 @@ GNOME-style Linux desktops, built with Python, GTK 4 and libadwaita.
 Project page: [https://robmoraes.github.io/pinleaf/](https://robmoraes.github.io/pinleaf/)
 
 The latest release is [0.8.0](https://github.com/robmoraes/pinleaf/releases/tag/v0.8.0),
-with profiles, groups and scoped text search. Download its Debian package from
-GitHub Releases or [run from source](#development-setup). The Ubuntu PPA
-currently provides **0.7.0**; the separate 0.8.0 PPA upload is pending.
+with profiles, groups and scoped text search. Install it through the Ubuntu PPA,
+download its Debian package from GitHub Releases or
+[run from source](#development-setup).
 
 ![Pinleaf desktop overview](docs/site/assets/screenshots/overview.png)
 

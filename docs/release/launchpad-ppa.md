@@ -15,9 +15,9 @@ the uploader through the source package's GPG signature. SSH setup is needed
 when choosing SFTP instead; see the
 [official upload guide](https://ubuntu.com/docs/launchpad/user/how-to/packaging/ppa-package-upload/).
 
-The examples target release 0.8.0, published through its GitHub tag. The PPA
-currently provides 0.7.0; its separate 0.8.0 source upload is pending. Confirm
-the current PPA version before uploading, since package versions cannot be reused.
+Release 0.8.0 is published on GitHub and the Ubuntu PPA. The operational
+examples below document that release; 0.8.0 has already been uploaded and must
+not be reused for a future upload. Choose a new package version for the next release.
 
 The current PPA target is Ubuntu 24.04 LTS:
 
@@ -352,11 +352,11 @@ Useful states:
 - `Failed to build`: inspect the build log, fix packaging, bump the version and
   upload again.
 
-The build page provides the build log and generated files. For the first
-`0.6.0` upload, the successful build was:
+The build page provides the build log and generated files. The successful
+Ubuntu 24.04 (`noble`) build for release `0.8.0` is:
 
 ```text
-https://launchpad.net/~robmoraes/+archive/ubuntu/pinleaf/+build/32971598
+https://launchpad.net/~robmoraes/+archive/ubuntu/pinleaf/+build/33831012
 ```
 
 ## Validate The Published PPA

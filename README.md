@@ -306,6 +306,11 @@ an SSH key is needed only when choosing SFTP.
 
 ## Project Structure
 
+Feature work follows the engineering-playbook's spec-driven workflow:
+Intent -> Spec -> Clarify -> Check -> Plan -> Tasks -> Implement -> Verify.
+Specifications, plans, tasks, contracts and verification evidence live in
+`specs/`, with one numbered directory per feature.
+
 ```text
 pinleaf/
   app.py                  GTK/libadwaita application lifecycle
@@ -316,7 +321,7 @@ pinleaf/
   services/               note service and autosave
   ui/                     GTK windows, dialogs and tray controller
   resources/              CSS, fonts and icons
-docs/.specs/001-desktop-sticky-notes/
+specs/001-desktop-sticky-notes/
   spec.md
   plan.md
   tasks.md

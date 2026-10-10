@@ -82,7 +82,7 @@ After batch focus and lazy-menu improvements, the real X11 desktop starts 100
 With all 100 open, the median is 1.94 seconds and maximum 2.001 seconds; the
 strict stress boundary has little margin. These local first-idle measurements
 exclude interpreter startup, fixture generation and shutdown. See the
-[final qualification evidence](.specs/011-profiles-and-groups/automation-2026-10-10.md)
+[final qualification evidence](../specs/011-profiles-and-groups/automation-2026-10-10.md)
 for every sample, the earlier nested baseline and nonfatal private-bus tray
 diagnostics. They do not guarantee the same timings on every desktop.
 

@@ -59,7 +59,7 @@ value to justify account, backend and privacy work.
 After release 0.8.0, the maintainer included a first remote save/restore
 integration in the next development package, alongside Shared profile notes
 and the panel creation menu. Its draft scope and open decisions are recorded
-in [spec 012](../.specs/012-shared-notes-and-remote-backup/spec.md).
+in [spec 012](../../specs/012-shared-notes-and-remote-backup/spec.md).
 No provider has been selected; S3-compatible storage remains a candidate.
 The broader sync ideas above do not define the first integration's behavior.
 

@@ -85,4 +85,4 @@ compatible newer binary on a copy.
 The isolated drill in `tests/migration_recovery.py` checks refusal by the
 `v0.7.0` migrator, exact snapshot restoration and recovery of newer work from a
 preserved real WAL set. It uses temporary synthetic libraries only. Execution
-results are recorded in the [feature evidence](.specs/011-profiles-and-groups/execution-2026-10-10.md).
+results are recorded in the [feature evidence](../specs/011-profiles-and-groups/execution-2026-10-10.md).

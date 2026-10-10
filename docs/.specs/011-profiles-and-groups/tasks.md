@@ -1,10 +1,10 @@
 # Tasks: Profiles and note groups
 
-Status: implementation authorized and completed locally. T01..T15 and T17 have
+Status: implementation merged in [PR #24](https://github.com/robmoraes/pinleaf/pull/24).
+T01..T15 and T17 have
 focused evidence; T16 and T18 retain desktop/performance qualification follow-ups.
 See [execution evidence](execution-2026-10-10.md) and the final
-[automated desktop qualification](automation-2026-10-10.md). The maintainer has
-authorized advancing to a feature-branch commit and remote review. Release
+[automated desktop qualification](automation-2026-10-10.md). Release
 publication remains outside scope; the 0.8.0 changes remain under Unreleased.
 
 ## Sources

@@ -38,22 +38,53 @@
       </section>
 
       <section>
-        <h2>What it does</h2>
+        <h2>Available in 0.7.0</h2>
         <ul class="features">
           <li>Independent post-it-style note windows.</li>
           <li>Autosave and local SQLite persistence.</li>
           <li>Four note colors with curated bundled and system font choices.</li>
           <li>Default text settings for new notes, plus per-note text appearance controls.</li>
           <li>Main panel with previews, local-time timestamps and struck-through hidden notes.</li>
-          <li>Live text search across open and hidden notes, ignoring case and accents, with Ctrl+F access.</li>
           <li>Focused note action dialog from Escape for hiding or deleting notes.</li>
           <li>AppIndicator menu for quick create, show and quit actions.</li>
           <li>Ubuntu PPA and local Debian package installation with apt.</li>
         </ul>
       </section>
 
+      <section id="preview" class="development-preview">
+        <p class="eyebrow">Development preview</p>
+        <h2>Organize your desktop in 0.8.0</h2>
+        <p>
+          The development version adds profiles, groups and text search.
+          Published packages currently provide 0.7.0; try the preview by
+          <a href="#run">running from source</a>.
+        </p>
+        <ul class="features">
+          <li>Separate work, freelance and personal notes with profiles chosen in the panel header.</li>
+          <li>Expand groups to browse notes. Activate one group to show its open notes on the desktop.</li>
+          <li>Keep hidden notes hidden when switching groups, and restore each profile's last active group.</li>
+          <li>Search full note text in the active group, current profile or all profiles, ignoring case and accents.</li>
+          <li>Move notes between groups or profiles. When deleting a group or profile, transfer its notes or delete them.</li>
+          <li>Existing notes start in Personal / General, with a permanent General group in every profile.</li>
+        </ul>
+        <div class="gallery preview-gallery">
+          <figure>
+            <img src="assets/screenshots/preview-groups.png" width="520" height="620" loading="lazy" alt="Pinleaf 0.8.0 development panel with a Personal profile selector, expandable groups and an explicit Activate action.">
+            <figcaption>Development preview: profiles and expandable groups</figcaption>
+          </figure>
+          <figure>
+            <img src="assets/screenshots/preview-search.png" width="520" height="620" loading="lazy" alt="Pinleaf 0.8.0 development search across all profiles, with profile and group paths identifying each result.">
+            <figcaption>Development preview: search across profiles and groups</figcaption>
+          </figure>
+        </div>
+        <p>
+          <a href="https://github.com/robmoraes/pinleaf/blob/main/README.md#profiles-and-groups">Read the profiles and groups guide</a>
+          for activation, hidden notes, movement and deletion behavior.
+        </p>
+      </section>
+
       <section>
-        <h2>Screenshots</h2>
+        <h2>Released version screenshots</h2>
         <div class="gallery">
           <figure>
             <img src="assets/screenshots/panel.png" alt="Pinleaf main panel listing notes with color indicators, previews and timestamps.">
@@ -131,9 +162,10 @@ cd pinleaf
       <section>
         <h2>Current status</h2>
         <p>
-          Pinleaf is preparing <code>v0.8.0</code> with live text search across
-          open and hidden notes, profiles, expandable groups and switching desktop
-          contexts. This work is still in development. Known limitations include
+          The latest published version on GitHub and the Ubuntu PPA is
+          <a href="https://github.com/robmoraes/pinleaf/releases/tag/v0.7.0">v0.7.0</a>.
+          The <a href="#preview">0.8.0 development preview</a> is available from source.
+          Known limitations include
           best-effort window positioning and desktop-environment-specific
           AppIndicator behavior.
         </p>

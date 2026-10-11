@@ -1,7 +1,7 @@
 # Feature: Convert General into Shared profile notes
 
-Status: draft for product review; one creation fallback remains to be confirmed.
-Current phase: Spec / Clarify. Implementation, plan and tasks have not started.
+Status: implemented and locally verified on 2026-10-11.
+Current phase: Verify / delivery, following the pre-approved plan and tasks.
 Package: [next development iteration](../012-shared-notes-and-remote-backup/spec.md).
 Target: after Pinleaf 0.8.0; release version and date are not assigned.
 
@@ -40,7 +40,7 @@ local SQLite storage, autosave, note actions and literal text search remain the
 baseline except where this specification explicitly changes them. Historical
 spec 011 and its schema-5 contract continue to describe the shipped release.
 
-## Decisions and Proposed Defaults
+## Accepted Decisions
 
 Confirmed direction:
 - General is replaced by a captive Shared in each profile.
@@ -48,11 +48,11 @@ Confirmed direction:
 - Shared's + creates a note directly in it.
 - Individually hidden notes retain their deliberate-open behavior.
 
-This draft interprets conversion literally: the original General becomes Shared
+This specification defines conversion literally: the original General becomes Shared
 with its notes and identity. It supersedes the earlier recommendation to keep
 General as an ordinary group and create Shared empty.
 
-Product defaults specified here for review:
+Accepted product defaults:
 - Use Shared in English and Compartilhado in pt-BR.
 - A profile can have no active ordinary group; only its shared notes then appear.
 - Preserve that state when migrating an active General, instead of selecting
@@ -60,9 +60,9 @@ Product defaults specified here for review:
 - Rename conflicting ordinary groups with a numeric suffix during migration.
 - Search the visible context under the label Current context / Contexto atual.
 
-**Pending clarification:** ordinary New Note commands create in Shared when no
-ordinary group is active. This is the proposed fallback in CR-02 and AC-06;
-the maintainer has been asked to confirm it before planning.
+On 2026-10-11 the maintainer accepted the recommendation: ordinary New Note
+commands create in Shared when no ordinary group is active. Plan, tasks and
+implementation through completion were authorized together.
 
 ## Behavior
 
@@ -131,7 +131,7 @@ the maintainer has been asked to confirm it before planning.
   group or its absence. The accessible name and tooltip identify the destination
   as New shared note / Nova nota compartilhada.
 - **CR-02:** Ordinary note creation from the header, keyboard shortcut or tray
-  targets the active ordinary group. Proposed fallback: with none active, create
+  targets the active ordinary group. With none active, create
   in Shared. Browsing or expanding a group does not change the destination.
 
 ### Movement and deletion
@@ -258,7 +258,7 @@ And ordinary New Note still creates a Kubernetes note.
 ### AC-06: Use a profile containing only Shared
 
 Given a new profile has only Shared and no active ordinary group
-When the user creates a note through + or, under proposed CR-02, New Note
+When the user creates a note through + or New Note
 Then the note belongs to Shared and opens without activating Shared
 And creating a Kubernetes group later activates it alongside the shared note.
 
@@ -350,14 +350,11 @@ Release:
 Update current product documentation during implementation. Prepare version
 metadata, tag and package publication later in the release workflow.
 
-## Open Question and Next Step
+## Clarification Outcome and Delivery
 
-Owner: Pinleaf maintainer. Resolve before Plan.
+No material product questions remain. CR-02 is accepted: create directly in
+Shared when no ordinary group is active. The [plan](plan.md), [tasks](tasks.md)
+and [review](review.md) govern implementation and verification. Remote-provider
+selection does not block this local slice.
 
-- Confirm CR-02: when no ordinary group is active, should ordinary New Note
-  commands create directly in Shared, or require creating/activating an ordinary
-  group first? Direct creation is the default proposed in this draft.
-
-Review the specified defaults above, complete Check using [review.md](review.md),
-then derive the technical plan, schema contract, tasks and maintained verification
-cases. Remote-provider selection does not block specification of this local slice.
+Implementation and verification results: [execution record](execution.md).

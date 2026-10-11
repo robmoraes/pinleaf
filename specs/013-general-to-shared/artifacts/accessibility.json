@@ -1,0 +1,18 @@
+{
+  "atspi_phases": [
+    {
+      "phase": 0,
+      "node_count": 113
+    },
+    {
+      "phase": 1,
+      "node_count": 69
+    },
+    {
+      "phase": 2,
+      "node_count": 117
+    }
+  ],
+  "profile_hidden_expanded_long_name_scope_destination": "passed",
+  "orca_speech": "not tested"
+}

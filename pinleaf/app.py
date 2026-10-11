@@ -98,6 +98,7 @@ def run(argv: Sequence[str] | None = None) -> int:
                         application=self,
                         note_service=service,
                         on_create_note=self.create_note,
+                        on_create_shared_note=lambda: self.create_note(shared=True),
                         on_open_note=self.open_note,
                         on_delete_note=self.delete_note,
                         on_execute=self.execute_command,
@@ -108,15 +109,15 @@ def run(argv: Sequence[str] | None = None) -> int:
                 self._restore_open_notes()
                 if self.store.context_recovered:
                     show_error(self.main_window, "Working context recovered",
-                               "The previous context was unavailable. Pinleaf selected a valid General group; your notes were preserved.")
+                               "The previous context was unavailable. Pinleaf restored an available profile with shared notes; your notes were preserved.")
                     self.store.context_recovered = False
             except Exception as exc:
                 self.startup_error = exc
                 print(f"Pinleaf failed to open the GUI ({type(exc).__name__}).", file=sys.stderr)
                 self._show_startup_error()
 
-        def create_note(self) -> None:
-            self._perform(self._service().create_note, affected_ids=set())
+        def create_note(self, *, shared: bool = False) -> None:
+            self._perform(lambda: self._service().create_note(shared=shared), affected_ids=set())
 
         def open_note(self, note_id: str) -> None:
             existing = self.note_windows.get(note_id)
@@ -124,7 +125,7 @@ def run(argv: Sequence[str] | None = None) -> int:
                 existing.present()
                 return
 
-            self._perform(lambda: self._service().organization.activate_and_open(note_id))
+            self._perform(lambda: self._service().organization.activate_and_open(note_id), focus_note_id=note_id)
 
         def _prepare_note_window(self, note: Note) -> NoteWindow:
             before = set(self.get_windows())
@@ -141,14 +142,16 @@ def run(argv: Sequence[str] | None = None) -> int:
                     window.destroy()
                 raise
 
-        def execute_command(self, action: Callable[[], object], *, affected_ids: set[str] | None = None) -> object:
+        def execute_command(self, action: Callable[[], object], *, affected_ids: set[str] | None = None,
+                            focus_note_id: str | None = None) -> object:
             if self.context_controller is None:
                 raise RuntimeError("Context controller is unavailable.")
-            return self.context_controller.execute(action, affected_ids=affected_ids)
+            return self.context_controller.execute(action, affected_ids=affected_ids, focus_note_id=focus_note_id)
 
-        def _perform(self, action: Callable[[], object], *, affected_ids: set[str] | None = None) -> None:
+        def _perform(self, action: Callable[[], object], *, affected_ids: set[str] | None = None,
+                     focus_note_id: str | None = None) -> None:
             try:
-                self.execute_command(action, affected_ids=affected_ids)
+                self.execute_command(action, affected_ids=affected_ids, focus_note_id=focus_note_id)
             except (OrganizationError, TransitionError) as exc:
                 show_error(self.main_window, "Could not complete this change", str(exc))
             except Exception:

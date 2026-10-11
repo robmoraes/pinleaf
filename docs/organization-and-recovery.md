@@ -1,52 +1,60 @@
 # Organization and database recovery
 
-Profiles contain groups; each note belongs to one group. A profile's permanent
-General group is labeled Geral in pt-BR. The initial profile name is localized
-once and can be renamed; user-created names do not change with the language.
-Profiles organize local data and do not provide separate accounts or permissions.
+This page describes the development branch's Shared feature. Published 0.8.0
+uses General and schema 5. Shared is not yet released.
 
-The panel title selects a profile and restores its last active group. Expand
-sections to browse; **Activate** changes which group's open notes appear on the
-desktop. Context switches preserve individual hidden/open state. Hidden notes
-stay crossed through until an explicit **Open** or **Activate and open** action.
-Create and activate explicitly switches context. Moving a note keeps the active
-group and all note properties; an open note entering that group appears there.
+Every live profile has one permanent Shared (Compartilhado in pt-BR). Each note
+belongs to one group. Profiles organize local data, with no separate accounts
+or permissions. The initial profile name is localized once and can be renamed;
+custom names remain unchanged when switching language.
 
-Search defaults to the active group, with current-profile and all-profile scopes.
-External results show their destination and require **Activate and open**.
-Clearing search restores the previous expansion; switching context clears the
-query. Organization labels stay in the panel, leaving sticky notes unchanged.
+The title selects a profile and resumes its last ordinary group, which may be
+absent. Shared's open notes appear with the project's open notes. **Activate**
+changes the ordinary group; Shared has no activation control. Its **+** creates
+there without switching context. Normal New and tray creation target the active
+ordinary group, falling back to Shared. New profiles contain only Shared.
 
-Deleting a profile covers all its groups. Choose transfer to one existing
-external group or deletion of every live note, including hidden notes. Transfer
-also moves retained deleted rows without reviving them. Deletion uses the
-existing soft-deletion policy; removed containers remain as internal tombstones.
-There is no trash, restore or permanent-purge UI in this version.
+Switching projects reuses shared editors. Switching profiles removes the old
+profile's windows without marking them hidden. Hidden notes stay crossed through
+until explicit Open. Moves preserve note metadata and do not activate groups.
+Search defaults to **Current context** (Shared plus the project, or Shared alone),
+with Current profile and All profiles available. A foreign Shared result offers
+**Switch profile and open**, restoring its owner's remembered ordinary context.
 
-Deleting the active group selects General in that profile. Deleting the active
-profile with transfer selects the destination group; deletion of its notes or
-an empty profile requires selecting a remaining profile to resume. Removing an
-inactive container keeps the current context. General is protected independently
-and the last profile cannot be removed. A changed deletion scope or destination
-requires a new review before confirmation.
+Deleting a profile includes all its groups. Transfer moves live and retained
+deleted notes to one external destination without reviving deleted rows. Delete
+all uses existing soft deletion, including hidden notes. Container tombstones
+remain; no trash or purge UI is provided. Removing an active ordinary group
+leaves Shared only. Removing an active profile with transfer activates an ordinary
+destination, or resumes the Shared destination's profile and remembered context.
+Delete all or an empty profile requires a replacement profile. Shared is protected
+independently and the last profile cannot be removed. Changed scope, destination
+or replacement context requires a new confirmation.
 
 ## Upgrade
 
-Opening a known schema-1..4 library first creates a validated SQLite snapshot in
+Opening a known schema-1..5 library first creates a validated SQLite snapshot in
 `backups/` beside `pinleaf.sqlite3`. The directory is private (0700), files are
 private (0600), and filenames include the source version, UTC time and a unique
 suffix. They are not uploaded or automatically pruned.
 
-The upgrade to schema 5 is one transaction. All retained notes enter Personal /
-General (Pessoal / Geral in pt-BR); original values and settings are preserved.
+The upgrade to schema 6 is one transaction. Each live schema-5 General converts
+to Shared without changing group IDs, note memberships or any note/settings
+values. Valid ordinary contexts remain; General context references become null.
+Earlier libraries enter Personal / Shared (Pessoal / Compartilhado in pt-BR).
+Ordinary Shared/Compartilhado collisions receive the first free numeric suffix,
+starting at (2), with IDs and notes preserved. A dismissible panel notice explains
+the change and any renames. Deleted profiles and group tombstones remain intact.
+
 A backup, validation or commit failure aborts the upgrade. Newer or malformed
-databases are refused rather than replaced. Invalid saved context metadata can
-be repaired to an existing General group; missing memberships or General groups
-are treated as integrity failures.
+databases are refused rather than replaced. Stale context metadata is repaired
+to an available profile and null ordinary context, or its valid remembered
+context when the original profile is gone. Missing memberships or Shared groups
+are integrity failures; Pinleaf does not silently replace the library.
 
 ## Return to an older version
 
-An older schema-4 binary refuses schema 5. There is no in-place downgrade. A
+Published 0.8.0 (schema 5) refuses schema 6. There is no in-place downgrade. A
 snapshot restore returns the library to the snapshot's point in time; later
 notes and edits will be absent from that restored view. Keep the newer database
 and its SQLite sidecars separately so that work can be recovered using a
@@ -56,7 +64,7 @@ compatible newer binary on a copy.
    Do not restore while another process can write the database.
 2. Locate the configured data directory: normally
    `${XDG_DATA_HOME:-$HOME/.local/share}/pinleaf`. Select the correct pre-upgrade
-   `backups/pinleaf-schema-v4-…sqlite3` snapshot (or a supported earlier version).
+   `backups/pinleaf-schema-v5-…sqlite3` snapshot (or a supported earlier version).
 3. Validate the selected snapshot without opening it for writes:
 
    ```bash
@@ -67,7 +75,7 @@ compatible newer binary on a copy.
    with sqlite3.connect(uri, uri=True) as connection:
        assert connection.execute('PRAGMA integrity_check').fetchone()[0] == 'ok'
        rows = connection.execute('SELECT version FROM schema_version').fetchall()
-       assert len(rows) == 1 and rows[0][0] in (1, 2, 3, 4)
+       assert len(rows) == 1 and rows[0][0] in (1, 2, 3, 4, 5)
        print('Validated source schema:', rows[0][0])
    PY
    ```
@@ -82,7 +90,12 @@ compatible newer binary on a copy.
 6. Start the compatible older binary. Check the expected notes. Keep the newer
    recovery directory and snapshots until their retention is deliberately decided.
 
-The isolated drill in `tests/migration_recovery.py` checks refusal by the
-`v0.7.0` migrator, exact snapshot restoration and recovery of newer work from a
-preserved real WAL set. It uses temporary synthetic libraries only. Execution
-results are recorded in the [feature evidence](../specs/011-profiles-and-groups/execution-2026-10-10.md).
+The isolated drill in `tests/migration_recovery.py` checks refusal by the actual
+`v0.8.0` migrator, exact snapshot restoration and recovery of newer work from a
+preserved real WAL set. It uses temporary synthetic libraries only. Run:
+
+```bash
+/usr/bin/python3 tests/migration_recovery.py
+```
+
+Results and native qualification are in the [Shared execution record](../specs/013-general-to-shared/execution.md).

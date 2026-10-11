@@ -53,7 +53,7 @@ class SQLiteStoreTests(unittest.TestCase):
         self.assertEqual(version, CURRENT_SCHEMA_VERSION)
 
     def test_create_get_and_list_note(self) -> None:
-        note = Note.new("note-1", group_id=self.store.organization.context().group.id, now="2026-06-12T00:00:00+00:00")
+        note = Note.new("note-1", group_id=self.store.organization.shared(self.store.organization.context().profile.id).id, now="2026-06-12T00:00:00+00:00")
 
         self.store.create(note)
 
@@ -61,8 +61,8 @@ class SQLiteStoreTests(unittest.TestCase):
         self.assertEqual(self.store.list_notes(), [note])
 
     def test_list_notes_orders_by_created_at_descending(self) -> None:
-        older = Note.new("note-1", group_id=self.store.organization.context().group.id, now="2026-06-12T00:00:00+00:00")
-        newer = Note.new("note-2", group_id=self.store.organization.context().group.id, now="2026-06-12T01:00:00+00:00")
+        older = Note.new("note-1", group_id=self.store.organization.shared(self.store.organization.context().profile.id).id, now="2026-06-12T00:00:00+00:00")
+        newer = Note.new("note-2", group_id=self.store.organization.shared(self.store.organization.context().profile.id).id, now="2026-06-12T01:00:00+00:00")
         self.store.create(older)
         self.store.create(newer)
 
@@ -78,7 +78,7 @@ class SQLiteStoreTests(unittest.TestCase):
         )
 
     def test_update_content_and_color(self) -> None:
-        self.store.create(Note.new("note-1", group_id=self.store.organization.context().group.id, now="2026-06-12T00:00:00+00:00"))
+        self.store.create(Note.new("note-1", group_id=self.store.organization.shared(self.store.organization.context().profile.id).id, now="2026-06-12T00:00:00+00:00"))
 
         updated = self.store.update_content(
             "note-1",
@@ -96,7 +96,7 @@ class SQLiteStoreTests(unittest.TestCase):
         self.assertEqual(recolored.updated_at, "2026-06-12T02:00:00+00:00")
 
     def test_update_font_family(self) -> None:
-        self.store.create(Note.new("note-1", group_id=self.store.organization.context().group.id, now="2026-06-12T00:00:00+00:00"))
+        self.store.create(Note.new("note-1", group_id=self.store.organization.shared(self.store.organization.context().profile.id).id, now="2026-06-12T00:00:00+00:00"))
 
         updated = self.store.update_font_family(
             "note-1",
@@ -113,7 +113,7 @@ class SQLiteStoreTests(unittest.TestCase):
         self.assertIsNone(reset.font_family)
 
     def test_update_text_appearance(self) -> None:
-        self.store.create(Note.new("note-1", group_id=self.store.organization.context().group.id, now="2026-06-12T00:00:00+00:00"))
+        self.store.create(Note.new("note-1", group_id=self.store.organization.shared(self.store.organization.context().profile.id).id, now="2026-06-12T00:00:00+00:00"))
 
         updated = self.store.update_text_appearance(
             "note-1",
@@ -206,7 +206,7 @@ class SQLiteStoreTests(unittest.TestCase):
                 self.assertEqual(saved.text_color, "#123ABC")
 
     def test_update_window_state(self) -> None:
-        self.store.create(Note.new("note-1", group_id=self.store.organization.context().group.id, now="2026-06-12T00:00:00+00:00"))
+        self.store.create(Note.new("note-1", group_id=self.store.organization.shared(self.store.organization.context().profile.id).id, now="2026-06-12T00:00:00+00:00"))
 
         note = self.store.update_window_state(
             "note-1",
@@ -225,7 +225,7 @@ class SQLiteStoreTests(unittest.TestCase):
         self.assertFalse(note.is_open)
 
     def test_soft_delete_hides_note_from_normal_reads(self) -> None:
-        self.store.create(Note.new("note-1", group_id=self.store.organization.context().group.id, now="2026-06-12T00:00:00+00:00"))
+        self.store.create(Note.new("note-1", group_id=self.store.organization.shared(self.store.organization.context().profile.id).id, now="2026-06-12T00:00:00+00:00"))
 
         self.store.soft_delete("note-1", now="2026-06-12T01:00:00+00:00")
 

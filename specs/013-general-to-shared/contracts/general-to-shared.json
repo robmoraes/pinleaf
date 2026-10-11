@@ -1,17 +1,25 @@
 {
   "contract_format_version": 1,
   "contract_kind": "migration-outcomes",
-  "status": "draft-for-product-review",
+  "status": "accepted",
   "spec": "../spec.md",
   "scope": "convert-live-profile-general-to-shared",
-  "source_schema_versions": [1, 2, 3, 4, 5],
-  "target_schema_policy": "newer-than-5; exact-version-and-schema-defined-in-plan",
+  "source_schema_versions": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
   "schema_5_conversion": {
     "population": "one-built-in-General-per-live-profile",
     "profile_ids": "unchanged",
     "converted_group_ids": "unchanged",
     "converted_role": "shared",
-    "labels": {"default": "Shared", "pt-BR": "Compartilhado"},
+    "labels": {
+      "default": "Shared",
+      "pt-BR": "Compartilhado"
+    },
     "note_memberships": "unchanged",
     "create_extra_ordinary_group": false,
     "preserve_active_profile": true,
@@ -23,15 +31,30 @@
     "population": "every-retained-note-including-soft-deleted",
     "ids_and_row_count": "unchanged",
     "exact_schema_5_columns": [
-      "id", "group_id", "content", "color", "width", "height",
-      "position_x", "position_y", "font_family", "font_size", "text_color",
-      "is_open", "created_at", "updated_at", "deleted_at"
+      "id",
+      "group_id",
+      "content",
+      "color",
+      "width",
+      "height",
+      "position_x",
+      "position_y",
+      "font_family",
+      "font_size",
+      "text_color",
+      "is_open",
+      "created_at",
+      "updated_at",
+      "deleted_at"
     ],
     "legacy_missing_fields": "existing-supported-upgrade-defaults",
     "app_settings": "unchanged"
   },
   "ordinary_name_collisions": {
-    "reserved_keys": ["shared", "compartilhado"],
+    "reserved_keys": [
+      "shared",
+      "compartilhado"
+    ],
     "normalization": "trim-and-NFC-casefold",
     "rename": "original-name-plus-first-available-numeric-suffix",
     "suffix_format": " (N)",
@@ -41,7 +64,10 @@
     "report_renames": true
   },
   "fresh_and_legacy_libraries": {
-    "initial_profile_label": {"default": "Personal", "pt-BR": "Pessoal"},
+    "initial_profile_label": {
+      "default": "Personal",
+      "pt-BR": "Pessoal"
+    },
     "initial_group_role": "shared",
     "initial_ordinary_group": null,
     "legacy_note_destination": "initial-profile-shared"
@@ -63,8 +89,78 @@
     "downgrade": "restore-validated-snapshot-with-app-stopped-preserving-newer-recovery-files"
   },
   "traceability": [
-    "SH-01", "SH-02", "SH-03", "SH-04", "CTX-01", "CTX-02", "CTX-03",
-    "MIG-01", "MIG-02", "MIG-03", "MIG-04", "MIG-05", "MIG-06", "MIG-07",
-    "AC-01", "AC-02", "AC-06", "AC-11", "AC-12"
-  ]
+    "SH-01",
+    "SH-02",
+    "SH-03",
+    "SH-04",
+    "CTX-01",
+    "CTX-02",
+    "CTX-03",
+    "MIG-01",
+    "MIG-02",
+    "MIG-03",
+    "MIG-04",
+    "MIG-05",
+    "MIG-06",
+    "MIG-07",
+    "AC-01",
+    "AC-02",
+    "AC-06",
+    "AC-11",
+    "AC-12"
+  ],
+  "target_schema_version": 6,
+  "required_tables": {
+    "profiles": [
+      "id",
+      "name",
+      "name_key",
+      "deleted_at"
+    ],
+    "groups": [
+      "id",
+      "profile_id",
+      "name",
+      "name_key",
+      "is_shared",
+      "deleted_at"
+    ],
+    "profile_context": [
+      "profile_id",
+      "last_group_id"
+    ],
+    "active_context": [
+      "singleton_id",
+      "profile_id",
+      "group_id"
+    ],
+    "migration_notices": [
+      "id",
+      "payload"
+    ],
+    "notes": [
+      "id",
+      "group_id",
+      "content",
+      "color",
+      "width",
+      "height",
+      "position_x",
+      "position_y",
+      "font_family",
+      "font_size",
+      "text_color",
+      "is_open",
+      "created_at",
+      "updated_at",
+      "deleted_at"
+    ],
+    "app_settings": [
+      "key",
+      "value"
+    ],
+    "schema_version": [
+      "version"
+    ]
+  }
 }

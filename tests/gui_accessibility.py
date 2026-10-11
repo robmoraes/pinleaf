@@ -52,6 +52,8 @@ def inspect(pid: int, phase: int) -> None:
     names = [node["name"] for node in nodes]
     assert "Switch profile, Pessoal" in names, names
     if phase == 0:
+        assert "Create shared note" in names, names
+        assert any("Shared" in name for name in names), names
         assert any(name.startswith("Hidden note. Hidden budget") for name in names), names
         assert any(node["name"] == "G" * 80 and node["expanded"] for node in nodes), nodes
         assert any("Active" in name for name in names), names
@@ -88,7 +90,7 @@ def main() -> int:
                 panel = app.main_window
                 if "initialized" not in state:
                     app.execute_command(lambda: org.rename("profile",org.context.profile.id,"Pessoal"),affected_ids=set())
-                    state["general"] = org.context.group.id
+                    state["general"] = app.execute_command(lambda: org.create_group("General")).id
                     app.create_note()
                     state["hidden"] = next(iter(app.note_windows))
                     app.note_windows[state["hidden"]].text_view.get_buffer().set_text("Hidden budget")

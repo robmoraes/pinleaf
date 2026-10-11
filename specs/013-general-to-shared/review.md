@@ -1,6 +1,7 @@
 # Review: General to Shared
 
-Current phase: Spec / Clarify. No plan, tasks or application changes.
+Current phase: Verify / delivery. Maintainer accepted the defaults and pre-approved the
+plan and tasks on 2026-10-11, authorizing the complete Shared implementation.
 
 Source standards:
 - `~/wspace/engineering-playbook/engineering-playbook/architecture/spec-driven-development.md`
@@ -16,10 +17,8 @@ The [spec](spec.md) interprets conversion as retaining the original General's
 identity and notes. It explicitly replaces the earlier draft recommendation
 to create Shared empty and retain General as an ordinary group.
 
-The specified empty ordinary context, localized label, name-collision suffix
-and Current context search label are product defaults submitted for review.
-CR-02's no-active-group creation fallback has been asked as a clarification;
-the draft proposes creating directly in Shared.
+The empty ordinary context, localized label, name-collision suffix, Current
+context search label and New Note fallback to Shared are accepted.
 
 ## Quality Checklist
 
@@ -32,17 +31,19 @@ the draft proposes creating directly in Shared.
 - [x] Conversion handles pre-existing Shared names, locale changes, snapshots,
       rollback and repeat startup.
 - [x] Concrete acceptance examples and a migration outcome contract are present.
-- [ ] Maintainer confirms the no-active-group creation fallback and reviews defaults.
-- [ ] Check completed; technical plan and target schema contract prepared.
-- [ ] Ordered tasks and maintained verification cases derived from the plan.
-- [ ] Implementation and verification evidence produced.
+- [x] Maintainer confirms the no-active-group creation fallback and reviews defaults.
+- [x] Check completed; technical plan and target schema contract prepared.
+- [x] Ordered tasks and maintained verification cases derived from the plan.
+- [x] Implementation and verification evidence produced.
 
 ## Verification Boundary
 
-The acceptance examples define future expected behavior. Documentation and
-contract checks do not demonstrate implementation, migration execution or
-desktop behavior. Application tests were not rerun for this documentation-only
-specification change.
+Implementation evidence is recorded in [execution.md](execution.md): 186 tests,
+native X11 keyboard/lifecycle/restart checks, private AT-SPI export, schema-5
+recovery and real-compositor startup passed. No user database was modified.
+Wayland and human Orca qualification remain outside the demonstrated results.
+
+Initial documentation-only checks (before implementation):
 
 Documentation checks on 2026-10-10:
 - Local links between the package brief, focused spec, review and JSON contract

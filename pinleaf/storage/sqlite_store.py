@@ -92,11 +92,17 @@ class NoteStore:
         ).fetchone()
         return _from_row(row) if row is not None else None
 
-    def list_notes(self, *, group_id: str | None = None, profile_id: str | None = None) -> list[Note]:
+    def list_notes(self, *, group_id: str | None = None, profile_id: str | None = None,
+                   group_ids: tuple[str, ...] | None = None) -> list[Note]:
         sql = """SELECT n.* FROM notes n JOIN groups g ON g.id=n.group_id
             JOIN profiles p ON p.id=g.profile_id
             WHERE n.deleted_at IS NULL AND g.deleted_at IS NULL AND p.deleted_at IS NULL"""
         args = []
+        if group_ids is not None:
+            if not group_ids:
+                return []
+            sql += " AND n.group_id IN (" + ",".join("?" for _ in group_ids) + ")"
+            args.extend(group_ids)
         if group_id is not None:
             sql += " AND n.group_id=?"
             args.append(group_id)
@@ -105,6 +111,16 @@ class NoteStore:
             args.append(profile_id)
         rows = self.connection.execute(sql + " ORDER BY n.created_at DESC,n.id DESC", args).fetchall()
         return [_from_row(row) for row in rows]
+
+    def migration_notice(self) -> dict | None:
+        import json
+
+        row = self.connection.execute("SELECT payload FROM migration_notices WHERE id='general-to-shared'").fetchone()
+        return json.loads(row[0]) if row else None
+
+    def dismiss_migration_notice(self) -> None:
+        self.connection.execute("DELETE FROM migration_notices WHERE id='general-to-shared'")
+        self._commit()
 
     def save_context_geometry(self, note_id: str, *, width: int, height: int,
                               position_x: int | None, position_y: int | None) -> None:

@@ -135,7 +135,7 @@ class MainWindowSearchTests(unittest.TestCase):
 
         self.assertEqual(self.window.search_entry.get_text(), "")
         self.assertEqual(self.window.stack.get_visible_child_name(), "list")
-        self.assertTrue(self.window.group_rows[self.service.organization.context.group.id].get_expanded())
+        self.assertTrue(self.window.group_rows[self.service.organization.repository.shared(self.service.organization.context.profile.id).id].get_expanded())
 
     def test_ctrl_f_selects_query_without_consuming_other_keys(self) -> None:
         self.search("cafe")

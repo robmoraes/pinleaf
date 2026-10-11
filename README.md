@@ -62,44 +62,53 @@ Pinleaf includes:
 
 ## Profiles and Groups
 
-Choose a profile in the panel's title bar. Its last active group is restored.
-Each profile has a permanent **General** group (**Geral** in pt-BR).
-Expand groups to browse their notes; use **Activate** to switch the desktop.
-Several groups may stay expanded. New notes, including tray-created notes,
-belong to the active group.
+The following describes the development branch. Published 0.8.0 uses General
+and an active-group-only desktop; Shared is scheduled for the next release.
 
-**New profile…** and **New group…** use **Create and activate**. Manage profiles
-from the title selector; rename or delete custom groups from their action menu.
-Note menus offer **Move to…**, with a profile/group destination. Moving preserves
-the note's appearance and open/hidden state and keeps the current context.
+Choose a profile in the panel's title bar. Its last ordinary group is restored,
+including the valid state with no ordinary group active. Every profile has a
+permanent **Shared** section (**Compartilhado** in pt-BR). Open Shared notes
+appear alongside the active project's notes. Use its **+** to create a shared
+note without changing projects. Shared has no Activate, Rename or Delete action.
 
-Switching contexts saves pending edits and removes the previous group's windows
-without marking those notes hidden. Individually hidden notes remain crossed
-through and stay off the desktop until explicitly opened. Opening an external
-note uses **Activate and open**; inspecting it leaves the desktop unchanged.
+Expand groups to browse; **Activate** switches the project's desktop notes while
+keeping shared windows in place. **New profile…** starts with Shared only;
+**New group…** creates and activates an ordinary group. Normal New and tray
+creation target the active ordinary group, falling back to Shared when absent.
 
-Deleting a group or profile offers **Move notes** to one existing group or
-**Delete all notes**. The summary includes hidden notes and the resulting active
-context. General cannot be removed independently, and one profile must remain.
+Note menus offer **Move to…** with profile/group destinations, including Shared.
+Moving preserves content, appearance, timestamps and open/hidden state without
+activating the destination. Context changes save pending edits. Hidden notes
+remain crossed through and stay closed until explicitly opened.
 
-On the first upgrade, all existing notes move to **Personal / General**
-(**Pessoal / Geral** in pt-BR), including retained deleted notes. A private,
-validated pre-upgrade snapshot is saved locally. See
-[organization and database recovery](docs/organization-and-recovery.md) before
-returning to an older Pinleaf version.
+Deleting a group or profile offers **Move notes** or **Delete all notes**,
+including hidden notes. Deleting the active ordinary group leaves Shared only.
+Transferring an active profile to an ordinary group activates that destination;
+transferring to Shared resumes the destination profile's remembered project or
+Shared-only context. Delete all or deleting an empty active profile requires a
+replacement profile. Shared cannot be deleted independently; one profile remains.
+
+Upgrading from 0.8.0 converts each General to Shared in place, keeping IDs and
+notes. A previously active General becomes Shared-only; no unrelated project
+is selected. Conflicting ordinary Shared/Compartilhado names receive a numeric
+suffix and are reported in a dismissible notice. Older libraries migrate to
+**Personal / Shared** (**Pessoal / Compartilhado** in pt-BR). A validated private
+snapshot precedes the upgrade. See [organization and database recovery](docs/organization-and-recovery.md)
+before returning to an older version.
 
 ## Search Notes
 
-In the main panel, type in **Search notes** to filter by the full note content.
-Search ignores case and accents, so `cafe` also finds `Café`. Results keep the
-newest-created notes first and include hidden notes. Select **Active group**
-(the default), **Current profile**, or **All profiles**. Global results show
-their full profile/group path. Search and expansion never change the desktop;
-an actual context switch clears the query and resets its scope.
+Type in **Search notes** to filter full note content. Search ignores case and
+accents, so `cafe` finds `Café`. Results retain creation order and include hidden
+notes. **Current context** (default) searches Shared plus the active ordinary
+group, or Shared alone. **Current profile** and **All profiles** broaden scope.
+Global results show the profile/group path. Opening current-profile Shared keeps
+the project active; **Switch profile and open** resumes a foreign Shared's
+profile. Ordinary external notes use **Activate and open**. Inspection and
+expansion leave the desktop unchanged; an actual context switch resets search.
 
-Press **Ctrl+F** to focus the search field. Clear the field with its clear icon
-or **Escape** while the field is focused to restore normal group sections and
-their previous expansion. With no matches, use **Clear Search**.
+Press **Ctrl+F** to focus search. Clear it or press **Escape** to restore normal
+sections and previous expansion. With no matches, use **Clear Search**.
 
 ## Install
 

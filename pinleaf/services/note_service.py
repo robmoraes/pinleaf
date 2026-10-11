@@ -23,12 +23,14 @@ class NoteService:
         self.id_factory = id_factory or (lambda: str(uuid4()))
         self.clock = clock or utc_now_iso
 
-    def create_note(self) -> Note:
+    def create_note(self, *, shared: bool = False) -> Note:
+        context = self.organization.context
+        group = context.group if not shared and context.group else self.organization.repository.shared(context.profile.id)
         appearance = self.store.get_default_text_appearance()
         return self.store.create(
             Note.new(
                 self.id_factory(),
-                group_id=self.organization.context.group.id,
+                group_id=group.id,
                 now=self.clock(),
                 font_family=appearance.font_family,
                 font_size=appearance.font_size,
@@ -36,12 +38,17 @@ class NoteService:
             )
         )
 
-    def list_notes(self, query: str = "", *, scope: SearchScope = SearchScope.ACTIVE_GROUP) -> list[Note]:
+    def list_notes(self, query: str = "", *, scope: SearchScope = SearchScope.CURRENT_CONTEXT) -> list[Note]:
         """List notes by creation time, optionally matching their full text."""
         scope = SearchScope(scope)
         context = self.organization.context
+        group_ids = None
+        if scope == SearchScope.CURRENT_CONTEXT:
+            group_ids = (self.organization.repository.shared(context.profile.id).id,)
+            if context.group_id is not None:
+                group_ids += (context.group_id,)
         notes = self.store.list_notes(
-            group_id=context.group.id if scope == SearchScope.ACTIVE_GROUP else None,
+            group_ids=group_ids,
             profile_id=context.profile.id if scope == SearchScope.CURRENT_PROFILE else None,
         )
         search_text = _normalize_search_text(query)

@@ -11,7 +11,7 @@ from gi.repository import Adw, Gdk, Gtk, Pango
 
 from pinleaf.appearance import TextAppearance
 from pinleaf.models import Group, Note, SearchScope
-from pinleaf.organization import OrganizationError, group_label
+from pinleaf.organization import OrganizationError, group_label, is_portuguese
 from pinleaf.services.context_controller import TransitionError
 from pinleaf.services.note_service import NoteService
 from pinleaf.ui.about import show_about
@@ -31,16 +31,22 @@ class MainWindow(Adw.ApplicationWindow):
         on_delete_note: Callable[[str], None],
         on_execute: Callable | None = None,
         on_hide_note: Callable[[str], None] | None = None,
+        on_create_shared_note: Callable[[], None] | None = None,
     ) -> None:
         super().__init__(application=application)
         self.note_service = note_service
         self.on_create_note = on_create_note
+        self.on_create_shared_note = on_create_shared_note or (
+            lambda: self._perform(lambda: self.note_service.create_note(shared=True), affected_ids=set()))
         self.on_open_note = on_open_note
         self.on_delete_note = on_delete_note
         self.on_execute = on_execute
         self.on_hide_note = on_hide_note
         self.organization = note_service.organization
-        self.expanded: dict[str, bool] = {self.organization.context.group.id: True}
+        context = self.organization.context
+        self.expanded: dict[str, bool] = {self.organization.repository.shared(context.profile.id).id: True}
+        if context.group_id:
+            self.expanded[context.group_id] = True
         self.group_rows: dict[str, Adw.ExpanderRow] = {}
         self.focus_targets: dict[str, Gtk.Widget] = {}
         self._search_expansion: dict[str, bool] | None = None
@@ -111,8 +117,9 @@ class MainWindow(Adw.ApplicationWindow):
         content.set_margin_bottom(18)
         content.set_margin_start(18)
         content.set_margin_end(18)
+        content.append(self._build_migration_notice())
         content.append(self.search_entry)
-        self.scope = Gtk.DropDown.new_from_strings(["Active group", "Current profile", "All profiles"])
+        self.scope = Gtk.DropDown.new_from_strings(["Contexto atual" if is_portuguese() else "Current context", "Current profile", "All profiles"])
         self.scope.set_tooltip_text("Search scope")
         self.scope.update_property([Gtk.AccessibleProperty.LABEL], ["Search scope"])
         self.scope_label = Gtk.Label(label="Search scope", xalign=0)
@@ -142,6 +149,29 @@ class MainWindow(Adw.ApplicationWindow):
         key_controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
         key_controller.connect("key-pressed", self._on_key_pressed)
         self.add_controller(key_controller)
+
+    def _build_migration_notice(self) -> Gtk.Widget:
+        box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        notice = self.note_service.store.migration_notice()
+        box.set_visible(notice is not None)
+        if notice is None:
+            return box
+        text = ("Geral agora é Compartilhado. Suas notas aparecem junto do grupo ativo."
+                if is_portuguese() else "General is now Shared. Its notes appear alongside the active group.")
+        for rename in notice["renames"]:
+            text += f"\n{rename['profile']}: {rename['from']} → {rename['to']}"
+        label = Gtk.Label(label=text, wrap=True, xalign=0, hexpand=True)
+        label.set_wrap_mode(Pango.WrapMode.WORD_CHAR)
+        box.append(label)
+        dismiss = Gtk.Button(icon_name="window-close-symbolic", valign=Gtk.Align.START)
+        dismiss.set_tooltip_text("Dispensar aviso" if is_portuguese() else "Dismiss notice")
+        dismiss.update_property([Gtk.AccessibleProperty.LABEL], [dismiss.get_tooltip_text()])
+        def dismissed(_button) -> None:
+            self._perform(self.note_service.store.dismiss_migration_notice, affected_ids=set())
+            box.set_visible(self.note_service.store.migration_notice() is not None)
+        dismiss.connect("clicked", dismissed)
+        box.append(dismiss)
+        return box
 
     def _build_menu(self) -> Gtk.Popover:
         popover = Gtk.Popover()
@@ -252,7 +282,8 @@ class MainWindow(Adw.ApplicationWindow):
             focused = focused.get_parent()
         self.focus_targets = {}
         self.group_rows = {}
-        self._active_group_id = context.group.id
+        self._visible_group_ids = {self.organization.repository.shared(context.profile.id).id, context.group_id}
+        self._shared_group_ids = {group.id for group in all_groups if group.is_shared}
         profiles = {profile.id: profile.name for profile in all_profiles}
         self._paths = {group.id: f"{profiles[group.profile_id]} / {group_label(group)}" for group in all_groups}
         self._clear_list()
@@ -269,14 +300,17 @@ class MainWindow(Adw.ApplicationWindow):
         if focus_key in self.focus_targets:
             self.focus_targets[focus_key].grab_focus()
         elif focus_key and focus_key.startswith("activate:"):
-            if context.group.id in self.group_rows:
-                self.group_rows[context.group.id].child_focus(Gtk.DirectionType.TAB_FORWARD)
+            if context.group_id in self.group_rows:
+                self.group_rows[context.group_id].child_focus(Gtk.DirectionType.TAB_FORWARD)
             else:
                 self.search_entry.grab_focus()
 
     def context_changed(self) -> None:
         self._search_expansion = None
-        self.expanded[self.organization.context.group.id] = True
+        context = self.organization.context
+        self.expanded[self.organization.repository.shared(context.profile.id).id] = True
+        if context.group_id:
+            self.expanded[context.group_id] = True
         self._refreshing = True
         self.search_entry.set_text("")
         self.scope.set_selected(0)
@@ -284,13 +318,13 @@ class MainWindow(Adw.ApplicationWindow):
         self._render_signature = None
 
     def execute(self, action: Callable, *, affected_ids: set[str] | None = None):
-        previous = self.organization.context.group.id
+        previous = self.organization.context.identity
         if self.on_execute is not None:
             result = self.on_execute(action, affected_ids=affected_ids)
         else:
             # Widget-only consumers have no desktop editors to reconcile.
             result = action()
-        if self.organization.context.group.id != previous:
+        if self.organization.context.identity != previous:
             self.context_changed()
         self.refresh()
         return result
@@ -369,17 +403,24 @@ class MainWindow(Adw.ApplicationWindow):
     def _build_group(self, group: Group, notes: list[Note], *, searching: bool) -> Adw.ExpanderRow:
         row = Adw.ExpanderRow(title=group_label(group))
         row.set_use_markup(False)
-        active = group.id == self.organization.context.group.id
+        active = group.id == self.organization.context.group_id
         count = len(notes) if searching else group.note_count
         row.set_subtitle(f"{count} {'note' if count == 1 else 'notes'}" + (" · Active" if active else ""))
         self._focusable(row, f"group:{group.id}")
-        if not active:
+        if not active and not group.is_shared:
             activate = Gtk.Button(label="Activate", valign=Gtk.Align.CENTER)
             activate.set_tooltip_text(f"Activate {group_label(group)} on the desktop")
             activate.connect("clicked", lambda _: self._perform(lambda: self.organization.activate_group(group.id)))
             row.add_suffix(self._focusable(activate, f"activate:{group.id}"))
-        if group.is_general:
-            row.set_tooltip_text("Permanent group. It cannot be renamed or deleted independently.")
+        if group.is_shared:
+            explanation = ("Aparece junto do grupo ativo" if is_portuguese() else "Shown alongside the active group")
+            row.set_subtitle(f"{count} {'note' if count == 1 else 'notes'} · {explanation}")
+            row.set_tooltip_text(explanation)
+            create = Gtk.Button(icon_name="list-add-symbolic", valign=Gtk.Align.CENTER)
+            create.set_tooltip_text("Criar nota compartilhada" if is_portuguese() else "Create shared note")
+            create.update_property([Gtk.AccessibleProperty.LABEL], [create.get_tooltip_text()])
+            create.connect("clicked", lambda _: self.on_create_shared_note())
+            row.add_suffix(self._focusable(create, f"shared-create:{group.id}"))
         else:
             actions = self._action_menu([
                 ("Rename group…", lambda: self._present_dialog(NameDialog(
@@ -397,9 +438,9 @@ class MainWindow(Adw.ApplicationWindow):
             nested_list.connect("row-activated", self._on_row_activated)
         if not notes:
             empty = Adw.ActionRow(title="No notes in this group")
-            if active:
+            if active or group.is_shared:
                 create = Gtk.Button(label="Create Note", valign=Gtk.Align.CENTER)
-                create.connect("clicked", lambda _: self.on_create_note())
+                create.connect("clicked", lambda _: self.on_create_shared_note() if group.is_shared else self.on_create_note())
                 empty.add_suffix(create)
             row.add_row(empty)
         row.set_expanded(True if searching else self.expanded.get(group.id, False))
@@ -495,7 +536,7 @@ class MainWindow(Adw.ApplicationWindow):
         updated.set_ellipsize(Pango.EllipsizeMode.END)
         _apply_hidden_text_style(updated, note)
         text.append(updated)
-        active = note.group_id == self._active_group_id
+        active = note.group_id in self._visible_group_ids
         path = self._paths[note.group_id]
         row.set_tooltip_text(("Hidden note · " if not note.is_open else "") + path)
         row.update_property([Gtk.AccessibleProperty.LABEL], [
@@ -505,7 +546,8 @@ class MainWindow(Adw.ApplicationWindow):
             trail.add_css_class("dim-label")
             text.append(trail)
         container.append(text)
-        actions = [("Open" if active else f"Activate and open · {path}", lambda: self.on_open_note(note.id))]
+        open_label = "Open" if active else ("Switch profile and open" if note.group_id in self._shared_group_ids else "Activate and open")
+        actions = [(open_label if active else f"{open_label} · {path}", lambda: self.on_open_note(note.id))]
         if active and note.is_open and self.on_hide_note is not None:
             actions.append(("Hide", lambda: self.on_hide_note(note.id)))
         actions.extend([
@@ -533,13 +575,15 @@ class MainWindow(Adw.ApplicationWindow):
                 self._inspect_or_open(note)
 
     def _inspect_or_open(self, note: Note) -> None:
-        if note.group_id == self.organization.context.group.id:
+        context = self.organization.context
+        group = self.organization.repository.get_group(note.group_id)
+        if note.group_id == context.group_id or (group.is_shared and group.profile_id == context.profile.id):
             self.on_open_note(note.id)
             return
-        group = self.organization.repository.get_group(note.group_id)
         owner = self.organization.repository.get_profile(group.profile_id)
         self._present_dialog(InspectNoteDialog(self, f"{owner.name} / {group_label(group)}", note.content,
-                                               lambda: self.on_open_note(note.id)))
+                                               lambda: self.on_open_note(note.id),
+                                               open_label="Switch profile and open" if group.is_shared else "Activate and open"))
 
     def _confirm_delete(self, note: Note) -> None:
         confirm_delete(self, note, lambda: self.on_delete_note(note.id))

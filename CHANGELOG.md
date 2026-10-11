@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Shared notes per profile, shown alongside the active ordinary group, with
+  direct creation through Shared's + and a Shared-only context for new profiles.
+- Current-context search covering Shared and the active project; opening a
+  foreign Shared note resumes its profile's remembered project.
+
+### Changed
+
+- Convert General to Shared in place with an atomic schema-6 upgrade, private
+  snapshot, reserved-name collision handling and a dismissible conversion notice.
+- Keep shared editor windows in place when switching projects; preserve hidden
+  notes, pending edits and note metadata during movement and container deletion.
+- Deleting the active ordinary group leaves the profile with shared notes only.
+
+
 ## [0.8.0] - 2026-10-10
 
 ### Added

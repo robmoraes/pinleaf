@@ -62,10 +62,18 @@ It preserves the active context and individually hidden notes.
 
 ## Profiles and Groups
 
-Schema 5 cannot be opened by a schema-4 binary. Returning to an older version
+Development schema 6 cannot be opened by published 0.8.0 (schema 5). Returning to an older version
 requires a deliberate [snapshot restore](organization-and-recovery.md) with
 Pinleaf stopped. Later edits remain only in the separately preserved newer
 recovery set. Backups are local and are not automatically pruned.
+
+Shared development QA adds automated migration, controller and GTK checks,
+plus an isolated nested X11 lifecycle with actual Ctrl+F/Escape/Enter events,
+shared-window identity, profile transfer, hidden-note opening, restart and
+normal/narrow dark layouts. The app's real tray helper runs on the private bus
+and is explicitly reaped after testing. These results supplement the 0.8.0 X11
+qualification below; they do not qualify a different desktop environment.
+See the [Shared execution record](../specs/013-general-to-shared/execution.md).
 
 Feature QA covers GTK widget tests, an isolated nested X11 session and a manual
 real X11 desktop pass with disposable data. Context switching, search, movement,

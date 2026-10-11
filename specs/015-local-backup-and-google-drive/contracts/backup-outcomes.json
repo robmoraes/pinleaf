@@ -1,0 +1,103 @@
+{
+  "contract_format_version": 1,
+  "contract_kind": "portable-backup-outcomes",
+  "status": "draft-awaiting-Q1-and-Q2",
+  "spec": "../spec.md",
+  "delivery_order": ["local-backup-and-restore", "google-drive-destination"],
+  "authority": "local-library",
+  "network_trigger": "deliberate-connect-or-drive-operation-only",
+  "portable_file": {
+    "self_contained": true,
+    "encoding_status": "technical-plan-must-define-versioned-manifest-and-envelope",
+    "format_version_is_independent_of_library_and_app_versions": true,
+    "source_computer_required_to_restore": false,
+    "google_account_required_for_local_restore": false,
+    "raw_migration_snapshot_is_portable_input": false
+  },
+  "scope": {
+    "question": "Q1",
+    "proposed": "whole-library",
+    "independent_of": ["active-profile", "active-group", "search", "desktop-visibility"]
+  },
+  "preservation": {
+    "profiles": ["id", "name", "name_key", "deleted_at"],
+    "groups": ["id", "profile_id", "name", "name_key", "is_shared", "deleted_at"],
+    "notes": [
+      "id", "group_id", "content", "color", "width", "height",
+      "position_x", "position_y", "font_family", "font_size", "text_color",
+      "is_open", "created_at", "updated_at", "deleted_at"
+    ],
+    "profile_context": ["profile_id", "last_group_id"],
+    "active_context": ["profile_id", "group_id"],
+    "portable_app_settings": ["default_font_family", "default_font_size", "default_text_color"],
+    "soft_deleted_records": "retain-without-reviving",
+    "record_ids_and_timestamps": "exact",
+    "geometry_application": "existing-platform-support",
+    "unavailable_fonts": "existing-fallback"
+  },
+  "excluded": [
+    "google-tokens", "passwords", "keyring-contents", "oauth-session-state",
+    "device-identity", "account-configuration", "backup-status-and-history",
+    "local-backup-paths", "older-backup-files", "logs", "caches",
+    "executable-code", "installed-fonts", "migration-notices"
+  ],
+  "capture": {
+    "flush_pending_edits": true,
+    "capture_supported_geometry": true,
+    "pending_save_failure": "abort-and-retain-editor",
+    "consistency": "point-in-time",
+    "later_edits": "remain-local-for-later-backup",
+    "change_note_timestamps_without_user_edits": false,
+    "empty_live_note_population": "valid"
+  },
+  "protection": {
+    "question": "Q2",
+    "proposed": "password-encrypted-authenticated-portable-file",
+    "applies_to": ["local-export", "google-drive-copy"],
+    "new_backup_password_confirmation": true,
+    "remember_password_option": false,
+    "password_recovery": false,
+    "plaintext_downgrade": false,
+    "private_recovery_copy": "local-database-permissions-never-auto-uploaded"
+  },
+  "restore": {
+    "question": "Q1",
+    "proposed": "replace-whole-library-without-merge",
+    "validation_before_confirmation": true,
+    "preview_changes_library": false,
+    "private_validated_recovery_copy_before_replacement": true,
+    "recovery_copy_includes_edits_after_preview": true,
+    "older_supported_version": "migrate-staged-copy-only",
+    "newer_or_unsupported_version": "reject-without-replacing",
+    "stale_editor_writes": "prevent",
+    "interrupted_commit": "recover-complete-old-or-new-library-never-mixed",
+    "hidden_and_deleted_notes": "never-revive",
+    "success_visibility": "spec-013-restored-context",
+    "repeat_restore": "no-duplicate-records",
+    "automatic_recovery_copy_pruning": false,
+    "available_from_storage_startup_error": true,
+    "unreadable_current_library": "preserve-closed-database-and-recovery-files-with-byte-verification-before-replacement"
+  },
+  "google_drive": {
+    "account_count_per_installation": 1,
+    "proposed_scope": "https://www.googleapis.com/auth/drive.file",
+    "proposed_folder": ["Pinleaf", "Backups"],
+    "files_visible_to_user": true,
+    "backup_identity": "distinct-per-save",
+    "overwrite_other_devices_backup": false,
+    "discovery_depends_on_origin_local_history": false,
+    "incomplete_transfer": "never-publish-success",
+    "download_validation": "same-local-reader",
+    "disconnect": "forget-local-connection-without-deleting-data-or-revoking-other-installations",
+    "automatic_transfer_or_restore": false,
+    "automatic_retention_or_remote_deletion_ui": false
+  },
+  "traceability": [
+    "BK-01", "BK-02", "BK-03", "BK-04", "BK-05", "BK-06",
+    "RS-01", "RS-02", "RS-03", "RS-04", "RS-05", "RS-06", "RS-07",
+    "GD-01", "GD-02", "GD-03", "GD-04", "GD-05", "GD-06",
+    "PR-01", "PR-02", "UX-01", "UX-02",
+    "AC-01", "AC-02", "AC-03", "AC-04", "AC-05", "AC-06", "AC-07",
+    "AC-08", "AC-09", "AC-10", "AC-11", "AC-12", "AC-13", "AC-14", "AC-15", "AC-16"
+  ]
+}

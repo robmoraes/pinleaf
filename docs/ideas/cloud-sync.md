@@ -58,10 +58,15 @@ value to justify account, backend and privacy work.
 
 After release 0.8.0, the maintainer included a first remote save/restore
 integration in the next development package, alongside Shared profile notes
-and the panel creation menu. Its draft scope and open decisions are recorded
-in the [package brief](../../specs/012-shared-notes-and-remote-backup/spec.md).
-The local Shared conversion has its own
-[specification](../../specs/013-general-to-shared/spec.md).
-No provider has been selected; S3-compatible storage remains a candidate.
-The broader sync ideas above do not define the first integration's behavior.
+and the panel creation menu. On 2026-10-11 they selected Google Drive for personal
+use first, with local backup/restore delivered before the remote destination and
+complete local/offline operation preserved.
+
+The canonical draft behavior, proposed defaults and open choices now live in
+[spec 015: local backup and Google Drive](../../specs/015-local-backup-and-google-drive/spec.md).
+The [package brief](../../specs/012-shared-notes-and-remote-backup/spec.md) records
+the delivery scope. Automatic backup, bidirectional synchronization, S3 and an
+operated Pinleaf service remain future exploration; the ideas above do not add
+them to the first integration. No backup or Drive implementation is claimed by
+these planning documents.
 

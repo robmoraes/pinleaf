@@ -54,21 +54,24 @@ New group row. Cancellation retains the previous context.
 
 ## Workstream 3: First Remote Integration
 
-Include a first remote save/restore integration after agreeing its provider and
-behavior. S3-compatible storage remains a candidate. The earlier
-[Cloud Sync Ideas](../../docs/ideas/cloud-sync.md) are exploration, not an
-implementation contract.
+Status: provider and delivery order selected on 2026-10-11; consolidated draft in
+[spec 015: local backup and Google Drive](../015-local-backup-and-google-drive/spec.md).
 
-Decisions owned by the maintainer before planning this workstream:
-1. Provider and explicit backup/restore versus scheduled backup or synchronization.
-2. Local export/import workflow and the library data included in a backup.
-3. Restore replacement/merge behavior, conflicts, retention and recovery.
-4. Encryption, credential storage, offline behavior and actionable failures.
+Confirmed direction: personal use first, complete local/offline operation,
+local backup/restore before Google Drive as the first remote destination. No
+operated Pinleaf service, S3 connector or bidirectional synchronization is part
+of this iteration. The earlier [Cloud Sync Ideas](../../docs/ideas/cloud-sync.md)
+remain exploration for future work.
 
-The focused remote specification must include concrete round-trip and failure
-acceptance examples before a technical plan adds dependencies or application
-network calls. Record consequential architecture choices in an ADR and the
-remote data format in a machine-readable contract.
+Spec 015 owns the proposed UX, included/excluded library data, replacement and
+recovery guarantees, Drive connection/history, failure behavior, machine-readable
+outcome contract and concrete acceptance examples. Whole-library replacement
+and password protection are explicit maintainer choices pending clarification;
+recommended defaults are not recorded as approved. Resolve these before Plan.
+
+The technical plan must record consequential architecture choices in ADRs and
+define the portable format's machine-readable manifest/envelope and compatibility
+examples before implementation adds dependencies or application network calls.
 
 ## Delivery Boundary
 

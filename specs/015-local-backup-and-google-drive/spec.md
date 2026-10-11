@@ -1,8 +1,7 @@
 # Feature: Local backup and restore, with Google Drive as a backup destination
 
-Status: consolidated draft, 2026-10-11; optional password protection agreed,
-clarification of restore scope pending. No implementation or release is
-authorized by this document.
+Status: product decisions agreed, Check complete, Plan and Tasks prepared on
+2026-10-11. Implementation has not started; publication remains deferred.
 Source: [package workstream 3](../012-shared-notes-and-remote-backup/spec.md).
 Decision record and quality check: [review.md](review.md).
 Machine-readable behavior contract: [backup-outcomes.json](contracts/backup-outcomes.json).
@@ -21,7 +20,7 @@ iteration does not introduce an operated Pinleaf account or storage service.
 
 | Slice | User outcome | Dependency |
 | --- | --- | --- |
-| A: Local | Create a backup file and restore it on this or another computer without internet | Resolve Q1; agree format and recovery design in the technical plan |
+| A: Local | Create a backup file and restore it on this or another computer without internet | Implement and verify the format and recovery design in the technical plan |
 | B: Google Drive | Connect a Google account, save a backup and restore a selected remote copy | Slice A verified; OAuth application configured; Drive qualification on two isolated installations |
 
 Both slices belong to this specification and the larger development package.
@@ -32,9 +31,9 @@ Out of scope: automatic/scheduled uploads, bidirectional synchronization,
 merging concurrent edits, selecting individual notes/profiles for export,
 continuous remote database access, S3, a Pinleaf backend/account, collaboration,
 cloud deletion management and automatic retention/pruning. Selective/merge
-restore is deferred subject to Q1, not silently added to the implementation.
+restore is deferred, not silently added to the implementation.
 
-## Confirmed direction and proposed defaults
+## Agreed direction and design defaults
 
 Confirmed by the maintainer:
 - Local/offline use remains complete and independent of cloud availability.
@@ -42,12 +41,12 @@ Confirmed by the maintainer:
 - Use the user's Google account rather than operate a Pinleaf storage service.
 - Password protection is optional for local and Drive backups, so forgotten
   passwords do not become a prerequisite for recovering every backup.
-- Consolidate the specification now; planning and implementation are later steps.
+- Back up the whole library and restore by replacement, with a validated local
+  recovery copy of the current library. The maintainer accepted this recommendation
+  and requested advancing the workflow on 2026-10-11.
 - Keep version 0.8.0 and delivery local until the larger package is ready.
 
-Recommended defaults in this draft, not yet a claim of approval:
-- **Q1:** Back up the entire library and restore by replacing the current
-  library, after preserving an independently recoverable local copy.
+Design defaults used by the plan:
 - Leave Protect with password off for each new backup. When deliberately
   enabled, restoring that copy requires its password; Pinleaf cannot recover it.
 - Store separate dated copies in a visible Pinleaf / Backups folder on Drive;
@@ -55,8 +54,8 @@ Recommended defaults in this draft, not yet a claim of approval:
 - Use deliberate Save/Restore actions, with no unattended transfer or startup
   polling in this iteration. A cloud backup is not described as synchronization.
 
-Only requirements explicitly referencing Q1 depend on its answer. Q2 is resolved
-as optional protection; Q1 is the remaining material clarification before planning.
+Q1 (whole-library replacement) and Q2 (optional password protection) are resolved.
+No material product clarification remains before planning or task breakdown.
 
 ## UX
 
@@ -105,7 +104,7 @@ retry. A local file's existence and a cloud copy's existence are separate facts.
 - **BK-01:** Starting Pinleaf and creating, editing, hiding, organizing and
   searching notes require neither network access nor a Google account. No
   network request occurs before a deliberate connection or Drive operation.
-- **BK-02:** Under Q1's recommended default, every backup contains the whole
+- **BK-02:** Every backup contains the whole
   library, independently of active profile, group, search or desktop visibility.
   Preserve stable IDs, memberships, text, appearance, timestamps, open/hidden
   state, retained soft-deleted records, active profile, optional ordinary group,
@@ -143,7 +142,7 @@ retry. A local file's existence and a cloud copy's existence are separate facts.
   unsupported versions with an actionable explanation, leaving source and
   current library intact. The first portable format supports libraries produced
   by its own delivery; raw pre-upgrade SQLite snapshots are not portable input.
-- **RS-03:** Under Q1's recommended default, final Restore replaces the entire
+- **RS-03:** Final Restore replaces the entire
   current library, with no merge, duplication or per-profile selection. Before
   replacement of a readable current library, save pending edits and create and
   validate a private, independently recoverable local copy. If either step
@@ -249,7 +248,7 @@ Pessoal / Kubernetes active. No personal data or credentials are test fixtures.
 | AC-02 | A text edit is pending when Create Backup runs, then another edit is made after capture | The first edit is in the backup; the later edit remains local; backup status names its capture time |
 | AC-03 | A pending edit cannot be saved, or export runs out of space/is cancelled | No successful backup is reported, an existing destination remains intact and the current editor/data remain available |
 | AC-04 | Preview a valid backup over a different current library, then cancel | No library, context, credentials or note window is replaced |
-| AC-05 (Q1) | Confirm restoring that backup after a new current edit was made following preview | The pre-restore recovery copy includes the new edit; the selected library replaces the old one; restoring the recovery copy recovers the old library |
+| AC-05 | Confirm restoring that backup after a new current edit was made following preview | The pre-restore recovery copy includes the new edit; the selected library replaces the old one; restoring the recovery copy recovers the old library |
 | AC-06 | Recovery-copy creation, replacement or staged migration fails; also interrupt the process at every commit/recovery boundary | Current data remains recoverable, startup selects a complete library and old autosave/tray callbacks cannot modify restored data |
 | AC-07 | Select truncated, malformed, inconsistent, newer, path-traversal or resource-limit-exceeding input | Reject it before replacement; keep current/source data intact and explain the relevant failure |
 | AC-08 | Enable protection and create a backup, inspect its bytes, try a wrong password/tampering, then restore with the correct password | Private content is not plaintext; invalid authentication writes no library data and cannot fall back to unprotected reading; correct password restores the fixture |
@@ -272,22 +271,16 @@ Outputs: a self-contained portable file, a dated Drive copy, or a validated
 replacement library plus the private pre-restore recovery copy.
 
 The [behavior contract](contracts/backup-outcomes.json) fixes included/excluded
-data and safety outcomes, with Q1 explicitly proposed and Q2 resolved as optional
-protection. It is not a finished binary encoding. Before implementation, the
-technical plan must provide the
-versioned machine-readable manifest/envelope schema, valid/invalid examples,
-reader limits, supported-version matrix and compatibility checks. Keep backup
-format version separate from application and library schema versions.
+data and agreed safety outcomes. The [plan](plan.md) defines the portable format,
+reader limits, compatibility matrix and replacement/recovery procedure, with
+machine-readable [payload](contracts/backup-payload.schema.json) and
+[envelope](contracts/backup-envelope.schema.json) schemas and [examples](contracts/examples/README.md).
+Backup format version remains separate from application and library schema versions.
 
-Record consequential choices in an ADR: local authority and destination
-boundary, portable encoding and any cryptographic dependency, credential
-storage/OAuth configuration and crash-safe replacement/recovery. Existing
-SQLite snapshots are useful prior art; copying a live database file into a
-Drive-synchronized directory is not this feature's contract.
-
-No schema version or dependency is selected by this draft. The plan must decide
-whether backup status and configuration require new local persistence, ensuring
-that device/account state is never included in the portable library payload.
+Consequential decisions are recorded in [ADR 001](adr-001-portable-backup-and-recovery.md)
+and [ADR 002](adr-002-google-drive-destination.md). Existing SQLite migration
+snapshots remain useful prior art. Device/account configuration and operation
+status are local state outside the portable payload, not new note settings.
 
 ## Quality, verification and operations
 
@@ -325,21 +318,17 @@ newer-schema refusal and downgrade/recovery policy. Do not bump versions, push,
 update remote PRs, publish tags/releases or trigger hosted pipelines for this
 specification work.
 
-## Open questions and next gate
+## Clarification outcome and delivery
 
-- **Q1 — Maintainer, before Plan:** Accept whole-library backup and replacement
-  restore with a recovery copy, or require selective/merge behavior? The latter
-  changes scope and requires revised examples and a conflict specification.
+No material product questions remain. Q1 is whole-library replacement with a
+recoverable local copy; Q2 is optional password protection, initially off.
+The [plan](plan.md) and [tasks](tasks.md) advance local backup/restore first,
+followed by the Drive destination. Scheduling and bidirectional synchronization
+remain deferred.
 
-Resolved **Q2:** The maintainer chose optional password protection. Both local
-and Drive creation/restore support unprotected files; protected copies still
-require their own password and have no recovery bypass. The UX default is off.
-
-Visible Drive files, manual history, single-account setup, UX entry point and
-credential handling above are proposed defaults available for review, not
-additional blocking questions. Scheduling and bidirectional synchronization
-are explicitly deferred. Resolve Q1, Check the spec, then create Plan and
-Tasks when requested. Do not infer implementation approval from this draft.
+The live Drive qualification requires the maintainer's OAuth application
+configuration and designated test account; this is an operational dependency,
+not an unresolved local-feature requirement. It does not block local work.
 
 ## Provider reference basis
 

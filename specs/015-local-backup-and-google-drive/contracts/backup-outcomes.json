@@ -1,22 +1,24 @@
 {
   "contract_format_version": 1,
   "contract_kind": "portable-backup-outcomes",
-  "status": "draft-awaiting-Q1",
+  "status": "agreed",
   "spec": "../spec.md",
   "delivery_order": ["local-backup-and-restore", "google-drive-destination"],
   "authority": "local-library",
   "network_trigger": "deliberate-connect-or-drive-operation-only",
   "portable_file": {
     "self_contained": true,
-    "encoding_status": "technical-plan-must-define-versioned-manifest-and-envelope",
+    "encoding": "version-1-utf8-json-envelope-and-logical-library-payload",
+    "envelope_schema": "backup-envelope.schema.json",
+    "payload_schema": "backup-payload.schema.json",
     "format_version_is_independent_of_library_and_app_versions": true,
     "source_computer_required_to_restore": false,
     "google_account_required_for_local_restore": false,
     "raw_migration_snapshot_is_portable_input": false
   },
   "scope": {
-    "question": "Q1",
-    "proposed": "whole-library",
+    "decision": "Q1-resolved-whole-library",
+    "selected": "whole-library",
     "independent_of": ["active-profile", "active-group", "search", "desktop-visibility"]
   },
   "preservation": {
@@ -68,8 +70,8 @@
     "private_recovery_copy": "local-database-permissions-never-auto-uploaded"
   },
   "restore": {
-    "question": "Q1",
-    "proposed": "replace-whole-library-without-merge",
+    "decision": "Q1-resolved-whole-library-replacement-with-recovery-copy",
+    "selected": "replace-whole-library-without-merge",
     "validation_before_confirmation": true,
     "preview_changes_library": false,
     "private_validated_recovery_copy_before_replacement": true,

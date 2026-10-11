@@ -1,0 +1,156 @@
+{
+  "format": "pinleaf-backup",
+  "format_version": 1,
+  "protection": "none",
+  "payload": {
+    "payload_version": 1,
+    "backup_id": "01234567-89ab-4cde-8fab-0123456789ab",
+    "created_at": "2026-10-11T12:00:00+00:00",
+    "producer": {
+      "app": "Pinleaf",
+      "version": "0.8.0"
+    },
+    "library_schema_version": 6,
+    "library": {
+      "profiles": [
+        {
+          "id": "personal",
+          "name": "Pessoal",
+          "name_key": "pessoal",
+          "deleted_at": null
+        },
+        {
+          "id": "work",
+          "name": "Trabalho",
+          "name_key": "trabalho",
+          "deleted_at": null
+        }
+      ],
+      "groups": [
+        {
+          "id": "kubernetes",
+          "profile_id": "personal",
+          "name": "Kubernetes",
+          "name_key": "kubernetes",
+          "is_shared": 0,
+          "deleted_at": null
+        },
+        {
+          "id": "shared-personal",
+          "profile_id": "personal",
+          "name": "Shared",
+          "name_key": "shared",
+          "is_shared": 1,
+          "deleted_at": null
+        },
+        {
+          "id": "shared-work",
+          "profile_id": "work",
+          "name": "Shared",
+          "name_key": "shared",
+          "is_shared": 1,
+          "deleted_at": null
+        }
+      ],
+      "notes": [
+        {
+          "id": "project-deleted",
+          "group_id": "kubernetes",
+          "content": "Synthetic deleted note",
+          "color": "yellow",
+          "width": 320,
+          "height": 280,
+          "position_x": null,
+          "position_y": null,
+          "font_family": null,
+          "font_size": 18,
+          "text_color": "#000000",
+          "is_open": 0,
+          "created_at": "2026-10-11T12:00:00+00:00",
+          "updated_at": "2026-10-11T12:00:00+00:00",
+          "deleted_at": "2026-10-11T12:00:00+00:00"
+        },
+        {
+          "id": "project-hidden",
+          "group_id": "kubernetes",
+          "content": "Café checklist",
+          "color": "yellow",
+          "width": 320,
+          "height": 280,
+          "position_x": null,
+          "position_y": null,
+          "font_family": null,
+          "font_size": 18,
+          "text_color": "#000000",
+          "is_open": 0,
+          "created_at": "2026-10-11T12:00:00+00:00",
+          "updated_at": "2026-10-11T12:00:00+00:00",
+          "deleted_at": null
+        },
+        {
+          "id": "project-open",
+          "group_id": "kubernetes",
+          "content": "Synthetic Kubernetes note",
+          "color": "yellow",
+          "width": 320,
+          "height": 280,
+          "position_x": null,
+          "position_y": null,
+          "font_family": null,
+          "font_size": 18,
+          "text_color": "#000000",
+          "is_open": 1,
+          "created_at": "2026-10-11T12:00:00+00:00",
+          "updated_at": "2026-10-11T12:00:00+00:00",
+          "deleted_at": null
+        },
+        {
+          "id": "shared-open",
+          "group_id": "shared-personal",
+          "content": "Synthetic AWS tags",
+          "color": "yellow",
+          "width": 320,
+          "height": 280,
+          "position_x": null,
+          "position_y": null,
+          "font_family": null,
+          "font_size": 18,
+          "text_color": "#000000",
+          "is_open": 1,
+          "created_at": "2026-10-11T12:00:00+00:00",
+          "updated_at": "2026-10-11T12:00:00+00:00",
+          "deleted_at": null
+        }
+      ],
+      "profile_context": [
+        {
+          "profile_id": "personal",
+          "last_group_id": "kubernetes"
+        },
+        {
+          "profile_id": "work",
+          "last_group_id": null
+        }
+      ],
+      "active_context": {
+        "profile_id": "personal",
+        "group_id": "kubernetes"
+      },
+      "app_settings": [
+        {
+          "key": "default_font_family",
+          "value": null
+        },
+        {
+          "key": "default_font_size",
+          "value": "18"
+        },
+        {
+          "key": "default_text_color",
+          "value": "#000000"
+        }
+      ]
+    }
+  },
+  "sha256": "4fc26cf9c0739ffd79f5e7b71a4415f43721f85437f2012c41651e80f004ae09"
+}

@@ -54,7 +54,7 @@ New group row. Cancellation retains the previous context.
 
 ## Workstream 3: First Remote Integration
 
-Status: provider and delivery order selected on 2026-10-11; consolidated draft in
+Status: product choices agreed on 2026-10-11; Plan and Tasks prepared in
 [spec 015: local backup and Google Drive](../015-local-backup-and-google-drive/spec.md).
 
 Confirmed direction: personal use first, complete local/offline operation,
@@ -66,13 +66,14 @@ remain exploration for future work.
 Spec 015 owns the proposed UX, included/excluded library data, replacement and
 recovery guarantees, Drive connection/history, failure behavior, machine-readable
 outcome contract and concrete acceptance examples. Password protection is now
-optional for local and Drive backups, initially off per new copy. Whole-library
-replacement remains a maintainer choice pending clarification; its recommended
-default is not recorded as approved. Resolve that choice before Plan.
+optional for local and Drive backups, initially off per new copy. The maintainer
+accepted whole-library backup and replacement restore with a validated local
+recovery copy. No material product clarification remains.
 
-The technical plan must record consequential architecture choices in ADRs and
-define the portable format's machine-readable manifest/envelope and compatibility
-examples before implementation adds dependencies or application network calls.
+The focused [plan](../015-local-backup-and-google-drive/plan.md) and
+[tasks](../015-local-backup-and-google-drive/tasks.md) record architecture,
+contracts, recovery, validation and the local-first delivery order. Live Drive
+qualification depends on OAuth setup and designated test-account consent.
 
 ## Delivery Boundary
 

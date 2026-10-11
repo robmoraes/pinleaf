@@ -1,0 +1,61 @@
+{
+  "format": "pinleaf-backup",
+  "format_version": 1,
+  "protection": "none",
+  "payload": {
+    "payload_version": 1,
+    "backup_id": "11234567-89ab-4cde-8fab-0123456789ab",
+    "created_at": "2026-10-11T12:00:00+00:00",
+    "producer": {
+      "app": "Pinleaf",
+      "version": "0.8.0"
+    },
+    "library_schema_version": 6,
+    "library": {
+      "profiles": [
+        {
+          "id": "work",
+          "name": "Trabalho",
+          "name_key": "trabalho",
+          "deleted_at": null
+        }
+      ],
+      "groups": [
+        {
+          "id": "shared-work",
+          "profile_id": "work",
+          "name": "Shared",
+          "name_key": "shared",
+          "is_shared": 1,
+          "deleted_at": null
+        }
+      ],
+      "notes": [],
+      "profile_context": [
+        {
+          "profile_id": "work",
+          "last_group_id": null
+        }
+      ],
+      "active_context": {
+        "profile_id": "work",
+        "group_id": null
+      },
+      "app_settings": [
+        {
+          "key": "default_font_family",
+          "value": null
+        },
+        {
+          "key": "default_font_size",
+          "value": "18"
+        },
+        {
+          "key": "default_text_color",
+          "value": "#000000"
+        }
+      ]
+    }
+  },
+  "sha256": "91f5e329f375b2b32678a3936ee0e541c4d1f3970ad21ba8b074c06ef93d22a3"
+}

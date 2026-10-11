@@ -62,7 +62,7 @@ and the panel creation menu. On 2026-10-11 they selected Google Drive for person
 use first, with local backup/restore delivered before the remote destination and
 complete local/offline operation preserved.
 
-The canonical draft behavior, proposed defaults and open choices now live in
+The agreed backup/restore behavior and local-before-Drive plan now live in
 [spec 015: local backup and Google Drive](../../specs/015-local-backup-and-google-drive/spec.md).
 The [package brief](../../specs/012-shared-notes-and-remote-backup/spec.md) records
 the delivery scope. Automatic backup, bidirectional synchronization, S3 and an

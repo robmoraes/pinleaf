@@ -72,9 +72,12 @@ appear alongside the active project's notes. Use its **+** to create a shared
 note without changing projects. Shared has no Activate, Rename or Delete action.
 
 Expand groups to browse; **Activate** switches the project's desktop notes while
-keeping shared windows in place. **New profile…** starts with Shared only;
-**New group…** creates and activates an ordinary group. Normal New and tray
-creation target the active ordinary group, falling back to Shared when absent.
+keeping shared windows in place. **New profile…** starts with Shared only.
+The header's **New** menu offers **New Note** and **New Group…**. New Group
+creates and activates an ordinary group. New Note and tray creation target the
+active ordinary group, falling back to Shared when absent. Each menu selection
+is an action; it does not establish a persistent creation mode. Group creation
+is kept in the header, leaving more space for notes in the panel body.
 
 Note menus offer **Move to…** with profile/group destinations, including Shared.
 Moving preserves content, appearance, timestamps and open/hidden state without

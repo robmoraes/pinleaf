@@ -16,7 +16,9 @@ are resolved.
 
 ## Workstream 1: General to Shared
 
-The canonical behavior, migration, proposed defaults and acceptance examples
+Status: implemented and verified in spec 013; published in draft PR #28.
+
+The canonical behavior, migration, accepted defaults and acceptance examples
 are in [spec 013: General to Shared](../013-general-to-shared/spec.md).
 
 Confirmed direction:
@@ -32,7 +34,11 @@ tracked in [its review record](../013-general-to-shared/review.md).
 
 ## Workstream 2: Panel Creation Menu
 
-Confirmed behavior to carry into a focused plan/specification:
+Status: implemented and locally verified on 2026-10-11 in
+[spec 014](../014-panel-creation-menu/spec.md). Publication waits for the larger
+package, as requested by the maintainer.
+
+Confirmed behavior:
 - **NEW-01:** The header's New control opens an action menu containing New Note
   and New Group. Choosing an action does not establish a persistent creation mode.
 - **NEW-02:** New Note uses the creation-destination rules from spec 013.

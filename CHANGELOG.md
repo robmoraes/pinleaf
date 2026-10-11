@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Header New menu with New Note and New Group actions, replacing the separate
+  group-creation button in the panel body to give the note list more space.
 - Shared notes per profile, shown alongside the active ordinary group, with
   direct creation through Shared's + and a Shared-only context for new profiles.
 - Current-context search covering Shared and the active project; opening a

@@ -82,10 +82,14 @@ class MainWindow(Adw.ApplicationWindow):
         menu_button.set_popover(self._build_menu())
         header.pack_end(menu_button)
 
-        new_button = Gtk.Button(label="New")
-        new_button.set_tooltip_text("Create note")
-        new_button.connect("clicked", lambda _: self.on_create_note())
-        header.pack_start(new_button)
+        self.new_button = Gtk.MenuButton(label="New")
+        self.new_button.set_tooltip_text("Create a note or group")
+        self.new_button.set_popover(self._action_popover([
+            ("New Note", self.on_create_note),
+            ("New Group…", lambda: self._present_dialog(NameDialog(
+                self, self.organization, self.execute, "group"))),
+        ]))
+        header.pack_start(self.new_button)
 
         self.stack = Gtk.Stack()
         self.stack.set_vexpand(True)
@@ -133,9 +137,6 @@ class MainWindow(Adw.ApplicationWindow):
         self.scope.set_visible(False)
         self.scope.connect("notify::selected", lambda *_: self.refresh())
         content.append(self.scope_row)
-        new_group = Gtk.Button(label="New group…", halign=Gtk.Align.START)
-        new_group.connect("clicked", lambda _: self._present_dialog(NameDialog(self, self.organization, self.execute, "group")))
-        content.append(new_group)
         content.append(self.stack)
 
         self.stack.add_named(scroller, "list")

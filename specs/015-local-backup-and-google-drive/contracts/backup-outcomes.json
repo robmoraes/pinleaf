@@ -1,7 +1,7 @@
 {
   "contract_format_version": 1,
   "contract_kind": "portable-backup-outcomes",
-  "status": "draft-awaiting-Q1-and-Q2",
+  "status": "draft-awaiting-Q1",
   "spec": "../spec.md",
   "delivery_order": ["local-backup-and-restore", "google-drive-destination"],
   "authority": "local-library",
@@ -51,10 +51,17 @@
     "empty_live_note_population": "valid"
   },
   "protection": {
-    "question": "Q2",
-    "proposed": "password-encrypted-authenticated-portable-file",
+    "decision": "Q2-resolved-optional-password-protection",
+    "allowed_modes": ["unprotected", "password-encrypted-authenticated"],
+    "default_mode_per_new_backup": "unprotected",
+    "persistent_protection_preference": false,
     "applies_to": ["local-export", "google-drive-copy"],
-    "new_backup_password_confirmation": true,
+    "password_confirmation_when_enabled": true,
+    "empty_or_mismatched_password_when_enabled": "reject-without-creating-copy",
+    "restore_protection_mode": "detect-from-selected-file",
+    "password_required_for_unprotected_file": false,
+    "integrity_validation_in_all_modes": true,
+    "unprotected_file_is_confidential_or_authenticated": false,
     "remember_password_option": false,
     "password_recovery": false,
     "plaintext_downgrade": false,
@@ -98,6 +105,6 @@
     "GD-01", "GD-02", "GD-03", "GD-04", "GD-05", "GD-06",
     "PR-01", "PR-02", "UX-01", "UX-02",
     "AC-01", "AC-02", "AC-03", "AC-04", "AC-05", "AC-06", "AC-07",
-    "AC-08", "AC-09", "AC-10", "AC-11", "AC-12", "AC-13", "AC-14", "AC-15", "AC-16"
+    "AC-08", "AC-09", "AC-10", "AC-11", "AC-12", "AC-13", "AC-14", "AC-15", "AC-16", "AC-17"
   ]
 }

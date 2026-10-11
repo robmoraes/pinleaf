@@ -1,8 +1,8 @@
 # Feature: Local backup and restore, with Google Drive as a backup destination
 
-Status: consolidated draft, 2026-10-11; clarification of restore scope and
-password protection is pending. No implementation or release is authorized by
-this document.
+Status: consolidated draft, 2026-10-11; optional password protection agreed,
+clarification of restore scope pending. No implementation or release is
+authorized by this document.
 Source: [package workstream 3](../012-shared-notes-and-remote-backup/spec.md).
 Decision record and quality check: [review.md](review.md).
 Machine-readable behavior contract: [backup-outcomes.json](contracts/backup-outcomes.json).
@@ -21,7 +21,7 @@ iteration does not introduce an operated Pinleaf account or storage service.
 
 | Slice | User outcome | Dependency |
 | --- | --- | --- |
-| A: Local | Create a backup file and restore it on this or another computer without internet | Resolve Q1 and Q2; agree format and recovery design in the technical plan |
+| A: Local | Create a backup file and restore it on this or another computer without internet | Resolve Q1; agree format and recovery design in the technical plan |
 | B: Google Drive | Connect a Google account, save a backup and restore a selected remote copy | Slice A verified; OAuth application configured; Drive qualification on two isolated installations |
 
 Both slices belong to this specification and the larger development package.
@@ -40,21 +40,23 @@ Confirmed by the maintainer:
 - Local/offline use remains complete and independent of cloud availability.
 - Start with local backup and restore; Google Drive is the first integration.
 - Use the user's Google account rather than operate a Pinleaf storage service.
+- Password protection is optional for local and Drive backups, so forgotten
+  passwords do not become a prerequisite for recovering every backup.
 - Consolidate the specification now; planning and implementation are later steps.
 - Keep version 0.8.0 and delivery local until the larger package is ready.
 
 Recommended defaults in this draft, not yet a claim of approval:
 - **Q1:** Back up the entire library and restore by replacing the current
   library, after preserving an independently recoverable local copy.
-- **Q2:** Protect portable backups with a password, locally and on Drive.
-  Restoring elsewhere requires that password; Pinleaf cannot recover it.
+- Leave Protect with password off for each new backup. When deliberately
+  enabled, restoring that copy requires its password; Pinleaf cannot recover it.
 - Store separate dated copies in a visible Pinleaf / Backups folder on Drive;
   never overwrite one shared "latest database" file.
 - Use deliberate Save/Restore actions, with no unattended transfer or startup
   polling in this iteration. A cloud backup is not described as synchronization.
 
-Unless a requirement explicitly references Q1 or Q2, it does not depend on those
-answers. The two choices are the material clarification gate before planning.
+Only requirements explicitly referencing Q1 depend on its answer. Q2 is resolved
+as optional protection; Q1 is the remaining material clarification before planning.
 
 ## UX
 
@@ -68,6 +70,15 @@ native Save dialog, proposes a filename containing a timestamp and unique backup
 identifier, and shows the captured time and saved location on success. Restore
 uses a native Open dialog, validates the file, then shows a preview before a
 separate final Restore action. Opening a chooser or preview changes nothing.
+
+For both local creation and Save Backup to Drive, offer an initially unchecked
+**Protect with password** option. Show password and confirmation fields only
+when enabled. Empty or mismatched passwords are validation errors while enabled;
+they never silently select unprotected output. A new backup starts unchecked
+even if the previous copy used a password; no persistent protection/password
+preference is introduced. Explain inline that an unprotected file can be read by
+anyone with access to it, and that a protected copy cannot be restored if its
+password is forgotten. Do not add another confirmation dialog for this choice.
 
 The preview shows backup date, source application version, live profile/group/
 note counts, hidden-note count and the replacement effect from Q1. It identifies
@@ -197,19 +208,24 @@ retry. A local file's existence and a cloud copy's existence are separate facts.
 
 ### Protection and interaction
 
-- **PR-01 (Q2 proposal):** Encrypt portable backup contents with a user-provided
-  password before local export or upload. Authenticate the encrypted payload
-  and reject wrong passwords/tampering before exposing private metadata or
-  replacing data. No plaintext downgrade or password recovery fallback exists.
-  Exact standard format, algorithms and password derivation belong to the plan
-  and ADR; do not invent cryptography in application code.
-- **PR-02:** Ask for a new backup's password and confirmation each time; restore
-  asks only for the selected file's password. No remembered-password option is
-  in this iteration. Never include passwords or Google tokens in backups,
+- **PR-01:** Support both unprotected and password-protected portable files,
+  locally and on Drive. Protection is optional and initially off per new backup;
+  creating/restoring an unprotected file never requires a password. Validate
+  integrity in both modes, without describing an unprotected file as confidential
+  or authenticated against deliberate changes. When enabled, encrypt and
+  authenticate private contents before export/upload, rejecting wrong passwords
+  or tampering before revealing private metadata or replacing data. Never
+  silently downgrade a protected operation or provide a password recovery
+  fallback. Exact standard format, algorithms and password derivation belong to
+  the plan and ADR; do not invent cryptography in application code.
+- **PR-02:** Ask for a new backup's password and confirmation only when protection
+  is enabled. Restore detects protection from the selected file and asks for a
+  password only for a protected copy, regardless of the last creation choice.
+  No remembered-password option is in this iteration. Never include passwords
+  or Google tokens in backups,
   SQLite app settings, logs, filenames or diagnostic messages. Store persistent
   Google authorization only through an OS credential facility; if unavailable,
   offer session-only authorization rather than a silent plaintext fallback.
-  The password-specific clauses remain conditional on Q2.
 - **UX-01:** Actions, selectors, password inputs, status and final confirmation
   are keyboard accessible and named for assistive technology. Escape cancels
   noncommitted dialogs and returns focus. Label replacement explicitly; an
@@ -236,7 +252,7 @@ Pessoal / Kubernetes active. No personal data or credentials are test fixtures.
 | AC-05 (Q1) | Confirm restoring that backup after a new current edit was made following preview | The pre-restore recovery copy includes the new edit; the selected library replaces the old one; restoring the recovery copy recovers the old library |
 | AC-06 | Recovery-copy creation, replacement or staged migration fails; also interrupt the process at every commit/recovery boundary | Current data remains recoverable, startup selects a complete library and old autosave/tray callbacks cannot modify restored data |
 | AC-07 | Select truncated, malformed, inconsistent, newer, path-traversal or resource-limit-exceeding input | Reject it before replacement; keep current/source data intact and explain the relevant failure |
-| AC-08 (Q2) | Create a protected backup, inspect its bytes, try a wrong password/tampering, then restore with the correct password | Private content is not plaintext; invalid authentication writes no library data; correct password restores the fixture |
+| AC-08 | Enable protection and create a backup, inspect its bytes, try a wrong password/tampering, then restore with the correct password | Private content is not plaintext; invalid authentication writes no library data and cannot fall back to unprotected reading; correct password restores the fixture |
 | AC-09 | Restore twice on a different display without the requested font | No duplicate or revived note appears; eligible windows follow restored context and supported placement; existing font fallback works |
 | AC-10 | Create a backup with no live notes, only the initial profile and Shared | Restore succeeds with zero notes, Shared-only context and no accidental ordinary group |
 | AC-11 | Connect Google Drive, cancel once, then consent and save twice | Cancellation leaves data/connection unchanged; consent enables two distinct complete copies; no full-Drive permission is requested |
@@ -245,17 +261,20 @@ Pessoal / Kubernetes active. No personal data or credentials are test fixtures.
 | AC-14 | Disconnect on one installation, then restart both without selecting a Drive action | Notes and cloud files remain; the other connection is not deliberately revoked; no background transfer or automatic restore occurs |
 | AC-15 | Use only keyboard navigation in normal/narrow/light/dark layouts with delayed file/network operations | Actions and progress remain reachable; precommit cancellation returns focus and writes no replacement; final destruction requires explicit selection |
 | AC-16 | Pinleaf cannot initialize a damaged disposable library; select a valid local backup from the startup error | Preserve and verify the original database/recovery files, validate the backup and explicitly restore a usable library; failed preservation prevents replacement |
+| AC-17 | Create a local/Drive backup with the initially unchecked protection option, then try empty/mismatched passwords when enabled and finally create a protected copy | Unprotected copies round-trip without any password; invalid password input creates no copy; protection is recorded per file and starts off again for the next backup; restore prompts only for protected files |
 
 ## Data, contracts and architecture handoff
 
 Inputs: a consistent local library, a selected portable file, a transient backup
-password if Q2 is accepted, and explicit Google authorization for slice B.
+password only when protection is selected, and explicit Google authorization
+for slice B.
 Outputs: a self-contained portable file, a dated Drive copy, or a validated
 replacement library plus the private pre-restore recovery copy.
 
 The [behavior contract](contracts/backup-outcomes.json) fixes included/excluded
-data and safety outcomes, with Q1/Q2 explicitly proposed. It is not a finished
-binary encoding. Before implementation, the technical plan must provide the
+data and safety outcomes, with Q1 explicitly proposed and Q2 resolved as optional
+protection. It is not a finished binary encoding. Before implementation, the
+technical plan must provide the
 versioned machine-readable manifest/envelope schema, valid/invalid examples,
 reader limits, supported-version matrix and compatibility checks. Keep backup
 format version separate from application and library schema versions.
@@ -274,6 +293,9 @@ that device/account state is never included in the portable library payload.
 
 Privacy: Google receives only deliberately uploaded backups and the metadata
 needed to store them. Generic filenames reveal no note/profile/group titles.
+Unprotected backups contain readable library data; Drive account access control
+does not make the portable file password-protected. Describe the selected mode
+honestly without making protection a prerequisite for local or remote backup.
 No telemetry, note text, passwords or tokens in diagnostics. Plaintext staging
 and recovery artifacts remain private like the database and are cleaned up or
 retained only according to their documented recovery role.
@@ -308,14 +330,15 @@ specification work.
 - **Q1 — Maintainer, before Plan:** Accept whole-library backup and replacement
   restore with a recovery copy, or require selective/merge behavior? The latter
   changes scope and requires revised examples and a conflict specification.
-- **Q2 — Maintainer, before Plan:** Accept password-protected portable backups
-  with no password recovery, or choose unencrypted files? If unencrypted, revise
-  PR-01/02, AC-08, the contract and privacy copy before selecting the format.
+
+Resolved **Q2:** The maintainer chose optional password protection. Both local
+and Drive creation/restore support unprotected files; protected copies still
+require their own password and have no recovery bypass. The UX default is off.
 
 Visible Drive files, manual history, single-account setup, UX entry point and
 credential handling above are proposed defaults available for review, not
 additional blocking questions. Scheduling and bidirectional synchronization
-are explicitly deferred. Resolve Q1/Q2, Check the spec, then create Plan and
+are explicitly deferred. Resolve Q1, Check the spec, then create Plan and
 Tasks when requested. Do not infer implementation approval from this draft.
 
 ## Provider reference basis

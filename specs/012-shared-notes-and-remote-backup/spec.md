@@ -65,9 +65,10 @@ remain exploration for future work.
 
 Spec 015 owns the proposed UX, included/excluded library data, replacement and
 recovery guarantees, Drive connection/history, failure behavior, machine-readable
-outcome contract and concrete acceptance examples. Whole-library replacement
-and password protection are explicit maintainer choices pending clarification;
-recommended defaults are not recorded as approved. Resolve these before Plan.
+outcome contract and concrete acceptance examples. Password protection is now
+optional for local and Drive backups, initially off per new copy. Whole-library
+replacement remains a maintainer choice pending clarification; its recommended
+default is not recorded as approved. Resolve that choice before Plan.
 
 The technical plan must record consequential architecture choices in ADRs and
 define the portable format's machine-readable manifest/envelope and compatibility

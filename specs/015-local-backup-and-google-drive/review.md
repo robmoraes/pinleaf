@@ -20,13 +20,14 @@ Standards applied:
 | D6 | Proposed default | Visible Drive files, narrow drive.file authorization and one account per installation |
 | D7 | Proposed default | Exclude credentials/device state; OS credential storage or explicit session-only authorization |
 | Q1 | Awaiting maintainer | Whole-library backup and replacement restore with a validated local recovery copy, or selective/merge scope |
-| Q2 | Awaiting maintainer | Password-protected portable files with no password recovery, or unencrypted files |
+| Q2 | Resolved | Maintainer requests optional password protection to avoid making forgotten passwords block all recovery; support both modes locally and on Drive, with protection initially off per new backup |
 
-Q1/Q2 were presented together as product choices while drafting. Until answered,
-their recommended behavior remains explicitly conditional in the spec and JSON
-contract. Silence does not accept them. The first option of each is recommended.
-Resolve these material questions before a technical plan; the other defaults
-are reviewable recommendations and do not create a new permission request.
+Q1/Q2 were presented together as product choices while drafting. The maintainer
+resolved Q2 as optional protection; the spec, contract and cases now cover both
+modes. A protected copy still requires its password, without a plaintext fallback.
+Q1 remains unanswered and conditional; silence does not accept its recommended
+whole-library replacement behavior. Resolve Q1 before a technical plan; other
+defaults remain reviewable recommendations without a new permission request.
 
 ## Repository fit
 
@@ -49,7 +50,8 @@ content to export. No technical implementation strategy is chosen yet.
 - [x] Failures, interruption, recovery and stale editor writes have concrete examples.
 - [x] Machine-readable behavior contract and maintained verification cases exist.
 - [x] Provider documentation is primary-source and linked with consultation date.
-- [ ] Maintainer answers Q1/Q2 and conditional requirements/contracts are updated.
+- [x] Q2 resolved as optional protection; UX, requirements, contract and cases updated.
+- [ ] Maintainer answers Q1 and conditional requirements/contracts are updated.
 - [ ] Check complete; technical Plan requested and written with required ADRs,
       encoding schema, limits, compatibility matrix and valid/invalid examples.
 - [ ] Tasks derived, implementation authorized and evidence produced.
@@ -66,8 +68,8 @@ cross-installation Drive discovery and actual file access still require real
 qualification. Testing-mode refresh-token lifetime belongs in the operating
 instructions. No account identifiers or credentials are captured here.
 
-Documentation checks on 2026-10-11 passed: 23 unique requirements and 16
-acceptance examples trace to 15 maintained verification cases; the JSON contract
+Documentation checks on 2026-10-11 passed: 23 unique requirements and 17
+acceptance examples trace to 16 maintained verification cases; the JSON contract
 parses and covers all 15 current Note fields and all three portable text settings;
 13 local links resolve. Version 0.8.0 is unchanged and no Plan/Tasks exist yet.
 Application tests are not execution evidence for this documentation-only change.

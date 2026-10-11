@@ -1,7 +1,7 @@
 # Feature: Convert General into Shared profile notes
 
 Status: implemented and locally verified on 2026-10-11.
-Current phase: Verify / delivery, following the pre-approved plan and tasks.
+Current phase: Verify complete; delivered in draft PR #28 for the larger package.
 Package: [next development iteration](../012-shared-notes-and-remote-backup/spec.md).
 Target: after Pinleaf 0.8.0; release version and date are not assigned.
 

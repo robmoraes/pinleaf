@@ -1,6 +1,6 @@
 # Review: General to Shared
 
-Current phase: Verify / delivery. Maintainer accepted the defaults and pre-approved the
+Current phase: Verify complete; published in draft PR #28. Maintainer accepted the defaults and pre-approved the
 plan and tasks on 2026-10-11, authorizing the complete Shared implementation.
 
 Source standards:

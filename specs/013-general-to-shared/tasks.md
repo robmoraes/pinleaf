@@ -1,6 +1,7 @@
 # Tasks: General to Shared
 
-Status: T01–T07 complete on 2026-10-11; publication in progress.
+Status: T01–T08 complete on 2026-10-11. Shared is implemented, verified and
+published for review in [draft PR #28](https://github.com/robmoraes/pinleaf/pull/28).
 Evidence: [execution record](execution.md).
 Sources: [spec](spec.md), [plan](plan.md), [contract](contracts/general-to-shared.json).
 
@@ -29,7 +30,7 @@ Sources: [spec](spec.md), [plan](plan.md), [contract](contracts/general-to-share
 - [x] **T07 — Document and qualify.** Update development docs and Unreleased,
   run unittest/compileall/diff checks, schema-5 recovery drill, native lifecycle
   and representative switch benchmark. Record evidence and platform limits.
-- [ ] **T08 — Publish reviewable work.** Review the complete diff, commit/push
+- [x] **T08 — Publish reviewable work.** Review the complete diff, commit/push
   and create/update the feature PR with spec, behavior, validation and limits.
   Leave package release/tag/merge for the later release decision.
 

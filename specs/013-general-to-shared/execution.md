@@ -102,4 +102,8 @@ the harness now validates restart in a fresh process. Its disposable app/helper
 were terminated and its stale socket removed. This was a QA harness issue,
 not a data migration or product failure.
 
-Delivery is tracked in [tasks](tasks.md). The larger package remains unreleased.
+Implementation commit: `9d1bf0c` on `feat/shared-groups-and-remote-backup`,
+published in [draft PR #28](https://github.com/robmoraes/pinleaf/pull/28).
+The PR remains draft for the larger package's remaining decisions; the Shared
+slice and its local validation are complete. All [tasks](tasks.md) are checked.
+The larger package remains unreleased; no merge, release or tag was performed.

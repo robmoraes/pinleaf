@@ -16,43 +16,43 @@ The maintainer accepted Q1/Q2 and requested advancing on 2026-10-11.
 
 ## Slice A: local backup and restore
 
-- [ ] **A01 — Trusted format reader/writer:** Implement canonical JSON,
+- [x] **A01 — Trusted format reader/writer:** Implement canonical JSON,
   bounded parsing, payload/envelope schemas, semantic validation and optional
   Scrypt/AESGCM. Bundle contract schemas and wire packaging dependencies.
   Verify TC-BKP-001,007,008,016, duplicate keys, floats/non-finite values,
   unexpected members, fixed KDF
   bounds, wrong password/header changes, max-size boundaries and fresh randomness.
-- [ ] **A02 — Consistent full-library capture:** Export raw whitelisted tables
+- [x] **A02 — Consistent full-library capture:** Export raw whitelisted tables
   and portable settings after pending edit/geometry capture; no retimestamping.
   Keep worker data independent of live SQLite/GTK objects. Verify TC-BKP-001,002,
   hidden/deleted owners, null context, absent/default settings and empty library.
-- [ ] **A03 — Durable local destination:** Stage, validate, fsync and publish a
+- [x] **A03 — Durable local destination:** Stage, validate, fsync and publish a
   unique file with overwrite handling/cancellation; maintain private local status
   separately. Verify TC-BKP-003 and permission/space/write/fsync/rollback faults;
   prior destination and current editor text remain recoverable.
-- [ ] **A04 — Read/preview and trusted staging:** Build validated staged SQLite
+- [x] **A04 — Read/preview and trusted staging:** Build validated staged SQLite
   from payload using trusted schema/parameterized values, before context repair.
   Expose preview counts and protection detection, with immutable selected input.
   Verify TC-BKP-004,007,008,016 and unchanged original bytes after rejection/cancel.
-- [ ] **A05 — Journaled replacement and recovery copy:** Flush again at final
+- [x] **A05 — Journaled replacement and recovery copy:** Flush again at final
   confirmation, create independently readable private recovery, gate all writes,
   invalidate old editor generations and replace in one SQLite transaction.
   Verify TC-BKP-005,006,009 with text changes after preview, matching IDs,
   queued autosave/tray/dialog events and commit/reopen failures.
-- [ ] **A06 — Process-interruption recovery:** Reconcile journal before NoteStore
+- [x] **A06 — Process-interruption recovery:** Reconcile journal before NoteStore
   startup; preserve staged/recovery artifacts and choose complete old/new data.
   Kill/restart disposable subprocesses at each boundary, including post-commit
   before cleanup. Verify TC-BKP-006 and prevent accidental empty-library seeding.
-- [ ] **A07 — Startup-error restoration:** Offer local Restore without a valid
+- [x] **A07 — Startup-error restoration:** Offer local Restore without a valid
   current store; preserve closed original DB/journal/WAL/SHM bytes and journal
   staged file installation. Verify TC-BKP-015 and interruption during each move;
   failed preservation must block replacement.
-- [ ] **A08 — GTK workflow:** Add main-menu entry and dedicated local window,
+- [x] **A08 — GTK workflow:** Add main-menu entry and dedicated local window,
   native choosers, unchecked protection option, validation, preview, explicit
   final Restore and progress/cancel/focus. Wire startup-error entry and restored
   context reload. Verify TC-BKP-004,009,014,016 with isolated native X11, light/
   dark/narrow screenshots and keyboard actions; inspect actual screenshots.
-- [ ] **A09 — Local qualification and documentation:** Run all relevant cases
+- [x] **A09 — Local qualification and documentation:** Run all relevant cases
   with small/1,000-note libraries, both modes and independent installations.
   Record timings, crash evidence and platform limits. Update implemented UX docs,
   README/Unreleased, run full unittest/compileall/diff and package checks. Record
@@ -86,5 +86,6 @@ The maintainer accepted Q1/Q2 and requested advancing on 2026-10-11.
   Keep remote publication/version/release work deferred until the maintainer's
   separate publication instruction.
 
-No implementation task is checked by specification-only validation. No application
-network calls or user-data operations are performed by this task preparation.
+Slice A is complete with product evidence in [execution](execution.md).
+Drive tasks remain pending. No application network code, daily-use data access,
+version bump or remote publication was introduced by the local slice.

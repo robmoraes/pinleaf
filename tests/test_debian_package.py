@@ -27,6 +27,8 @@ class DebianPackageTests(unittest.TestCase):
         for dependency in (
             "python3",
             "python3-gi",
+            "python3-jsonschema",
+            "python3-cryptography",
             "gir1.2-gtk-4.0",
             "gir1.2-adw-1",
             "gir1.2-ayatanaappindicator3-0.1",

@@ -113,6 +113,30 @@ expansion leave the desktop unchanged; an actual context switch resets search.
 Press **Ctrl+F** to focus search. Clear it or press **Escape** to restore normal
 sections and previous expansion. With no matches, use **Clear Search**.
 
+## Backup and Restore (development branch)
+
+Open **Main menu → Backup & Restore…** to create a local `.pinleaf-backup`
+file or restore one. This unreleased feature works offline and includes the
+whole library: profiles, groups, hidden notes, retained deleted records, current
+context and text defaults. Pending edits are saved before capture; later edits
+remain local and are not included in the captured copy.
+
+Each creation starts with **Protect with password** off. Enable it to encrypt
+that copy, then enter and confirm a password. Unprotected files are readable by
+anyone with access to them; protected files require their password to restore.
+Pinleaf cannot recover a forgotten backup password.
+
+Restore validates the selected file and shows a preview. Final **Restore**
+replaces the entire library. Before replacement, Pinleaf preserves the latest
+current data in a private, independently restorable file under `backups/` beside
+the database. Hidden/deleted notes retain their state. Cancelling the chooser or
+preview leaves the current library in place. The startup-error screen also offers
+local restore and preserves unreadable original database/journal files first.
+
+The first format accepts library schema 6. Raw SQLite migration snapshots and
+other portable versions are not inputs for this reader. Google Drive is the
+next delivery slice and is not connected by this local implementation.
+
 ## Install
 
 ### Ubuntu PPA
@@ -183,6 +207,8 @@ On Ubuntu 24.04:
 ```bash
 sudo apt install \
   python3-gi \
+  python3-jsonschema \
+  python3-cryptography \
   gir1.2-gtk-4.0 \
   gir1.2-adw-1 \
   gir1.2-ayatanaappindicator3-0.1 \

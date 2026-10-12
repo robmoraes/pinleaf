@@ -100,3 +100,23 @@ class ContextController:
 
     def restore(self) -> None:
         self.execute(lambda: None, affected_ids=set(), present_existing=True)
+
+    def capture_library(self) -> dict:
+        """Flush/capture on the GTK thread; workers receive only copied values."""
+        from pinleaf.storage.library_backup import capture
+
+        if self.busy:
+            raise TransitionError("Another change is in progress. Try again.")
+        self.busy = True
+        try:
+            for window in self.windows.values():
+                if not window.flush_for_transition():
+                    raise TransitionError("Could not save the latest edits. Retry after saving your notes.")
+            states = {key: window.capture_state() for key, window in self.windows.items()}
+            with self.service.store.transaction():
+                for key, state in states.items():
+                    self.service.store.save_context_geometry(key, **state)
+                return capture(self.service.store.connection)
+        finally:
+            self.busy = False
+            self.on_refresh()

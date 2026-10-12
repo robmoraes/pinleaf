@@ -23,6 +23,7 @@ DEFAULT_TEXT_COLOR_SETTING = "default_text_color"
 class NoteStore:
     def __init__(self, database_path: Path | str) -> None:
         self.database_path = Path(database_path)
+        _preflight_existing(self.database_path)
         self.connection = sqlite3.connect(self.database_path)
         self.connection.row_factory = sqlite3.Row
         self._transaction_depth = 0
@@ -327,6 +328,25 @@ def _to_row_values(note: Note) -> tuple[object, ...]:
         note.deleted_at,
         note.group_id,
     )
+
+
+def _preflight_existing(path: Path) -> None:
+    """Reject damaged storage before a writable open can discard its sidecars."""
+    if not path.is_file():
+        return
+    connection = sqlite3.connect(path.resolve().as_uri() + "?mode=ro", uri=True)
+    try:
+        rows = connection.execute("PRAGMA quick_check").fetchall()
+        if rows != [("ok",)]:
+            raise RuntimeError("Database integrity validation failed; original files were kept.")
+    except sqlite3.OperationalError as exc:
+        # A legitimate hot rollback journal needs SQLite's ordinary writable
+        # transaction recovery. Portable-restore journals are reconciled first
+        # by the app; this branch does not initialize or repair library records.
+        if getattr(exc, "sqlite_errorcode", 0) & 0xFF != sqlite3.SQLITE_READONLY:
+            raise
+    finally:
+        connection.close()
 
 
 def _from_row(row: sqlite3.Row) -> Note:

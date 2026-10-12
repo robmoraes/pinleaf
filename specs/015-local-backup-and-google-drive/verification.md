@@ -1,7 +1,8 @@
 # Maintained verification cases: Backup and restore
 
-Automation state for every case is **candidate / not implemented**. These are
-reusable case definitions; execution results must be recorded separately.
+Local cases TC-BKP-001–009 and 015 are automated; local portions of 014/016 are
+automated. Drive cases 010–013 and remote portions of 014/016 remain candidates.
+These are reusable definitions; actual results are in [execution](execution.md).
 
 ## Shared preconditions, data and cleanup
 

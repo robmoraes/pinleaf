@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Offline whole-library backup and replacement restore, with optional password
+  protection, validated preview, private recovery copies, interrupted-restore
+  reconciliation and restore access from storage-startup errors.
 - Header New menu with New Note and New Group actions, replacing the separate
   group-creation button in the panel body to give the note list more space.
 - Shared notes per profile, shown alongside the active ordinary group, with

@@ -321,12 +321,18 @@
           ]
         },
         "font_size": {
-          "type": "integer",
+          "type": [
+            "integer",
+            "null"
+          ],
           "minimum": -9223372036854775808,
           "maximum": 9223372036854775807
         },
         "text_color": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "is_open": {
           "type": "integer",

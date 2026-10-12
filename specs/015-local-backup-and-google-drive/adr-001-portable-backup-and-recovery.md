@@ -1,6 +1,6 @@
 # ADR 001: Logical portable files and coordinated local replacement
 
-Status: accepted for the technical plan on 2026-10-11; not implemented.
+Status: accepted and implemented in local slice A on 2026-10-11.
 Traceability: BK-02–06, RS-01–07, PR-01/02, UX-02 in [spec](spec.md).
 
 ## Context

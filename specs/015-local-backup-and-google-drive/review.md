@@ -1,9 +1,9 @@
 # Review: Local backup and Google Drive
 
-Current phase: Check complete; [Plan](plan.md) and [Tasks](tasks.md) prepared on
-2026-10-11 after the maintainer accepted whole-library replacement with recovery.
-Implementation, Google account access, version change and remote publication
-have not been performed for this workstream.
+Current phase: local slice A implemented and qualified on 2026-10-11;
+[execution](execution.md) records product evidence. Google Drive slice B remains
+pending. No Google account access, version change or remote publication has
+been performed for this workstream.
 
 Standards applied:
 - `~/wspace/engineering-playbook/engineering-playbook/architecture/spec-driven-development.md`
@@ -56,14 +56,15 @@ healthy-library replacement; ADR 002 isolates Drive as a destination.
 - [x] Check complete; technical Plan requested and written with required ADRs,
       encoding schema, limits, compatibility matrix and valid/invalid examples.
 - [x] Tasks derived in local-before-Drive order, with traceable validation routes.
-- [ ] Implementation and product verification evidence produced.
+- [x] Local implementation and product verification evidence produced.
+- [ ] Google Drive implementation and real-provider verification produced.
 
 ## Verification boundary
 
-This phase validates documentation, JSON syntax, preservation-field coverage,
-traceability and local links only. Acceptance examples and verification cases
-are design artifacts, not executed product tests. Do not claim a working local
-backup, encryption, Drive connection or restoration from this specification.
+The original planning phase validated documentation/contracts only. The later
+local delivery executes product tests for format, encryption, persistence,
+replacement, real-process interruption and native GTK workflows. Local evidence
+is separate from the still-unimplemented Google Drive cases.
 
 Public provider references support the proposed OAuth flow and narrow scopes;
 cross-installation Drive discovery and actual file access still require real
@@ -77,6 +78,8 @@ parses and covers all 15 current Note fields and all three portable text setting
 specification/planning tasks are complete. The [fixture checker](contracts/validate_examples.py)
 validates two schemas, nine synthetic files, wrong-password rejection and
 authenticated-header rejection with system jsonschema 4.10.3/cryptography 41.0.7.
-Version 0.8.0 and schema
-6 are unchanged. Plan/Tasks/ADRs exist; product implementation remains pending.
-Application tests are not execution evidence for this documentation-only change.
+These were planning checks, not product tests. The local implementation now
+preserves legacy null font-size/text-color values; canonical and packaged
+schemas agree. Read-only startup preflight avoids discarding damaged database
+sidecars before recovery. Original-file fallback is repeatable after interruption.
+Version 0.8.0 and schema 6 remain unchanged. Drive remains pending.

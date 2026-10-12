@@ -1,7 +1,8 @@
 # Feature: Local backup and restore, with Google Drive as a backup destination
 
-Status: product decisions agreed, Check complete, Plan and Tasks prepared on
-2026-10-11. Implementation has not started; publication remains deferred.
+Status: local slice A implemented on 2026-10-11; qualification is recorded in
+[execution](execution.md). Google Drive slice B remains pending. Version change
+and remote publication remain deferred.
 Source: [package workstream 3](../012-shared-notes-and-remote-backup/spec.md).
 Decision record and quality check: [review.md](review.md).
 Machine-readable behavior contract: [backup-outcomes.json](contracts/backup-outcomes.json).

@@ -112,7 +112,7 @@ def main() -> None:
             continue
         raise AssertionError("Authentication unexpectedly succeeded")
     print("PASS: two schemas, nine synthetic fixtures, wrong password and header tampering")
-    print("Contract examples only; product reader, restore and Drive are not implemented.")
+    print("Contract examples only; see ../execution.md for product verification evidence.")
 
 
 if __name__ == "__main__":

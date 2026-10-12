@@ -32,6 +32,7 @@ class MainWindow(Adw.ApplicationWindow):
         on_execute: Callable | None = None,
         on_hide_note: Callable[[str], None] | None = None,
         on_create_shared_note: Callable[[], None] | None = None,
+        on_backup: Callable[[], None] | None = None,
     ) -> None:
         super().__init__(application=application)
         self.note_service = note_service
@@ -42,6 +43,7 @@ class MainWindow(Adw.ApplicationWindow):
         self.on_delete_note = on_delete_note
         self.on_execute = on_execute
         self.on_hide_note = on_hide_note
+        self.on_backup = on_backup
         self.organization = note_service.organization
         context = self.organization.context
         self.expanded: dict[str, bool] = {self.organization.repository.shared(context.profile.id).id: True}
@@ -191,6 +193,12 @@ class MainWindow(Adw.ApplicationWindow):
         text_appearance.set_child(self.text_appearance_label)
         box.append(text_appearance)
 
+        if self.on_backup is not None:
+            backup = Gtk.Button(label="Backup & Restore…")
+            backup.add_css_class("flat")
+            backup.connect("clicked", lambda _: (popover.popdown(), self.on_backup()))
+            box.append(backup)
+
         box.append(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL))
 
         about = Gtk.Button(label="About Pinleaf")
@@ -231,6 +239,8 @@ class MainWindow(Adw.ApplicationWindow):
         label.set_text("Text Settings")
 
     def _save_default_text_appearance(self, appearance: TextAppearance) -> None:
+        if self._disposed:
+            raise TransitionError("This library has been replaced. Reopen Text Settings.")
         self.note_service.set_default_text_appearance(
             font_family=appearance.font_family,
             font_size=appearance.font_size,
@@ -319,6 +329,8 @@ class MainWindow(Adw.ApplicationWindow):
         self._render_signature = None
 
     def execute(self, action: Callable, *, affected_ids: set[str] | None = None):
+        if self._disposed:
+            raise TransitionError("This library has been replaced. Reopen the panel.")
         previous = self.organization.context.identity
         if self.on_execute is not None:
             result = self.on_execute(action, affected_ids=affected_ids)

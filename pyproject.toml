@@ -3,7 +3,7 @@ name = "pinleaf"
 version = "0.8.0"
 description = "Desktop sticky notes built with Python and GTK/libadwaita."
 requires-python = ">=3.11"
-dependencies = []
+dependencies = ["jsonschema>=4.10", "cryptography>=41"]
 
 [project.optional-dependencies]
 gtk = [
@@ -23,6 +23,7 @@ include = ["pinleaf*"]
 [tool.setuptools.package-data]
 pinleaf = [
   "resources/*.css",
+  "resources/backup/*.json",
   "resources/fonts/*.md",
   "resources/fonts/**/*.ttf",
   "resources/fonts/**/*.otf",

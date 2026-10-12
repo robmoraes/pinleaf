@@ -1,6 +1,6 @@
 # Portable backup format 1
 
-Status: planned contract, not an implemented exporter. Extension:
+Status: implemented by `pinleaf.backup_format` in the local delivery slice. Extension:
 `.pinleaf-backup`; encoding: UTF-8 JSON without BOM. Outer and decrypted/plain
 payload objects reject duplicate keys and non-finite numbers. JSON depth is at
 most 16, the full file at most 64 MiB, and canonical payload bytes at most 32 MiB.
@@ -53,6 +53,8 @@ at least one live profile, live-note ownership and optional ordinary-group
 context using the same domain rules as the current store. Only the three
 portable app-setting keys are allowed and absent keys remain absent. Missing
 fonts and out-of-display geometry are presentation concerns, not data rewriting.
+Legacy null `font_size` and `text_color` values are preserved as null, like
+`font_family`; the existing presentation fallback remains responsible for them.
 
 Reader order: bounded bytes/depth → strict JSON → envelope version/shape and
 fixed parameter validation → checksum or decryption → payload size/JSON/schema →

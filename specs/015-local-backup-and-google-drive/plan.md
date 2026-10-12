@@ -1,6 +1,7 @@
 # Plan: Local backup and restore, then Google Drive
 
-Status: prepared on 2026-10-11 after Q1/Q2 were resolved. The [spec](spec.md)
+Status: prepared on 2026-10-11 after Q1/Q2 were resolved; local slice A implemented
+and qualified in [execution](execution.md), with Drive slice B pending. The [spec](spec.md)
 owns product behavior; [tasks](tasks.md) order delivery and verification.
 Architecture decisions: [ADR 001](adr-001-portable-backup-and-recovery.md),
 [ADR 002](adr-002-google-drive-destination.md).
@@ -12,6 +13,7 @@ Architecture decisions: [ADR 001](adr-001-portable-backup-and-recovery.md),
 | `pinleaf/backup_format.py` | Versioned payload/envelope reader and writer, canonical JSON, limits, optional encryption; no GTK, network or live store |
 | `pinleaf/storage/library_backup.py` | Capture whitelisted raw rows, validate references, reconstruct trusted staged SQLite and replace logical library data |
 | `pinleaf/storage/restore_recovery.py` | Durable recovery copy/journal, startup reconciliation and preservation of unreadable original files |
+| `pinleaf/storage/atomic_files.py` | Private staging, durable publication, overwrite rollback and filesystem synchronization shared by backups/status/journals |
 | `pinleaf/services/backup_service.py` | Immutable capture, operation lifecycle, cancellation and worker jobs; separate local/Drive destination interfaces |
 | `pinleaf/ui/backup_window.py` | Local creation, protection option, preview, explicit final restore, progress/status and later Drive actions |
 | `pinleaf/app.py`, `ui/main_window.py`, context controller/editor lifecycle | Menu/startup-error wiring, flush/geometry boundary, generation guard, disposal and reload of restored context |
@@ -20,8 +22,11 @@ Architecture decisions: [ADR 001](adr-001-portable-backup-and-recovery.md),
 Keep NoteService focused on notes. One operation owner serializes backup/restore;
 GTK and its SQLite connection stay on the main thread. Workers receive copied
 payloads or use their own disposable staging connections. Progress/results
-return through GLib; callbacks carry an operation token and library generation,
-so a cancelled/destroyed window or replaced library cannot accept stale results.
+return through GLib with an operation token. Restore is serialized through that
+owner; application generation guards reject old panel/tray actions, disposed
+editors reject callbacks and the retired store connection is closed after the
+transaction, before recreating services/editors. A cancelled/destroyed operation
+cannot accept a stale worker result.
 
 ## Portable format and compatibility
 

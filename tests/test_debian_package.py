@@ -18,6 +18,8 @@ class DebianPackageTests(unittest.TestCase):
             "source/format",
             "dev.pinleaf.Pinleaf.desktop",
             "pinleaf-wrapper",
+            "pinleaf.manpages",
+            "pinleaf.1",
         ):
             self.assertTrue((DEBIAN / path).exists(), path)
 
@@ -29,6 +31,9 @@ class DebianPackageTests(unittest.TestCase):
             "python3-gi",
             "python3-jsonschema",
             "python3-cryptography",
+            "python3-google-auth-oauthlib",
+            "python3-requests",
+            "python3-secretstorage",
             "gir1.2-gtk-4.0",
             "gir1.2-adw-1",
             "gir1.2-ayatanaappindicator3-0.1",

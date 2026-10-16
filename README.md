@@ -202,6 +202,8 @@ For Google's testing mode, add the designated account under OAuth test users.
 Testing grants may expire and require Disconnect followed by Connect. The
 development client override is not included in backups or packages. A registered
 client resource/distribution configuration is still required before release.
+See [OAuth setup and package qualification](docs/release/google-drive-oauth.md)
+for independent-installation testing, client distribution and local package checks.
 
 ## Install
 

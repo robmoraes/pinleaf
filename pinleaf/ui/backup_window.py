@@ -9,7 +9,7 @@ import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw, Gtk
+from gi.repository import Adw, GLib, Gtk, Pango
 
 from pinleaf.backup_format import AuthenticationError, BackupError, PasswordRequired, decode, read_bytes
 from pinleaf.services.drive_backup import DriveCopy
@@ -22,7 +22,7 @@ from pinleaf.ui.dialogs import show_error
 
 
 def _label(text: str) -> Gtk.Label:
-    return Gtk.Label(label=text, xalign=0, wrap=True, selectable=True)
+    return Gtk.Label(label=text, xalign=0, wrap=True, wrap_mode=Pango.WrapMode.WORD_CHAR, selectable=True)
 
 
 class PasswordWindow(Adw.Window):
@@ -150,7 +150,10 @@ class BackupWindow(Adw.Window):
         content.append(_label("Save dated copies of your complete library to Google Drive. Refresh to select a copy, validate it and preview a replacement restore."))
         self.drive_status = _label("")
         content.append(self.drive_status)
-        self.session_only = Gtk.CheckButton(label="Connect for this session only (do not save access)")
+        session_label = "Connect for this session only (do not save access)"
+        self.session_only = Gtk.CheckButton()
+        self.session_only.set_child(Gtk.Label(label=session_label, xalign=0, wrap=True, wrap_mode=Pango.WrapMode.WORD_CHAR))
+        self.session_only.update_property([Gtk.AccessibleProperty.LABEL], [session_label])
         content.append(self.session_only)
         self.connect_drive = Gtk.Button(label="Connect Google Drive…")
         self.connect_drive.connect("clicked", lambda _: self._connect_drive())
@@ -173,7 +176,8 @@ class BackupWindow(Adw.Window):
         self.drive_copies = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         self.drive_copies.append(_label("Refresh to discover completed copies. Contents will be validated when restoring."))
         copies_scroll = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER,
-                                          max_content_height=260, propagate_natural_height=True)
+                                          min_content_height=180, max_content_height=260,
+                                          propagate_natural_height=True)
         copies_scroll.set_child(self.drive_copies)
         content.append(copies_scroll)
         self._drive_status()
@@ -208,6 +212,7 @@ class BackupWindow(Adw.Window):
         content.append(self.preview_box)
         scroll = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER, vexpand=True)
         scroll.set_child(content)
+        self.scroll, self.content_box = scroll, content
         toolbar.set_content(scroll)
         self.set_content(toolbar)
         self.connect("close-request", self._close)
@@ -288,6 +293,8 @@ class BackupWindow(Adw.Window):
             self.drive_status.set_text(f"Connected: {connection.account}\n{mode}")
             self.disconnect_drive.set_label("Disconnect This Session" if connection.session_only else "Disconnect / Forget Saved Access")
         self.connect_drive.set_sensitive(connection is None and not self.service.busy)
+        self.connect_drive.set_visible(connection is None)
+        self.session_only.set_visible(connection is None)
         available = connection is not None and not self.service.busy
         self.save_drive.set_sensitive(available)
         self.refresh_drive.set_sensitive(available)
@@ -394,10 +401,14 @@ class BackupWindow(Adw.Window):
                 row.append(_label(f"{copy.captured_at} · {mode} · {copy.size:,} bytes\n{copy.name}"))
                 select = Gtk.Button(label="Preview & Restore…")
                 select.update_property([Gtk.AccessibleProperty.LABEL], [f"Preview and restore Drive backup {copy.name}"])
+                select.set_tooltip_text(f"Restore preview for {copy.name}")
                 select.connect("clicked", lambda _, selected=copy: self._download_drive(selected))
                 row.append(select)
                 self.drive_copies.append(row)
             self.drive_transfer_status.set_text(f"Found {len(copies)} completed copies. Select one to download and validate before restoring.")
+            if copies:
+                row = self.drive_copies.get_first_child()
+                self._reveal(row, row.get_last_child())
         self._run_drive("Listing Drive copies…", self.service.list_drive, listed,
                         cancel_message="Listing cancelled. Your current library was kept. Refresh to try again.")
 
@@ -409,6 +420,24 @@ class BackupWindow(Adw.Window):
                         lambda cancel: self.service.download_drive(copy, cancel),
                         lambda raw: self._selected(raw, drive_copy=copy),
                         cancel_message="Download cancelled. Your current library was kept. Select a copy to try again.")
+
+    def _reveal(self, widget: Gtk.Widget, focus: Gtk.Widget) -> None:
+        """Scroll the result into view after GTK has allocated its new rows."""
+        def allocated() -> bool:
+            if widget.get_root() is not self or not widget.get_mapped():
+                return False
+            valid, bounds = widget.compute_bounds(self.content_box)
+            if valid:
+                adjustment = self.scroll.get_vadjustment()
+                value, page = adjustment.get_value(), adjustment.get_page_size()
+                top, bottom = bounds.get_y(), bounds.get_y() + bounds.get_height() + 12
+                if top < value:
+                    adjustment.set_value(top)
+                elif bottom > value + page:
+                    adjustment.set_value(bottom - page)
+                focus.grab_focus()
+            return False
+        GLib.timeout_add(50, allocated)
 
     def _create(self) -> None:
         self.password_window = PasswordWindow(self, self._choose_save)
@@ -535,6 +564,7 @@ class BackupWindow(Adw.Window):
             f"Restore replaces the entire current library. Recovery copy:\n{recovery}")
         self.preview_box.set_visible(True)
         self.final_restore.grab_focus()
+        self._reveal(self.preview_box, self.final_restore)
 
     def _confirm_restore(self) -> None:
         if self.preview is None:

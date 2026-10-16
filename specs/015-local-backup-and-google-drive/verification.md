@@ -57,3 +57,15 @@ Detailed format fixtures, commit hooks, provider doubles and exact limits are
 defined by the [plan](plan.md) and [tasks](tasks.md). Q1/Q2 are resolved; update
 this ledger whenever accepted behavior changes. Real OAuth qualification is not
 replaced by passing a mock.
+
+## Drive delivery evidence
+
+Connection, upload/discovery and download/restore evidence is maintained in
+[Drive execution](execution-drive.md). Provider/transport/storage/GTK tests
+cover TC-BKP-010–014/016 error and preservation boundaries. Live D03 restores
+used the designated account and disposable target libraries in both protection
+modes; D05 additionally qualified Noble's Google SDKs, 1,000-note native restore,
+actual default-Cancel keyboard input, responsive layouts, AT-SPI controls and a
+configured disposable Debian binary. Independent A/B browser authorization and
+post-disconnect live token refresh remain D04 prerequisites, not replaced by
+reusing development access or provider doubles.

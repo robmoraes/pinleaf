@@ -187,3 +187,98 @@ nonfatal GTK popup stacking and Ayatana deprecation diagnostics remain.
 D04/D05 remain pending: independent installation authorization, deliberate test
 cleanup, release client distribution, native screenshots/accessibility and final
 packaging qualification. Version and remote publication remain unchanged.
+
+## D05 local qualification checkpoint
+
+The live D04 helper is now prepared with two fresh libraries and independently
+keyed Secret Service connections. It requires two actual browser consents and
+uses 1,000 synthetic notes, both backup modes, B's own distinct save, restart and
+real token refresh after A disconnects. Only this invocation's three verified
+test files may be deleted by cleanup; pre-existing copies and development access
+are preserved. The first A consent timed out without confirmation, before any
+upload or usable connection. D04 remains pending human browser interaction.
+
+The Google SDK packages published for Ubuntu 24.04 are older than this host's:
+Google Auth 1.5.1-3 and google-auth-oauthlib 0.4.2-1. They were downloaded from
+the official Ubuntu archive and extracted under `/tmp`, with six 1.16.0-4;
+system packages were not downgraded. Google Auth 1.5 lacks `Credentials.to_json`.
+The credential writer now uses the SDK's documented authorized-user refresh
+fields when that method is unavailable, still writing only to Secret Service.
+Modern SDK behavior is retained. Python/Debian minimum dependencies now reflect
+the qualified APIs. SDK support for explicit PKCE was checked in the actual
+0.4.2 source and its real authorization URL test passed.
+
+Using these extracted Google SDKs, **64 focused Drive tests passed**, and the
+live real-app restore passed again for both synthetic D02 copies, with 35 worker
+timer callbacks. This verifies the older SDK path on the current Python 3.14
+host, not a complete separate Noble OS/GTK session. Official package reference:
+[OAuthlib package](https://packages.ubuntu.com/noble/python3-google-auth-oauthlib),
+[Google Auth package](https://packages.ubuntu.com/noble/python3-google-auth).
+
+Native visual/keyboard QA passed in a nested off-screen X11 server. The harness
+now forces X11 even on a Wayland host, so tests cannot accidentally render into
+the daily desktop. ImageMagick 6/7 capture commands are both supported. Long
+filenames wrap, the session checkbox wraps at narrow widths, connection setup
+controls hide while connected, and listing/preview actions reveal their results
+after allocation. The copy list has a minimum useful viewport instead of
+collapsing to a clipped action. Normal/light and 360-pixel dark screenshots were
+inspected; actual XTest Enter cancels the final destructive dialog in both modes.
+The 1,000-note native restore passed for both modes with ten worker heartbeats.
+
+A separate AT-SPI process passed five phases: disconnected setup, connected
+save/list/selection, protected-file password, validated preview/cancellation,
+and final confirmation. Buttons expose focusable names and each copy's tooltip
+description identifies its generic filename when GTK's computed button name
+takes precedence over the requested label. Protected selection exposes no
+private preview before unlock. Cancellation preserved the original library.
+See [AT-SPI evidence](artifacts/drive-accessibility.json). This does not qualify
+Orca speech or human screen-reader usability.
+
+The unsigned all-architecture Debian binary built in a private temporary source
+copy. Only its build copy received whitelisted desktop-client configuration;
+no client contents, user credentials or databases entered the repository.
+Extraction verified both schemas, Drive modules, runtime dependencies, manpage
+and configuration loading without `PINLEAF_GOOGLE_CLIENT_FILE`. A manpage was
+added to resolve the previous missing-manual warning. Strict Lintian passed
+without errors or warnings outside the sandbox; the sandbox's man-db rendering
+pipeline was restricted even though direct groff rendering passed. See
+[package evidence](artifacts/package-qualification.json). The binary was neither
+installed nor published and retains 0.8.0 only as a disposable unreleased build.
+
+CI/release jobs now install the new Python runtime dependencies before tests.
+The release job validates the bundled client without developer overrides before
+building, preventing an unconfigured Drive binary from being published. The
+maintainer's distribution-client choice remains pending; the original JSON stays
+ignored and no application publishing/account setting was changed. Normal
+development CI does not require a registered client.
+
+Reproduction additions:
+
+```bash
+/usr/bin/python3 tests/gui_session.py /usr/bin/python3 tests/gui_drive.py --visual
+/usr/bin/python3 tests/gui_session.py /usr/bin/python3 tests/gui_drive.py --large
+/usr/bin/python3 tests/gui_session.py --a11y /usr/bin/python3 tests/gui_drive_accessibility.py
+```
+
+Set `PINLEAF_QA_SCREENSHOTS` or `PINLEAF_QA_A11Y_REPORT` to record synthetic
+artifacts. The [maintainer guide](../../docs/release/google-drive-oauth.md) records
+the explicit live two-installation and package qualification commands.
+
+Final local regression: **280 tests passed, zero skips**, 17.581 seconds.
+Compileall, diff whitespace checks and both schemas/nine contract examples
+passed. The final configured disposable Debian build passed strict Lintian with
+empty diagnostics; its SHA-256 is recorded in the package artifact manifest.
+
+Inspected synthetic screenshots:
+
+- [Drive copies, light](screenshots/drive-copies-light.png)
+- [Drive copies, narrow dark](screenshots/drive-copies-narrow-dark.png)
+- [Validated preview, light](screenshots/drive-preview-light.png)
+- [Validated preview, narrow dark](screenshots/drive-preview-narrow-dark.png)
+- [Protected-file password](screenshots/drive-password-dark.png)
+- [Final confirmation, light](screenshots/drive-confirmation-light.png)
+- [Final confirmation, narrow dark](screenshots/drive-confirmation-narrow-dark.png)
+
+D04 and final D05 closure remain pending independent consent and distribution
+configuration. No version bump, package installation, push, release or PPA upload
+has occurred.

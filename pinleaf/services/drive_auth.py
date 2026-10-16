@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from threading import Event
+from typing import TYPE_CHECKING
 from urllib.parse import parse_qs, urlsplit
 
 from pinleaf.config import resource_path
@@ -20,6 +21,9 @@ DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.file"
 AUTH_URI = "https://accounts.google.com/o/oauth2/auth"
 TOKEN_URI = "https://oauth2.googleapis.com/token"
 
+if TYPE_CHECKING:
+    from google.oauth2.credentials import Credentials
+
 
 class DriveAuthError(Exception):
     """Safe to display; never contains provider responses or credentials."""
@@ -27,6 +31,20 @@ class DriveAuthError(Exception):
 
 class CredentialStoreError(DriveAuthError):
     pass
+
+
+def credential_json(credentials: Credentials) -> str:
+    """Google Auth 1.5 (Ubuntu 24.04) predates Credentials.to_json()."""
+    serialize = getattr(credentials, "to_json", None)
+    if callable(serialize):
+        return serialize()
+    # The SDK's from_authorized_user_info consumes this documented refresh
+    # material. Old SDKs refresh explicitly on Connect; no token file is used.
+    return json.dumps({"refresh_token": credentials.refresh_token,
+                       "token_uri": credentials.token_uri,
+                       "client_id": credentials.client_id,
+                       "client_secret": credentials.client_secret,
+                       "scopes": list(credentials.scopes)})
 
 
 def client_configuration() -> dict:
@@ -249,7 +267,7 @@ class DriveAuth:
             account, email = self.identify(credentials)
             check_cancel(cancel)
             if not session_only:
-                self.store.save(client_id, account, credentials.to_json())
+                self.store.save(client_id, account, credential_json(credentials))
                 if cancel.is_set():
                     if saved is None:
                         self.store.delete(client_id)
@@ -281,7 +299,7 @@ class DriveAuth:
                 credentials.refresh(lambda *args, **kwargs: Request()(*args, **(kwargs | {"timeout": 30})))
                 check_cancel(cancel)
                 if self.persisted:
-                    self.store.save(self.client_id, self.account_id, credentials.to_json())
+                    self.store.save(self.client_id, self.account_id, credential_json(credentials))
             check_cancel(cancel)
             if not isinstance(credentials.token, str) or not credentials.token:
                 raise DriveAuthError("Google access is unavailable. Disconnect and reconnect.")

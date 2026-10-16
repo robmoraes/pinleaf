@@ -16,7 +16,7 @@ from urllib.error import HTTPError
 
 from pinleaf.services.drive_auth import (
     AUTH_URI, TOKEN_URI, DRIVE_SCOPE, CredentialStoreError, DriveAuth,
-    DriveAuthError, SecretCredentials, authorize, client_configuration,
+    DriveAuthError, SecretCredentials, authorize, client_configuration, credential_json,
 )
 from pinleaf.storage.atomic_files import OperationCancelled
 
@@ -26,6 +26,18 @@ CONFIG = {"installed": {"client_id": "synthetic.apps.googleusercontent.com",
 
 
 class DriveAuthTests(unittest.TestCase):
+    def test_noble_credentials_without_to_json_use_keyring_refresh_material(self):
+        credentials = SimpleNamespace(refresh_token="synthetic-refresh", token_uri=TOKEN_URI,
+                                      client_id=CONFIG["installed"]["client_id"], client_secret="synthetic",
+                                      scopes=[DRIVE_SCOPE], token="synthetic-access")
+        saved = json.loads(credential_json(credentials))
+        self.assertEqual(saved["refresh_token"], "synthetic-refresh")
+        self.assertEqual(saved["scopes"], [DRIVE_SCOPE])
+        self.assertNotIn("token", saved)
+        from google.oauth2.credentials import Credentials
+        restored = Credentials.from_authorized_user_info(saved, scopes=[DRIVE_SCOPE])
+        self.assertEqual(restored.refresh_token, "synthetic-refresh")
+
     def test_configuration_requires_desktop_and_google_endpoints(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "client.json"

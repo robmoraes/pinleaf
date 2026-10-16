@@ -22,7 +22,7 @@ sys.path.insert(0, str(ROOT))
 import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Gio, GLib
+from gi.repository import Adw, Gio, GLib
 
 from pinleaf.app import run
 from pinleaf.backup_format import decode, encode
@@ -37,7 +37,18 @@ PASSWORD = "Synthetic-drive-smoke-only-789"
 
 def main() -> None:
     live = "--live" in sys.argv
+    large = "--large" in sys.argv
+    if live and large:
+        raise SystemExit("The existing live fixtures are small; use --large with the provider double.")
+    visual = "--visual" in sys.argv
+    keyboard = None
+    if visual:
+        from gui_desktop_qualification import XInput, screenshot
+        keyboard = XInput()
     payload = json.loads((ROOT / "specs/015-local-backup-and-google-drive/contracts/examples/valid-unprotected.pinleaf-backup").read_bytes())["payload"]
+    if large:
+        from drive_two_installations import synthetic_library
+        payload = synthetic_library()
     if live:
         clients = list((ROOT / "tmp").glob("client_secret_*.json"))
         if len(clients) != 1:
@@ -96,11 +107,21 @@ def main() -> None:
                     state["editor"] = app.note_windows[note_id]
                     state["editor"].text_view.get_buffer().set_text("Target before remote restore")
                     app.show_backup()
+                    if visual and state["case"] == 1:
+                        Adw.StyleManager.get_default().set_color_scheme(Adw.ColorScheme.FORCE_DARK)
+                        keyboard.resize(app.backup_window, 360, 680)
                     state["phase"] = "list"
                 elif phase == "list":
                     window.refresh_drive.emit("clicked")
                     state["phase"] = "choose"
-                elif phase == "choose":
+                elif phase in ("choose", "capture-choose"):
+                    if visual and phase == "choose":
+                        state["phase"] = "capture-choose"
+                        return True
+                    if visual:
+                        if state["case"] == 1:
+                            assert window.get_width() <= 380, window.get_width()
+                        screenshot("drive-copies-narrow-dark" if state["case"] else "drive-copies-light", window)
                     row = window.drive_copies.get_first_child()
                     while row is not None and selected.name not in row.get_first_child().get_text():
                         row = row.get_next_sibling()
@@ -110,6 +131,8 @@ def main() -> None:
                 elif phase == "password":
                     assert window.preview is None
                     assert window.password_window.unlock
+                    if visual:
+                        screenshot("drive-password-dark", window.password_window)
                     window.password_window.password.set_text("wrong-synthetic-password")
                     window.password_window.confirm.emit("clicked")
                     state["phase"] = "retry-password"
@@ -119,14 +142,34 @@ def main() -> None:
                     window.password_window.password.set_text(PASSWORD)
                     window.password_window.confirm.emit("clicked")
                     state["phase"] = "preview"
-                elif phase == "preview":
+                elif phase in ("preview", "capture-preview"):
                     assert window.preview is not None
                     assert window.preview.backup.payload == payload
+                    if visual and phase == "preview":
+                        state["phase"] = "capture-preview"
+                        return True
+                    if visual:
+                        screenshot("drive-preview-narrow-dark" if state["case"] else "drive-preview-light", window)
                     assert app.store.get(state["target_note"]) is not None
                     state["recovery"] = window.preview.recovery
                     window._confirm_restore()
                     assert window.confirmation.get_default_response() == "cancel"
+                    if visual:
+                        state["phase"] = "default-cancel"
+                        return True
                     window.confirmation.response("cancel")
+                    assert app.store.get(state["target_note"]) is not None
+                    state["editor"].text_view.get_buffer().set_text("Latest target edit before final remote restore")
+                    window._confirm_restore()
+                    window.confirmation.response("restore")
+                    state["phase"] = "verify"
+                elif phase == "default-cancel":
+                    screenshot("drive-confirmation-narrow-dark" if state["case"] else "drive-confirmation-light", window.confirmation)
+                    keyboard.focus(window.confirmation)
+                    keyboard.key("Return")
+                    state["phase"] = "after-default-cancel"
+                elif phase == "after-default-cancel":
+                    assert not window.confirmation.get_visible()
                     assert app.store.get(state["target_note"]) is not None
                     state["editor"].text_view.get_buffer().set_text("Latest target edit before final remote restore")
                     window._confirm_restore()
@@ -185,7 +228,10 @@ def main() -> None:
                 tray.stop()
                 if tray._process is not None:
                     tray._process.wait(timeout=5)
+            if keyboard:
+                keyboard.close()
     print(json.dumps({"status": "PASS", "provider": "live" if live else "double",
+                      "notes": len(payload["library"]["notes"]),
                       "restored_modes": ["unprotected", "protected"],
                       "responsive_worker_heartbeats": state["heartbeats"]}))
 

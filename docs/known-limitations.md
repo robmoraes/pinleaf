@@ -94,6 +94,27 @@ exclude interpreter startup, fixture generation and shutdown. See the
 for every sample, the earlier nested baseline and nonfatal private-bus tray
 diagnostics. They do not guarantee the same timings on every desktop.
 
+## Google Drive development qualification
+
+Development supports explicit Drive connection, upload/discovery and replacement
+restore. Simulated provider/storage/GTK tests and live synthetic-data restore
+drills passed on this Ubuntu 26.04 / Python 3.14 machine. Ubuntu 24.04's Google
+Auth 1.5.1 and OAuthlib helper 0.4.2 were extracted without installation and used
+for focused tests and a live restore; the older credential serialization API is
+supported. This is SDK compatibility evidence, not a separate Ubuntu 24.04 boot.
+
+Independent live authorization/disconnection on two installations still needs
+the maintainer's two browser confirmations. The first consent attempt expired
+without creating cloud files. AT-SPI control names/roles/focusability, real Enter
+defaulting to Cancel, normal/light and 360-pixel dark layouts, and 1,000-note
+restore workflows passed in isolated X11; Orca speech remains unqualified.
+
+The release OAuth client is not yet bundled in the repository. A local test
+binary with an injected client passed build/inspection/Lintian but was not
+installed or published. A release workflow gate rejects a missing bundled
+client. Google's testing-mode account/expiry restrictions remain until deliberate
+publishing configuration. See [OAuth qualification](release/google-drive-oauth.md).
+
 ## Packaging
 
 The supported packaged install path is Ubuntu 24.04 LTS through the Launchpad

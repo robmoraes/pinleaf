@@ -1,0 +1,115 @@
+{
+  "status": "PASS",
+  "phases": [
+    {
+      "phase": 0,
+      "controls": [
+        {
+          "name": "Connect for this session only (do not save access)",
+          "description": "",
+          "role": "check box",
+          "focusable": true
+        },
+        {
+          "name": "Connect Google Drive\u2026",
+          "description": "",
+          "role": "button",
+          "focusable": true
+        },
+        {
+          "name": "Forget Saved Access",
+          "description": "",
+          "role": "button",
+          "focusable": true
+        }
+      ]
+    },
+    {
+      "phase": 1,
+      "controls": [
+        {
+          "name": "Disconnect This Session",
+          "description": "",
+          "role": "button",
+          "focusable": true
+        },
+        {
+          "name": "Save Backup to Drive\u2026",
+          "description": "",
+          "role": "button",
+          "focusable": true
+        },
+        {
+          "name": "Refresh Drive Copies",
+          "description": "",
+          "role": "button",
+          "focusable": true
+        },
+        {
+          "name": "Preview & Restore\u2026",
+          "description": "Restore preview for pinleaf-20261011T120000Z-10d89474-d8c2-478b-9d35-b1d8101108b3.pinleaf-backup",
+          "role": "button",
+          "focusable": true
+        }
+      ]
+    },
+    {
+      "phase": 2,
+      "controls": [
+        {
+          "name": "Backup password",
+          "description": "",
+          "role": "password text",
+          "focusable": true
+        },
+        {
+          "name": "Cancel",
+          "description": "",
+          "role": "button",
+          "focusable": true
+        },
+        {
+          "name": "Unlock",
+          "description": "",
+          "role": "button",
+          "focusable": true
+        }
+      ]
+    },
+    {
+      "phase": 3,
+      "controls": [
+        {
+          "name": "Restore This Backup\u2026",
+          "description": "",
+          "role": "button",
+          "focusable": true
+        },
+        {
+          "name": "Cancel Preview",
+          "description": "",
+          "role": "button",
+          "focusable": true
+        }
+      ]
+    },
+    {
+      "phase": 4,
+      "controls": [
+        {
+          "name": "Cancel",
+          "description": "",
+          "role": "button",
+          "focusable": true
+        },
+        {
+          "name": "Restore",
+          "description": "",
+          "role": "button",
+          "focusable": true
+        }
+      ]
+    }
+  ],
+  "scope": "AT-SPI names, roles and focusable states; not Orca speech"
+}

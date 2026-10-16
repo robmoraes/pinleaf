@@ -10,6 +10,7 @@ import ctypes
 import json
 import os
 import subprocess
+import shutil
 import sys
 import tempfile
 import traceback
@@ -89,7 +90,8 @@ def screenshot(name: str, window: Gtk.Window) -> None:
         output = Path(directory)
         output.mkdir(parents=True, exist_ok=True)
         xid = GdkX11.X11Surface.get_xid(window.get_surface())
-        subprocess.run(["import", "-window", str(xid), str(output / f"{name}.png")], check=True)
+        command = ["import"] if shutil.which("import") else ["magick", "import"]
+        subprocess.run([*command, "-window", str(xid), str(output / f"{name}.png")], check=True)
 
 
 def main() -> int:

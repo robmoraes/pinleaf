@@ -56,3 +56,9 @@ Consulted 2026-10-11:
   and [paginated file listing](https://developers.google.com/workspace/drive/api/reference/rest/v3/files/list).
 - [SecretStorage](https://secretstorage.readthedocs.io/en/latest/) provides access
   to the desktop Secret Service; no generic plaintext credential fallback is used.
+
+Qualification on 2026-10-16 found that Noble supplies Google Auth 1.5.1 and
+google-auth-oauthlib 0.4.2. PKCE remains explicit and supported by that helper;
+the older Credentials class uses its documented authorized-user refresh fields
+instead of the later `to_json` API. Serialization remains confined to Secret
+Service. See [D05 evidence](execution-drive.md#d05-local-qualification-checkpoint).

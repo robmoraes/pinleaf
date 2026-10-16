@@ -32,15 +32,17 @@ with tempfile.TemporaryDirectory(prefix="pinleaf-startup-") as directory:
     with store.transaction():
         for index in range(100):
             timestamp = (datetime(2026, 10, 10, 12, tzinfo=UTC) + timedelta(minutes=index)).isoformat()
-            note = Note.new(f"startup-{index:03d}", group_id=service.organization.context.group.id, now=timestamp)
+            note = Note.new(f"startup-{index:03d}", group_id=service.organization.repository.shared(service.organization.context.profile.id).id, now=timestamp)
             visible = index % 4 != 0 if open_count == 75 else index < open_count
             store.create(replace(note, content=f"Short note {index} ".ljust(128, "."), is_open=visible))
     store.close()
     start = time.perf_counter()
     result = {}
     errors = []
+    helpers = []
     def activated():
         application = Gio.Application.get_default()
+        helpers.append(application.tray)
         try:
             assert len(application.note_windows) == open_count
             assert all(window.get_visible() and window.get_mapped()
@@ -54,6 +56,9 @@ with tempfile.TemporaryDirectory(prefix="pinleaf-startup-") as directory:
     GLib.idle_add(activated)
     with patch("pinleaf.app.load_config", return_value=AppConfig(Path(directory), path)):
         assert run(["pinleaf-startup-benchmark"]) == 0
+    for tray in helpers:
+        if tray._process is not None:
+            tray._process.wait(timeout=5)
     if errors:
         raise errors[0]
     print(json.dumps(result))

@@ -49,7 +49,7 @@ class ContextControllerTests(unittest.TestCase):
         self.store = NoteStore(':memory:')
         self.service = NoteService(self.store)
         self.org = self.service.organization
-        self.source = self.org.context.group
+        self.source = self.org.create_group('Source')
         self.first = self.service.create_note()
         self.target = self.org.create_group('LGPD')
         self.second = self.service.create_note()

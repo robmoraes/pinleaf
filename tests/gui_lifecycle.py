@@ -93,7 +93,7 @@ def check() -> bool:
         if scenario == "restart":
             assert org.context.group.name == "Financeiro"
             all_notes = app.store.list_notes()
-            expected = {note.id for note in all_notes if note.group_id == org.context.group.id and note.is_open}
+            expected = {note.id for note in all_notes if note.id in {n.id for n in app._service().list_notes()} and note.is_open}
             assert set(app.note_windows) == expected and len(expected) == 1
             assert any(not note.is_open for note in all_notes)
             before = dict(app.note_windows)
@@ -103,6 +103,7 @@ def check() -> bool:
             app.quit()
             return False
         if step == 0:
+            app.execute_command(lambda: org.create_group("General"))
             state["initial"] = org.context
             app.create_note()
             note_id = next(iter(app.note_windows))
@@ -161,7 +162,7 @@ def check() -> bool:
             menu = app.main_window.focus_targets[f"note-menu:{row.note_id}"]
             menu.popup()
             action = menu.get_popover().get_child().get_first_child()
-            assert action.get_child().get_text().startswith("Activate and open")
+            assert action.get_child().get_text().startswith("Switch profile and open")
             action.emit("clicked")
             assert org.context.profile.id == state["other"].id
             assert app.main_window.search_entry.get_text() == "" and app.main_window.scope.get_selected() == 0

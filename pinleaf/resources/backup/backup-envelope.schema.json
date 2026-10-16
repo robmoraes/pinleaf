@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pinleaf:backup-envelope:1",
+  "title": "Pinleaf portable backup envelope v1",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "format",
+        "format_version",
+        "protection",
+        "payload",
+        "sha256"
+      ],
+      "properties": {
+        "format": {
+          "const": "pinleaf-backup"
+        },
+        "format_version": {
+          "const": 1
+        },
+        "protection": {
+          "const": "none"
+        },
+        "payload": {
+          "$ref": "urn:pinleaf:backup-payload:1"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "format",
+        "format_version",
+        "protection",
+        "kdf",
+        "salt",
+        "nonce",
+        "ciphertext"
+      ],
+      "properties": {
+        "format": {
+          "const": "pinleaf-backup"
+        },
+        "format_version": {
+          "const": 1
+        },
+        "protection": {
+          "const": "scrypt-aes256-gcm"
+        },
+        "kdf": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "n",
+            "r",
+            "p"
+          ],
+          "properties": {
+            "name": {
+              "const": "scrypt"
+            },
+            "n": {
+              "const": 32768
+            },
+            "r": {
+              "const": 8
+            },
+            "p": {
+              "const": 3
+            }
+          }
+        },
+        "salt": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{22}==$"
+        },
+        "nonce": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{16}$"
+        },
+        "ciphertext": {
+          "type": "string",
+          "minLength": 24,
+          "maxLength": 44739264,
+          "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+        }
+      }
+    }
+  ]
+}

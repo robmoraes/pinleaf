@@ -40,10 +40,10 @@ class ContextController:
         self.busy = False
 
     def execute(self, action: Callable[[], T], *, affected_ids: set[str] | None = None,
-                present_existing: bool = False) -> T:
+                present_existing: bool = False, focus_note_id: str | None = None) -> T:
         if self.busy:
             raise TransitionError("Another change is in progress. Try again.")
-        previous = self.service.organization.context.group.id
+        previous = self.service.organization.context.identity
         self.busy = True
         staged: dict[str, NoteEditor] = {}
         committed = False
@@ -59,7 +59,7 @@ class ContextController:
                     self.service.store.save_context_geometry(key, **state)
                 result = action()
                 context = self.service.organization.context
-                desired = {note.id: note for note in self.service.store.list_notes(group_id=context.group.id) if note.is_open}
+                desired = {note.id: note for note in self.service.list_notes() if note.is_open}
                 # Stage against uncommitted membership, without exposing any windows.
                 for key, note in desired.items():
                     if key not in self.windows:
@@ -71,9 +71,14 @@ class ContextController:
             self.windows.update(staged)
             for key, note in desired.items():
                 self.windows[key].sync_note(note)
-            if context.group.id != previous:
+            if context.identity != previous:
                 self.on_context_changed()
-            to_present = self.windows if present_existing else staged
+            to_present = dict(self.windows if present_existing else staged)
+            if focus_note_id in self.windows:
+                # A deliberate Open targets that editor even when the profile
+                # switch also restores several other notes.
+                to_present.pop(focus_note_id, None)
+                to_present[focus_note_id] = self.windows[focus_note_id]
             last_key = next(reversed(to_present), None)
             for key, window in to_present.items():
                 try:
@@ -95,3 +100,23 @@ class ContextController:
 
     def restore(self) -> None:
         self.execute(lambda: None, affected_ids=set(), present_existing=True)
+
+    def capture_library(self) -> dict:
+        """Flush/capture on the GTK thread; workers receive only copied values."""
+        from pinleaf.storage.library_backup import capture
+
+        if self.busy:
+            raise TransitionError("Another change is in progress. Try again.")
+        self.busy = True
+        try:
+            for window in self.windows.values():
+                if not window.flush_for_transition():
+                    raise TransitionError("Could not save the latest edits. Retry after saving your notes.")
+            states = {key: window.capture_state() for key, window in self.windows.items()}
+            with self.service.store.transaction():
+                for key, state in states.items():
+                    self.service.store.save_context_geometry(key, **state)
+                return capture(self.service.store.connection)
+        finally:
+            self.busy = False
+            self.on_refresh()

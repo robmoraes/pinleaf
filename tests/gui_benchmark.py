@@ -45,12 +45,12 @@ with tempfile.TemporaryDirectory(prefix="pinleaf-benchmark-") as directory:
     service = NoteService(store)
     org = service.organization
     initial = org.context
-    groups = [initial.group]
+    groups = [org.repository.shared(initial.profile.id)]
     with store.transaction():
         for profile_index in range(3):
             if profile_index:
                 org.create_profile(f"Profile {profile_index}")
-                groups.append(org.context.group)
+                groups.append(org.repository.shared(org.context.profile.id))
             for index in range(9):
                 groups.append(org.create_group(f"Project {index:02d}"))
         for index in range(1000):
@@ -58,7 +58,7 @@ with tempfile.TemporaryDirectory(prefix="pinleaf-benchmark-") as directory:
             note = Note.new(f"benchmark-{index:04d}", group_id=group.id,
                             now=(datetime(2026, 10, 10, 12, tzinfo=UTC) + timedelta(minutes=index)).isoformat())
             store.create(replace(note, content=f"Café orçamento project {index} ".ljust(128, "."), is_open=index % 4 != 0))
-        org.activate_group(initial.group.id)
+        org.activate_group(groups[1].id)
     results["global_search_1000"] = measure(lambda: service.list_notes("cafe", scope=SearchScope.ALL_PROFILES))
     app = Adw.Application(application_id="dev.pinleaf.Benchmark", flags=Gio.ApplicationFlags.NON_UNIQUE)
     app.register(None)
@@ -75,12 +75,19 @@ with tempfile.TemporaryDirectory(prefix="pinleaf-benchmark-") as directory:
     controller = ContextController(service, windows, lambda note: NoteWindow(
         application=app, note=note, note_service=service, on_closed=lambda _: None, on_changed=lambda: None))
     controller.restore()
-    target = groups[1]
+    target = groups[2]
+    shared_editors = {key: editor for key, editor in windows.items()
+                      if service.get_note(key).group_id == groups[0].id}
+    visible_counts = {len(windows)}
     def cycle():
-        destination = target if org.context.group.id == initial.group.id else initial.group
+        destination = target if org.context.group_id == groups[1].id else groups[1]
         controller.execute(lambda: org.activate_group(destination.id))
-    results["context_17_34_native_editors"] = measure(cycle)
-    results["fixture"] = {"notes":1000,"groups":30,"profiles":3,"note_code_points":128,"hidden_notes":250}
+        assert all(windows[key] is editor for key, editor in shared_editors.items())
+        visible_counts.add(len(windows))
+    results["context_shared_plus_project_native_editors"] = measure(cycle)
+    results["fixture"] = {"notes":1000,"groups":30,"shared_groups":3,"ordinary_groups":27,
+                          "profiles":3,"note_code_points":128,"hidden_notes":250,
+                          "reused_shared_editors":len(shared_editors),"visible_editors_per_context":sorted(visible_counts)}
     for window in windows.values():
         window.dispose_for_context()
     panel.destroy()
@@ -106,9 +113,11 @@ with tempfile.TemporaryDirectory(prefix="pinleaf-startup-") as directory:
     store.close()
     start = time.perf_counter()
     failures = []
+    helpers = []
     def activated():
         application = next(window.get_application() for window in Gtk.Window.list_toplevels()
                            if isinstance(window, MainWindow) and hasattr(window.get_application(), "note_windows"))
+        helpers.append(application.tray)
         try:
             assert len(application.note_windows) == 100
             results["startup_100_open_notes_ms"] = round((time.perf_counter() - start) * 1000, 2)
@@ -119,6 +128,9 @@ with tempfile.TemporaryDirectory(prefix="pinleaf-startup-") as directory:
     GLib.idle_add(activated)
     with patch("pinleaf.app.load_config", return_value=AppConfig(Path(directory), path)):
         assert run(["pinleaf-benchmark"]) == 0
+    for tray in helpers:
+        if tray._process is not None:
+            tray._process.wait(timeout=5)
     if failures:
         raise failures[0]
 print(json.dumps(results, indent=2))

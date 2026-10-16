@@ -121,6 +121,8 @@ class NoteWindow(Adw.ApplicationWindow):
         return saved
 
     def flush_for_transition(self) -> bool:
+        if self._skip_close_save:
+            return True
         return self.autosave.flush()
 
     def capture_state(self) -> dict:
@@ -205,6 +207,8 @@ class NoteWindow(Adw.ApplicationWindow):
         return popover
 
     def _set_color(self, color: NoteColor) -> None:
+        if self._skip_close_save:
+            return
         previous = self.note.color
         if previous == color:
             return
@@ -220,6 +224,8 @@ class NoteWindow(Adw.ApplicationWindow):
         self.on_changed()
 
     def _set_font_family(self, font_family: str | None) -> None:
+        if self._skip_close_save:
+            return
         selected = font_option_for(font_family).value
         if self.note.font_family == selected:
             return
@@ -254,6 +260,8 @@ class NoteWindow(Adw.ApplicationWindow):
         return False
 
     def _set_text_appearance(self, appearance: TextAppearance) -> None:
+        if self._skip_close_save:
+            return
         current = self._note_text_appearance()
         if current == appearance:
             return
@@ -309,7 +317,7 @@ class NoteWindow(Adw.ApplicationWindow):
         self.color_dot.add_css_class(f"note-{color.value}")
 
     def _on_text_changed(self, buffer: Gtk.TextBuffer) -> None:
-        if self._loading_buffer:
+        if self._loading_buffer or self._skip_close_save:
             return
         start, end = buffer.get_bounds()
         content = buffer.get_text(start, end, True)
@@ -317,6 +325,8 @@ class NoteWindow(Adw.ApplicationWindow):
         self.on_changed()
 
     def _save_content(self, note_id: str, content: str) -> None:
+        if self._skip_close_save:
+            return
         self.note = self.note_service.update_content(note_id, content)
         self.on_changed()
 
@@ -347,6 +357,8 @@ class NoteWindow(Adw.ApplicationWindow):
         self.note_action_dialog = None
 
     def _delete_note(self) -> None:
+        if self._skip_close_save:
+            return
         if not self.flush_pending_changes():
             return
         try:

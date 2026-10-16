@@ -27,6 +27,7 @@ class OrganizationDialogsTests(unittest.TestCase):
         self.store = NoteStore(":memory:")
         self.service = NoteService(self.store)
         self.org = self.service.organization
+        self.org.create_group("General")
         self.original = self.org.context
         self.parent = Adw.ApplicationWindow(application=self.application)
         self.dialogs = []
@@ -47,7 +48,7 @@ class OrganizationDialogsTests(unittest.TestCase):
     def test_create_validation_and_create_and_activate(self) -> None:
         dialog = self.keep(NameDialog(self.parent, self.org, self.execute, "group"))
         self.assertEqual(dialog.confirm.get_label(), "Create and activate")
-        dialog.entry.set_text("Geral")
+        dialog.entry.set_text("Compartilhado")
         dialog.confirm.emit("clicked")
         self.assertTrue(dialog.error.get_visible())
         self.assertEqual(self.org.context, self.original)
@@ -96,8 +97,8 @@ class OrganizationDialogsTests(unittest.TestCase):
         self.assertEqual(dialog.confirm.get_label(), "Delete group and move notes")
         self.assertFalse(dialog.confirm.has_css_class("destructive-action"))
         dialog.confirm.emit("clicked")
-        self.assertEqual(self.org.context.group.id, self.original.group.id)
-        self.assertEqual(self.store.get(note.id).group_id, self.original.group.id)
+        self.assertIsNone(self.org.context.group)
+        self.assertEqual(self.store.get(note.id).group_id, self.org.repository.shared(self.original.profile.id).id)
         self.assertFalse(self.store.get(note.id).is_open)
 
     def test_stale_deletion_requires_new_confirmation_and_destination_review(self) -> None:
@@ -110,7 +111,7 @@ class OrganizationDialogsTests(unittest.TestCase):
         self.assertEqual(dialog.preview.note_count, 2)
         self.assertEqual(len(self.store.list_notes(group_id=group.id)), 2)
         dialog.confirm.emit("clicked")
-        self.assertEqual(len(self.store.list_notes(group_id=self.original.group.id)), 2)
+        self.assertEqual(len(self.store.list_notes(group_id=self.org.repository.shared(self.original.profile.id).id)), 2)
 
     def test_delete_active_profile_requires_replacement_and_destructive_action(self) -> None:
         self.org.create_profile("Freelancer")
@@ -136,7 +137,8 @@ class OrganizationDialogsTests(unittest.TestCase):
         self.assertFalse(dialog.picker.get_visible())
         self.assertEqual(dialog.confirm.get_label(), "Delete group")
         dialog.confirm.emit("clicked")
-        self.assertEqual(self.org.context, self.original)
+        self.assertEqual(self.org.context.profile, self.original.profile)
+        self.assertIsNone(self.org.context.group)
 
     def test_failed_command_keeps_dialog_available_for_retry(self) -> None:
         execute = Mock(side_effect=OSError("unavailable"))

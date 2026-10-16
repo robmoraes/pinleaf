@@ -1,0 +1,46 @@
+.TH PINLEAF 1 "October 2026" "Pinleaf" "User Commands"
+.SH NAME
+pinleaf \- local desktop sticky notes
+.SH SYNOPSIS
+.B pinleaf
+.SH DESCRIPTION
+Pinleaf is a GTK 4 and libadwaita desktop application for sticky notes.
+Notes are saved automatically in a local SQLite library.
+Profiles and groups organize notes; open Shared notes remain visible alongside
+the active group's notes.
+.PP
+Use the main panel to create, search, organize and reopen notes.
+Closing the panel hides it; use the status indicator to show it again or quit.
+.PP
+The Backup & Restore window saves portable whole-library backups, with optional
+password protection, to a local file or Google Drive.
+Google Drive operations require an explicit connection and a configured desktop
+OAuth client. Starting Pinleaf and editing notes do not require a network.
+.PP
+Restore validates the chosen file and previews its contents before asking to
+replace the library. A local recovery copy preserves the current library first.
+Passwords for protected backups cannot be recovered by Pinleaf.
+.SH ENVIRONMENT
+.TP
+.B XDG_DATA_HOME
+Base directory for local application data. Defaults to
+.IR ~/.local/share .
+.TP
+.B PINLEAF_GOOGLE_CLIENT_FILE
+Optional maintainer/development override for the registered desktop OAuth
+client JSON. User access tokens are stored in the system keyring, or only in
+session memory when that mode is explicitly selected.
+.SH FILES
+.TP
+.I $XDG_DATA_HOME/pinleaf/pinleaf.sqlite3
+Local note library. With the default data directory, this is
+.IR ~/.local/share/pinleaf/pinleaf.sqlite3 .
+.TP
+.I $XDG_DATA_HOME/pinleaf/backups/
+Private local recovery backups. Removing the application package does not
+remove note data or these recovery copies.
+.SH AUTHOR
+Carlos R Moraes.
+.SH HOMEPAGE
+.UR https://robmoraes.github.io/pinleaf/
+.UE

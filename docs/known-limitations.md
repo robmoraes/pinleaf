@@ -62,10 +62,18 @@ It preserves the active context and individually hidden notes.
 
 ## Profiles and Groups
 
-Schema 5 cannot be opened by a schema-4 binary. Returning to an older version
+Development schema 6 cannot be opened by published 0.8.0 (schema 5). Returning to an older version
 requires a deliberate [snapshot restore](organization-and-recovery.md) with
 Pinleaf stopped. Later edits remain only in the separately preserved newer
 recovery set. Backups are local and are not automatically pruned.
+
+Shared development QA adds automated migration, controller and GTK checks,
+plus an isolated nested X11 lifecycle with actual Ctrl+F/Escape/Enter events,
+shared-window identity, profile transfer, hidden-note opening, restart and
+normal/narrow dark layouts. The app's real tray helper runs on the private bus
+and is explicitly reaped after testing. These results supplement the 0.8.0 X11
+qualification below; they do not qualify a different desktop environment.
+See the [Shared execution record](../specs/013-general-to-shared/execution.md).
 
 Feature QA covers GTK widget tests, an isolated nested X11 session and a manual
 real X11 desktop pass with disposable data. Context switching, search, movement,
@@ -82,9 +90,30 @@ After batch focus and lazy-menu improvements, the real X11 desktop starts 100
 With all 100 open, the median is 1.94 seconds and maximum 2.001 seconds; the
 strict stress boundary has little margin. These local first-idle measurements
 exclude interpreter startup, fixture generation and shutdown. See the
-[final qualification evidence](.specs/011-profiles-and-groups/automation-2026-10-10.md)
+[final qualification evidence](../specs/011-profiles-and-groups/automation-2026-10-10.md)
 for every sample, the earlier nested baseline and nonfatal private-bus tray
 diagnostics. They do not guarantee the same timings on every desktop.
+
+## Google Drive development qualification
+
+Development supports explicit Drive connection, upload/discovery and replacement
+restore. Simulated provider/storage/GTK tests and live synthetic-data restore
+drills passed on this Ubuntu 26.04 / Python 3.14 machine. Ubuntu 24.04's Google
+Auth 1.5.1 and OAuthlib helper 0.4.2 were extracted without installation and used
+for focused tests and a live restore; the older credential serialization API is
+supported. This is SDK compatibility evidence, not a separate Ubuntu 24.04 boot.
+
+Independent live authorization/disconnection passed using two disposable
+installations, 1,000 notes and both protection modes. B refreshed its own token
+after A disconnected; all three new test copies were removed and existing copies
+were preserved. AT-SPI control names/roles/focusability, real Enter
+defaulting to Cancel, normal/light and 360-pixel dark layouts, and 1,000-note
+restore workflows passed in isolated X11; Orca speech remains unqualified.
+
+The selected Pinleaf Desktop OAuth client is bundled in the repository. A local
+test binary built from that resource passed build/inspection/Lintian and loaded
+the client without a development override. It was not installed or published. Google's testing-mode account/expiry restrictions remain until deliberate
+publishing configuration. See [OAuth qualification](release/google-drive-oauth.md).
 
 ## Packaging
 

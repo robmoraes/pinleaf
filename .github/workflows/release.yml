@@ -24,6 +24,11 @@ jobs:
             debhelper \
             dpkg-dev \
             python3-gi \
+            python3-jsonschema \
+            python3-cryptography \
+            python3-google-auth-oauthlib \
+            python3-requests \
+            python3-secretstorage \
             gir1.2-gtk-4.0 \
             gir1.2-adw-1 \
             gir1.2-ayatanaappindicator3-0.1 \
@@ -35,6 +40,9 @@ jobs:
 
       - name: Compile Python modules
         run: /usr/bin/python3 -m compileall pinleaf tests
+
+      - name: Validate bundled Google Drive client
+        run: env -u PINLEAF_GOOGLE_CLIENT_FILE /usr/bin/python3 -c "from pinleaf.services.drive_auth import client_configuration; client_configuration()"
 
       - name: Build Debian package
         run: dpkg-buildpackage -us -uc -b

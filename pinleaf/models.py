@@ -19,7 +19,7 @@ class NoteColor(StrEnum):
 
 
 class SearchScope(StrEnum):
-    ACTIVE_GROUP = "active-group"
+    CURRENT_CONTEXT = "current-context"
     CURRENT_PROFILE = "current-profile"
     ALL_PROFILES = "all-profiles"
 
@@ -35,14 +35,22 @@ class Group:
     id: str
     profile_id: str
     name: str
-    is_general: bool
+    is_shared: bool
     note_count: int = 0
 
 
 @dataclass(frozen=True)
 class ActiveContext:
     profile: Profile
-    group: Group
+    group: Group | None
+
+    @property
+    def group_id(self) -> str | None:
+        return self.group.id if self.group is not None else None
+
+    @property
+    def identity(self) -> tuple[str, str | None]:
+        return self.profile.id, self.group_id
 
 
 def utc_now_iso() -> str:

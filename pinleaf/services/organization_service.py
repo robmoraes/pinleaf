@@ -52,7 +52,8 @@ class OrganizationService:
             return self.repository.activate(group_id)
 
     def activate_profile(self, profile_id: str) -> ActiveContext:
-        return self.activate_group(self.repository.last_group(profile_id).id)
+        with self.store.transaction():
+            return self.repository.activate_profile(profile_id)
 
     def create_profile(self, name: str) -> Profile:
         name, key = validate_name(name)
@@ -60,8 +61,8 @@ class OrganizationService:
         try:
             with self.store.transaction():
                 self.connection.execute("INSERT INTO profiles(id,name,name_key) VALUES (?,?,?)", (profile_id, name, key))
-                self.connection.execute("INSERT INTO groups(id,profile_id,name,name_key,is_general) VALUES (?,?,'General','general',1)", (group_id, profile_id))
-                self.repository.activate(group_id)
+                self.connection.execute("INSERT INTO groups(id,profile_id,name,name_key,is_shared) VALUES (?,?,'Shared','shared',1)", (group_id, profile_id))
+                self.repository.set_context(profile_id, None)
         except sqlite3.IntegrityError as exc:
             raise OrganizationError("A profile with this name already exists.") from exc
         return self.repository.get_profile(profile_id)
@@ -73,7 +74,7 @@ class OrganizationService:
         group_id = self.id_factory()
         try:
             with self.store.transaction():
-                self.connection.execute("INSERT INTO groups(id,profile_id,name,name_key,is_general) VALUES (?,?,?,?,0)", (group_id, profile_id, name, key))
+                self.connection.execute("INSERT INTO groups(id,profile_id,name,name_key,is_shared) VALUES (?,?,?,?,0)", (group_id, profile_id, name, key))
                 self.repository.activate(group_id)
         except sqlite3.IntegrityError as exc:
             raise OrganizationError("A group with this name already exists in this profile.") from exc
@@ -83,8 +84,8 @@ class OrganizationService:
         table = self._table(kind)
         if kind == "group":
             group = self.repository.get_group(container_id)
-            if group.is_general:
-                raise ProtectedContainerError("General cannot be renamed.")
+            if group.is_shared:
+                raise ProtectedContainerError("Shared cannot be renamed.")
         else:
             self.repository.get_profile(container_id)
         name, key = validate_name(name, group=kind == "group")
@@ -106,15 +107,20 @@ class OrganizationService:
             note = self.store.get(note_id)
             if note is None:
                 raise OrganizationError("The note is no longer available.")
-            self.repository.activate(note.group_id)
+            group = self.repository.get_group(note.group_id)
+            if group.is_shared:
+                if group.profile_id != self.context.profile.id:
+                    self.repository.activate_profile(group.profile_id)
+            else:
+                self.repository.activate(group.id)
             self.connection.execute("UPDATE notes SET is_open=1 WHERE id=? AND deleted_at IS NULL", (note_id,))
 
     def preview_deletion(self, kind: str, container_id: str) -> DeletionPreview:
         self._table(kind)
         if kind == "group":
             group = self.repository.get_group(container_id)
-            if group.is_general:
-                raise ProtectedContainerError("General is permanent and cannot be deleted independently.")
+            if group.is_shared:
+                raise ProtectedContainerError("Shared is permanent and cannot be deleted independently.")
             owner = self.repository.get_profile(group.profile_id)
             name = f"{owner.name} / {group.name}"
             groups = ((group.id, group.name, None),)
@@ -134,7 +140,7 @@ class OrganizationService:
     def delete_container(self, preview: DeletionPreview, *, destination_group_id: str | None = None,
                          delete_notes: bool = False, replacement_profile_id: str | None = None,
                          destination_identity: tuple[str, str, str, str] | None = None,
-                         replacement_identity: tuple[str, str, str, str] | None = None) -> None:
+                         replacement_identity: tuple[str, str, str | None, str | None] | None = None) -> None:
         with self.store.transaction():
             try:
                 current = self.preview_deletion(preview.kind, preview.container_id)
@@ -156,21 +162,27 @@ class OrganizationService:
                     raise StalePreviewError("The destination changed. Choose it again and review the summary.")
                 if destination.id in preview.group_ids:
                     raise OrganizationError("Choose a destination outside the removed profile/group.")
-            next_group = active.group
-            if active.group.id in preview.group_ids:
+            next_profile, next_group = active.profile, active.group
+            removing_active = (preview.kind == "profile" and active.profile.id == preview.container_id
+                               or active.group_id in preview.group_ids)
+            if removing_active:
                 if preview.kind == "group":
-                    next_group = self.repository.general(active.profile.id)
+                    next_group = None
                 elif destination is not None:
-                    next_group = destination
+                    next_profile = self.repository.get_profile(destination.profile_id)
+                    next_group = (self.repository.last_group(next_profile.id)
+                                  if destination.is_shared else destination)
                 else:
                     if replacement_profile_id is None or replacement_profile_id == preview.container_id:
                         raise OrganizationError("Choose the profile to activate after deletion.")
                     try:
-                        replacement = self.repository.get_profile(replacement_profile_id)
+                        next_profile = self.repository.get_profile(replacement_profile_id)
                         next_group = self.repository.last_group(replacement_profile_id)
                     except OrganizationError as exc:
                         raise StalePreviewError("The replacement profile changed. Review the summary again.") from exc
-                    if replacement_identity is not None and replacement_identity != (replacement.id, replacement.name, next_group.id, next_group.name):
+                    identity = (next_profile.id, next_profile.name,
+                                next_group.id if next_group else None, next_group.name if next_group else None)
+                    if replacement_identity is not None and replacement_identity != identity:
                         raise StalePreviewError("The replacement context changed. Review the summary again.")
             slots = ",".join("?" for _ in preview.group_ids)
             now = self.clock()
@@ -182,7 +194,7 @@ class OrganizationService:
             if preview.kind == "profile":
                 self.connection.execute("DELETE FROM profile_context WHERE profile_id=?", (preview.container_id,))
                 self.connection.execute("UPDATE profiles SET deleted_at=? WHERE id=?", (now, preview.container_id))
-            self.repository.activate(next_group.id)
+            self.repository.set_context(next_profile.id, next_group.id if next_group else None)
             self.repository.repair_context()
             validate_data(self.connection)
 

@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "checks": [
+    "Enter opens New",
+    "Escape returns focus without writes",
+    "New Note creates in Shared or the active project",
+    "Tab/Enter selects New Group",
+    "group cancellation",
+    "Create and activate",
+    "no persistent creation mode",
+    "body space reclaimed",
+    "narrow dark menu",
+    "helper cleanup"
+  ]
+}

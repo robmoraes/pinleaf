@@ -16,6 +16,7 @@ class OrganizationServiceTests(unittest.TestCase):
         self.notes = NoteService(self.store)
         self.org = self.notes.organization
         self.initial = self.org.context
+        self.shared = self.org.repository.shared(self.initial.profile.id)
 
     def tearDown(self) -> None:
         self.store.close()
@@ -23,7 +24,7 @@ class OrganizationServiceTests(unittest.TestCase):
     def test_create_rename_and_resume_last_group(self) -> None:
         group = self.org.create_group('LGPD')
         profile = self.org.create_profile('Freelancer')
-        self.assertTrue(self.org.context.group.is_general)
+        self.assertIsNone(self.org.context.group)
         self.org.activate_profile(self.initial.profile.id)
         self.assertEqual(self.org.context.group.id, group.id)
         self.org.rename('profile', profile.id, 'Trabalho')
@@ -32,13 +33,13 @@ class OrganizationServiceTests(unittest.TestCase):
 
     def test_uniqueness_and_protection_are_service_rules(self) -> None:
         self.org.create_group('Café')
-        for name in ('CAFE\u0301', 'General', 'geral', ' ', 'G' * 81):
+        for name in ('CAFE\u0301', 'Shared', 'compartilhado', ' ', 'G' * 81):
             with self.subTest(name=name), self.assertRaises(OrganizationError):
                 self.org.create_group(name)
         with self.assertRaises(ProtectedContainerError):
-            self.org.rename('group', self.initial.group.id, 'Other')
+            self.org.rename('group', self.shared.id, 'Other')
         with self.assertRaises(ProtectedContainerError):
-            self.org.preview_deletion('group', self.initial.group.id)
+            self.org.preview_deletion('group', self.shared.id)
         with self.assertRaises(ProtectedContainerError):
             self.org.preview_deletion('profile', self.initial.profile.id)
 
@@ -50,7 +51,7 @@ class OrganizationServiceTests(unittest.TestCase):
         self.notes.update_content(second.id, 'Café projeto')
         self.notes.close_note(second.id, width=320, height=280)
         self.assertEqual(second.group_id, group.id)
-        self.assertEqual([n.id for n in self.notes.list_notes('cafe')], [second.id])
+        self.assertEqual({n.id for n in self.notes.list_notes('cafe')}, {first.id, second.id})
         self.assertEqual({n.id for n in self.notes.list_notes('cafe', scope=SearchScope.CURRENT_PROFILE)}, {first.id, second.id})
         self.org.create_profile('Freelancer')
         self.assertEqual(self.notes.list_notes('cafe'), [])
@@ -75,13 +76,13 @@ class OrganizationServiceTests(unittest.TestCase):
         original = [tuple(row) for row in self.store.connection.execute('SELECT * FROM notes ORDER BY id')]
         preview = self.org.preview_deletion('group', source.id)
         self.assertEqual(preview.note_count, 2)
-        self.org.delete_container(preview, destination_group_id=self.initial.group.id)
-        self.assertEqual(self.org.context.group.id, self.initial.group.id)
+        self.org.delete_container(preview, destination_group_id=self.shared.id)
+        self.assertIsNone(self.org.context.group)
         self.assertFalse(self.store.get(hidden.id).is_open)
         self.assertIsNone(self.store.get(deleted.id))
         after = [tuple(row) for row in self.store.connection.execute('SELECT * FROM notes ORDER BY id')]
         self.assertEqual([row[:-1] for row in original], [row[:-1] for row in after])
-        self.assertEqual({row[-1] for row in after}, {self.initial.group.id})
+        self.assertEqual({row[-1] for row in after}, {self.shared.id})
         self.assertTrue(self.store.get(first.id).is_open)
 
     def test_profile_delete_all_repairs_context_and_preserves_other_notes(self) -> None:
@@ -121,7 +122,7 @@ class OrganizationServiceTests(unittest.TestCase):
         self.store.connection.execute("""CREATE TEMP TRIGGER refuse_disposal BEFORE UPDATE OF deleted_at ON groups
             BEGIN SELECT RAISE(ABORT,'injected failure'); END""")
         with self.assertRaises(sqlite3.IntegrityError):
-            self.org.delete_container(preview, destination_group_id=self.initial.group.id)
+            self.org.delete_container(preview, destination_group_id=self.shared.id)
         self.assertEqual(self.store.get(note.id), note)
         self.assertEqual(self.org.context.group.id, source.id)
 
@@ -156,7 +157,7 @@ class OrganizationServiceTests(unittest.TestCase):
         hidden = self.notes.create_note()
         self.notes.close_note(hidden.id, width=300, height=220)
         self.org.create_profile('Freelancer')
-        destination = self.org.context.group
+        destination = self.org.repository.shared(self.org.context.profile.id)
         before = [tuple(row)[:-1] for row in self.store.connection.execute('SELECT * FROM notes ORDER BY id')]
         preview = self.org.preview_deletion('profile', self.initial.profile.id)
         self.assertEqual(preview.note_count, 2)
@@ -169,7 +170,7 @@ class OrganizationServiceTests(unittest.TestCase):
 
     def test_same_context_is_a_noop_and_renamed_destination_requires_review(self) -> None:
         before = self.store.connection.total_changes
-        self.org.activate_group(self.initial.group.id)
+        self.org.activate_profile(self.initial.profile.id)
         self.assertEqual(self.store.connection.total_changes, before)
         destination = self.org.create_group('Destination')
         source = self.org.create_group('Source')

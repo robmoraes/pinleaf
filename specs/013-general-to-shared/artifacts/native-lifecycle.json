@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "checks": [
+    "Shared creation",
+    "window identity across projects",
+    "Ctrl+F/Escape/Enter",
+    "hidden Shared explicit open",
+    "profile isolation",
+    "profile transfer to Shared",
+    "narrow dark layout",
+    "restart",
+    "tray helper cleanup"
+  ]
+}

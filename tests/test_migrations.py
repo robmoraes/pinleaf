@@ -126,16 +126,16 @@ NoteStore(sys.argv[1])
 
     def test_machine_readable_contract_matches_schema(self) -> None:
         root = Path(__file__).resolve().parents[1]
-        contract = json.loads((root / 'docs/.specs/011-profiles-and-groups/contracts/migration-v5.json').read_text())
+        contract = json.loads((root / 'specs/013-general-to-shared/contracts/general-to-shared.json').read_text())
         store = NoteStore(':memory:')
         try:
             self.assertEqual(contract['target_schema_version'], migrations.CURRENT_SCHEMA_VERSION)
-            for table, definition in contract['schema'].items():
+            for table, required in contract['required_tables'].items():
                 info = store.connection.execute(f'PRAGMA table_info({table})').fetchall()
                 columns = {row['name'] for row in info}
-                self.assertTrue(set(definition.get('required_columns', [])) <= columns)
+                self.assertTrue(set(required) == columns)
             columns = {row['name'] for row in store.connection.execute('PRAGMA table_info(notes)')}
-            self.assertEqual(columns - {'group_id'}, set(contract['preservation']['existing_note_columns']))
+            self.assertEqual(columns, set(contract['note_preservation']['exact_schema_5_columns']))
             membership = next(row for row in store.connection.execute('PRAGMA table_info(notes)') if row['name'] == 'group_id')
             self.assertEqual(membership['notnull'], 1)
         finally:

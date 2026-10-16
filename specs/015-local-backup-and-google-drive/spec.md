@@ -298,7 +298,8 @@ Reliability: automate round-trip comparisons across all preserved fields,
 failure injection, process-interruption recovery and stale-editor protection.
 Exercise both a small fixture and 1,000-note multi-profile library. Use controlled
 slow storage/network work to verify responsiveness; measure results rather than
-claim untested timings. No implementation evidence exists at this phase.
+claim untested timings. Delivered local and Drive slices are recorded in
+[local execution](execution.md) and [Drive execution](execution-drive.md).
 
 Verification design: [maintained cases](verification.md). Use disposable data and
 mocked Drive for repeatable tests. Qualify real OAuth/Drive discovery and restore

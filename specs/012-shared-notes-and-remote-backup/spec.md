@@ -55,7 +55,9 @@ New group row. Cancellation retains the previous context.
 ## Workstream 3: First Remote Integration
 
 Status: local backup/restore implemented and qualified on 2026-10-11; Google
-Drive remains pending. Plan, Tasks and execution evidence are in
+Drive OAuth, upload and listing are implemented and tested as of 2026-10-16.
+Drive download/restore and two-installation qualification remain pending.
+Plan, Tasks and execution evidence are in
 [spec 015: local backup and Google Drive](../015-local-backup-and-google-drive/spec.md).
 
 Confirmed direction: personal use first, complete local/offline operation,
@@ -84,6 +86,7 @@ the local Shared feature. Split implementation into reviewable slices while
 keeping the intended release package together.
 
 This brief and its focused specs record agreement and delivery evidence. Shared,
-the New menu and local backup/restore are implemented; Google Drive remains the
-next slice. Version metadata, remote publication, release PR, tag and package
+the New menu and local backup/restore are implemented. Drive connection,
+upload and discovery are delivered; Drive download/restore is the next slice.
+Version metadata, remote publication, release PR, tag and package
 publication remain separate subsequent work.

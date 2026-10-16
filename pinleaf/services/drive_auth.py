@@ -202,6 +202,7 @@ class DriveAuth:
         self.connection: DriveConnection | None = None
         self.client_id: str | None = None
         self.persisted = False
+        self.account_id: str | None = None
 
     @staticmethod
     def _identify(credentials) -> tuple[str, str]:
@@ -256,6 +257,7 @@ class DriveAuth:
                         self.store.save(client_id, account, json.dumps(saved))
                     check_cancel(cancel)
             self.credentials, self.client_id = credentials, client_id
+            self.account_id = account
             self.persisted = not session_only
             self.connection = DriveConnection(email, session_only)
             return self.connection
@@ -267,12 +269,38 @@ class DriveAuth:
                 raise
             raise DriveAuthError("Could not connect Google Drive. Check your connection or reconnect after Disconnect.") from None
 
+    def access_token(self, cancel: Event) -> str:
+        """Refresh only within a user-requested Drive operation."""
+        check_cancel(cancel)
+        credentials = self.credentials
+        if credentials is None or self.connection is None:
+            raise DriveAuthError("Connect Google Drive before using remote backups.")
+        try:
+            if not credentials.valid:
+                from google.auth.transport.requests import Request
+                credentials.refresh(lambda *args, **kwargs: Request()(*args, **(kwargs | {"timeout": 30})))
+                check_cancel(cancel)
+                if self.persisted:
+                    self.store.save(self.client_id, self.account_id, credentials.to_json())
+            check_cancel(cancel)
+            if not isinstance(credentials.token, str) or not credentials.token:
+                raise DriveAuthError("Google access is unavailable. Disconnect and reconnect.")
+            return credentials.token
+        except (DriveAuthError,):
+            raise
+        except Exception as exc:
+            from pinleaf.storage.atomic_files import OperationCancelled
+            if isinstance(exc, OperationCancelled):
+                raise
+            raise DriveAuthError("Google access expired or was revoked. Disconnect and reconnect.") from None
+
     def disconnect(self, cancel: Event) -> None:
         check_cancel(cancel)
         client_id = self.client_id or client_configuration()["installed"]["client_id"]
         # Clear memory even if the keyring is locked; report deletion failure truthfully.
         self.credentials = None
         self.connection = None
+        self.account_id = None
         if self.persisted or self.client_id is None:
             self.store.delete(client_id)
         self.persisted = False

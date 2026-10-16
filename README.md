@@ -135,8 +135,8 @@ local restore and preserves unreadable original database/journal files first.
 
 The first format accepts library schema 6. Raw SQLite migration snapshots and
 other portable versions are not inputs for this reader. Google Drive is the
-next delivery slice. The development window now supports connecting and
-disconnecting an account; Drive upload/download are not implemented yet.
+partially delivered: the development window supports account connection, saving
+backups and listing completed copies. Download/restore from Drive is next.
 
 ### Google Drive development setup
 
@@ -156,9 +156,31 @@ If the keyring is unavailable or locked, unlock it or explicitly select
 **Connect for this session only**; there is no plaintext token-file fallback.
 **Disconnect / Forget Saved Access** removes this installation's saved access;
 it does not revoke other installations or remove Drive files. Saved credentials
-are loaded/refreshed only when you explicitly Connect, never at app startup.
+are loaded when you explicitly Connect and refreshed only during deliberate
+account/Drive operations, never at app startup.
 In session-only mode, **Disconnect This Session** clears memory; any previously
 saved access can then be removed separately with **Forget Saved Access**.
+During a Drive transfer, Disconnect cancels the operation before forgetting
+local access; a remotely completed copy may remain discoverable on reconnection.
+
+**Save Backup to Drive…** captures the whole library, with password protection
+initially off for each new copy. Each save creates a distinct dated file under
+app-marked **Pinleaf / Backups** folders; it does not overwrite another device's
+copy. Editing can continue during upload; the status identifies the capture time.
+Uploads are resumable, verified by size/checksum and marked complete only after
+verification. **Refresh Drive Copies** discovers complete compatible files across
+marked backup folders, including from another installation using the same Google
+account and OAuth client. Listing checks metadata; file contents will be validated
+by the upcoming download/restore flow.
+
+After an interrupted save, **Retry Drive Save** checks the same UUID/file ID and
+continues that captured copy, including the original encrypted bytes. It does not
+capture newer edits. Retry data stays in memory until success, a new save,
+Disconnect or app exit; after restart, refresh discovers completed copies and a
+new save creates a new attempt. Incomplete files stay excluded from the list;
+there is no automatic retry, cleanup or pruning. A cancelled/lost response can
+leave a remotely completed copy, which Refresh or Retry can discover. Local
+backup status and the last recorded successful Drive upload are kept separately.
 
 For Google's testing mode, add the designated account under OAuth test users.
 Testing grants may expire and require Disconnect followed by Connect. The

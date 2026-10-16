@@ -60,18 +60,20 @@ The maintainer accepted Q1/Q2 and requested advancing on 2026-10-11.
 
 ## Slice B: Google Drive destination
 
-- [ ] **D01 — OAuth and credential boundary:** Add lazy integration dependencies,
+- [x] **D01 — OAuth and credential boundary:** Add lazy integration dependencies,
   registered-client configuration, system-browser PKCE/state/loopback flow,
   bounded cancellation and Secret Service/session-only storage. Verify
   TC-BKP-010,013 with provider/credential doubles, no startup network, no plaintext
   token files, cancellation/denied scopes and disconnect without project revocation.
   Implementation and automated coverage added 2026-10-16; maintainer confirmed
-  live OAuth/account connection. Real keyring persistence/restart qualification
-  remains pending. See [Drive execution](execution-drive.md).
-- [ ] **D02 — Publish and discover dated copies:** Implement marked visible
+  live OAuth/account connection. A separate process reused real saved keyring
+  access for the upload drill. See [Drive execution](execution-drive.md).
+- [x] **D02 — Publish and discover dated copies:** Implement marked visible
   folders, pending/complete publication, attempt reconciliation, pagination and
   metadata checks. Verify TC-BKP-010,011,012 against mock transport, duplicate
   names, absent local history, ambiguous responses and preservation of other files.
+  Implemented with stateful provider/GTK tests and a live two-copy upload/list
+  drill on 2026-10-16. See [Drive execution](execution-drive.md).
 - [ ] **D03 — Download through local restore:** Add bounded download/validation
   and remote selector/status; reuse A's preview/confirmation/recovery path and
   per-file protection. Verify TC-BKP-011,012,014,016, connection loss, quota,
@@ -90,5 +92,6 @@ The maintainer accepted Q1/Q2 and requested advancing on 2026-10-11.
   separate publication instruction.
 
 Slice A is complete with product evidence in [execution](execution.md).
-Drive transfers remain pending. D01 now adds explicit account operations; no
+Drive download/restore remains pending. D01/D02 add explicit account/upload/list
+operations; no
 startup network, daily-use data access, version bump or publication was introduced.

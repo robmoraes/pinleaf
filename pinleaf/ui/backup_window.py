@@ -12,7 +12,7 @@ gi.require_version("Adw", "1")
 from gi.repository import Adw, Gtk
 
 from pinleaf.backup_format import BackupError, PasswordRequired, decode, read_bytes
-from pinleaf.services.backup_service import BackupService, ExportResult
+from pinleaf.services.backup_service import BackupService, DriveExportResult, ExportResult
 from pinleaf.services.context_controller import TransitionError
 from pinleaf.services.drive_auth import DriveAuthError
 from pinleaf.storage.atomic_files import OperationCancelled, check_cancel
@@ -26,7 +26,8 @@ def _label(text: str) -> Gtk.Label:
 
 class PasswordWindow(Adw.Window):
     """A new creation flow always starts with protection off."""
-    def __init__(self, parent: Gtk.Window, submit: Callable[[str | None], None], *, unlock: bool = False) -> None:
+    def __init__(self, parent: Gtk.Window, submit: Callable[[str | None], None], *, unlock: bool = False,
+                 submit_label: str = "Choose Location…") -> None:
         super().__init__(transient_for=parent, modal=True, title="Unlock Backup" if unlock else "Create Backup")
         self.set_default_size(400, 320)
         self.submit = submit
@@ -62,7 +63,7 @@ class PasswordWindow(Adw.Window):
         cancel = Gtk.Button(label="Cancel")
         cancel.connect("clicked", lambda _: self.close())
         actions.append(cancel)
-        self.confirm = Gtk.Button(label="Unlock" if unlock else "Choose Location…")
+        self.confirm = Gtk.Button(label="Unlock" if unlock else submit_label)
         self.confirm.add_css_class("suggested-action")
         self.confirm.connect("clicked", lambda _: self._submit())
         actions.append(self.confirm)
@@ -121,6 +122,7 @@ class BackupWindow(Adw.Window):
         self.chooser: Gtk.FileChooserNative | None = None
         self.confirmation: Adw.MessageDialog | None = None
         self.gated = False
+        self.disconnect_pending = False
         toolbar = Adw.ToolbarView()
         toolbar.add_top_bar(Adw.HeaderBar())
         content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=18,
@@ -143,7 +145,7 @@ class BackupWindow(Adw.Window):
         drive_heading = _label("Google Drive")
         drive_heading.add_css_class("title-3")
         content.append(drive_heading)
-        content.append(_label("Connect your account for upcoming Drive backups. Upload and download are not available yet."))
+        content.append(_label("Save dated copies of your complete library to Google Drive. Each save creates a separate file. Download and restore from Drive are coming next."))
         self.drive_status = _label("")
         content.append(self.drive_status)
         self.session_only = Gtk.CheckButton(label="Connect for this session only (do not save access)")
@@ -154,7 +156,26 @@ class BackupWindow(Adw.Window):
         self.disconnect_drive = Gtk.Button(label="Disconnect / Forget Saved Access")
         self.disconnect_drive.connect("clicked", lambda _: self._disconnect_drive())
         content.append(self.disconnect_drive)
+        self.save_drive = Gtk.Button(label="Save Backup to Drive…")
+        self.save_drive.set_visible(not startup_only and capture is not None)
+        self.save_drive.connect("clicked", lambda _: self._create_drive())
+        content.append(self.save_drive)
+        self.retry_drive = Gtk.Button(label="Retry Drive Save")
+        self.retry_drive.connect("clicked", lambda _: self._retry_drive())
+        content.append(self.retry_drive)
+        self.refresh_drive = Gtk.Button(label="Refresh Drive Copies")
+        self.refresh_drive.connect("clicked", lambda _: self._refresh_drive())
+        content.append(self.refresh_drive)
+        self.drive_transfer_status = _label("")
+        content.append(self.drive_transfer_status)
+        self.drive_copies = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        self.drive_copies.append(_label("Refresh to discover completed copies. Contents will be validated when restoring."))
+        copies_scroll = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER,
+                                          max_content_height=260, propagate_natural_height=True)
+        copies_scroll.set_child(self.drive_copies)
+        content.append(copies_scroll)
         self._drive_status()
+        self._show_drive_last_status()
         self.progress = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         self.spinner = Gtk.Spinner()
         self.progress.append(self.spinner)
@@ -200,12 +221,15 @@ class BackupWindow(Adw.Window):
 
     def _busy(self, active: bool, message: str = "") -> None:
         for widget in (self.create_button, self.restore_button, self.final_restore,
-                       self.connect_drive, self.disconnect_drive, self.session_only):
+                       self.connect_drive, self.disconnect_drive, self.session_only,
+                       self.save_drive, self.retry_drive, self.refresh_drive):
             widget.set_sensitive(not active)
         self.progress.set_visible(active)
         self.spinner.set_spinning(active)
         self.progress_text.set_text(message)
         self.cancel_button.set_sensitive(active)
+        if not active:
+            self._drive_status()
 
     def _run(self, message: str, job: Callable, done: Callable) -> None:
         self._busy(True, message)
@@ -241,16 +265,110 @@ class BackupWindow(Adw.Window):
             self.drive_status.set_text(f"Connected: {connection.account}\n{mode}")
             self.disconnect_drive.set_label("Disconnect This Session" if connection.session_only else "Disconnect / Forget Saved Access")
         self.connect_drive.set_sensitive(connection is None and not self.service.busy)
+        available = connection is not None and not self.service.busy
+        self.save_drive.set_sensitive(available)
+        self.refresh_drive.set_sensitive(available)
+        attempt = self.service.drive_attempt
+        retryable = attempt is not None and connection is not None and attempt.owner == (self.service.drive_auth.client_id, connection.account)
+        self.retry_drive.set_visible(retryable)
+        self.retry_drive.set_sensitive(available and retryable)
 
     def _connect_drive(self) -> None:
         session_only = self.session_only.get_active()
         self._run("Connecting Google Drive. Complete authorization in your browser…",
                   lambda cancel: self.service.drive_auth.connect(cancel, session_only=session_only),
-                  lambda _: self._drive_status())
+                  lambda _: self._connected_drive())
+
+    def _connected_drive(self) -> None:
+        self._drive_status()
+        self._show_drive_last_status()
+        self._clear_drive_copies()
+        self.drive_copies.append(_label("Refresh to discover completed copies."))
+
+    def _show_drive_last_status(self) -> None:
+        last = self.service.last_drive_status()
+        if last is not None:
+            self.drive_transfer_status.set_text(f"Last recorded Drive upload: captured {last['captured_at']}. Refresh to check available copies.")
+        elif self.service.drive_auth.connection is not None:
+            self.drive_transfer_status.set_text("No Drive upload recorded on this computer. Refresh to discover copies.")
 
     def _disconnect_drive(self) -> None:
+        if self.service.busy:
+            self.disconnect_pending = True
+            self.service.cancel()
+            self.disconnect_drive.set_sensitive(False)
+            self.drive_transfer_status.set_text("Cancelling the Drive operation before disconnecting…")
+            return
+        self._clear_drive_copies()
+        self.drive_transfer_status.set_text("")
         self._run("Forgetting Google Drive access on this computer…",
-                  self.service.drive_auth.disconnect, lambda _: self._drive_status())
+                  self.service.disconnect_drive, lambda _: self._drive_status())
+
+    def _create_drive(self) -> None:
+        self.password_window = PasswordWindow(self, self._save_drive, submit_label="Save to Drive")
+        self.password_window.present()
+
+    def _save_drive(self, password: str | None) -> None:
+        try:
+            payload = self.capture()
+        except Exception as exc:
+            self._failed(exc)
+            return
+        self._run_drive("Saving backup to Drive…", lambda cancel: self.service.save_drive(payload, password, cancel), self._drive_saved)
+
+    def _run_drive(self, message: str, job: Callable, done: Callable) -> None:
+        self.drive_transfer_status.set_text(message)
+        self._busy(True, message)
+        def completed(result) -> None:
+            self._busy(False)
+            done(result)
+            self._finish_pending_disconnect()
+        def failed(error) -> None:
+            self._busy(False)
+            message = str(error) if isinstance(error, (DriveAuthError, BackupError, OperationCancelled)) else "Drive operation failed. Check your connection and retry."
+            if isinstance(error, OperationCancelled):
+                message = "Drive operation cancelled. Retry checks the same copy; refresh can reveal a copy that finished remotely."
+            self.drive_transfer_status.set_text(message)
+            if not isinstance(error, OperationCancelled) and not self.disconnect_pending:
+                show_error(self, "Google Drive operation could not finish", message)
+            self._finish_pending_disconnect()
+        try:
+            self.service.start(job, completed, failed)
+            self.disconnect_drive.set_sensitive(self.service.drive_auth.connection is not None)
+        except Exception as exc:
+            failed(exc)
+
+    def _finish_pending_disconnect(self) -> None:
+        if self.disconnect_pending:
+            self.disconnect_pending = False
+            self._disconnect_drive()
+
+    def _drive_saved(self, result: DriveExportResult) -> None:
+        copy = result.copy
+        self.drive_transfer_status.set_text(f"Drive backup saved. Captured {copy.captured_at}\n{copy.name}"
+                                          + (f"\n{result.warning}" if result.warning else ""))
+        self._clear_drive_copies()
+        self.drive_copies.append(_label("Refresh to list this and other completed copies."))
+        self._drive_status()
+
+    def _retry_drive(self) -> None:
+        self._run_drive("Checking and retrying the same Drive copy…", self.service.retry_drive, self._drive_saved)
+
+    def _clear_drive_copies(self) -> None:
+        while child := self.drive_copies.get_first_child():
+            self.drive_copies.remove(child)
+
+    def _refresh_drive(self) -> None:
+        self._clear_drive_copies()
+        def listed(copies) -> None:
+            self._clear_drive_copies()
+            if not copies:
+                self.drive_copies.append(_label("No completed compatible copies found."))
+            for copy in copies:
+                mode = "Password protected" if copy.protected else "Unprotected"
+                self.drive_copies.append(_label(f"{copy.captured_at} · {mode} · {copy.size:,} bytes\n{copy.name}"))
+            self.drive_transfer_status.set_text(f"Found {len(copies)} completed copies. Contents have not been downloaded or validated.")
+        self._run_drive("Listing Drive copies…", self.service.list_drive, listed)
 
     def _create(self) -> None:
         self.password_window = PasswordWindow(self, self._choose_save)

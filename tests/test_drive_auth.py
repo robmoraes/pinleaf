@@ -259,3 +259,39 @@ class DriveAuthTests(unittest.TestCase):
             response.iter_content.return_value = [b"x" * 65537]
             with self.assertRaises(DriveAuthError):
                 DriveAuth._identify(credentials)
+
+    @patch("pinleaf.services.drive_auth.client_configuration", return_value=CONFIG)
+    def test_transfer_refreshes_expired_access_only_during_explicit_operation(self, _config):
+        auth, store, credentials = self._service()
+        credentials.valid = True
+        credentials.token = "synthetic-access"
+        auth.connect(Event())
+        store.reset_mock()
+        self.assertEqual(auth.access_token(Event()), "synthetic-access")
+        credentials.refresh.assert_not_called()
+        store.save.assert_not_called()
+        credentials.valid = False
+        credentials.refresh.side_effect = lambda request: request(TOKEN_URI, timeout=999)
+        with patch("google.auth.transport.requests.Request") as request:
+            self.assertEqual(auth.access_token(Event()), "synthetic-access")
+        self.assertEqual(request.return_value.call_args.kwargs["timeout"], 30)
+        store.save.assert_called_once_with(CONFIG["installed"]["client_id"], "account-id", credentials.to_json())
+
+    def test_transfer_without_connection_cancel_or_revocation_sends_no_backup(self):
+        auth, store, credentials = self._service()
+        with self.assertRaises(DriveAuthError):
+            auth.access_token(Event())
+        auth.credentials = credentials
+        from pinleaf.services.drive_auth import DriveConnection
+        auth.connection = DriveConnection("test@example.org", True)
+        cancel = Event()
+        cancel.set()
+        with self.assertRaises(OperationCancelled):
+            auth.access_token(cancel)
+        credentials.refresh.assert_not_called()
+        credentials.valid = False
+        credentials.refresh.side_effect = RuntimeError("synthetic-private-refresh")
+        with self.assertRaises(DriveAuthError) as error:
+            auth.access_token(Event())
+        self.assertNotIn("private-refresh", str(error.exception))
+        store.save.assert_not_called()

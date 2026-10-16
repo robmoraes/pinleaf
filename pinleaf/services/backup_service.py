@@ -10,6 +10,7 @@ from threading import Event, Thread
 from pinleaf.backup_format import BackupError, canonical, decode, encode
 from pinleaf.storage.atomic_files import OperationCancelled, check_cancel, publish, write_private
 from pinleaf.storage.restore_recovery import PreparedRestore, RestorePreview, RestoreRecovery
+from pinleaf.services.drive_auth import DriveAuth
 
 
 @dataclass(frozen=True)
@@ -22,6 +23,7 @@ class ExportResult:
 class BackupService:
     def __init__(self, database: Path, dispatch: Callable[[Callable], object]) -> None:
         self.recovery = RestoreRecovery(database)
+        self.drive_auth = DriveAuth(database.parent)
         self.state_path = database.parent / "backup-state.json"
         self.dispatch = dispatch
         self.busy = False
@@ -99,3 +101,4 @@ class BackupService:
         self.closed = True
         self.cancel()
         self.token += 1
+        self.drive_auth.credentials = None

@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Development Google Drive account connection through browser OAuth with PKCE,
+  cancellable loopback return, system-keyring or explicit session-only access,
+  and local disconnection. Drive transfers remain in development.
 - Offline whole-library backup and replacement restore, with optional password
   protection, validated preview, private recovery copies, interrupted-restore
   reconciliation and restore access from storage-startup errors.

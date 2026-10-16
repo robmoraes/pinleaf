@@ -3,7 +3,7 @@ name = "pinleaf"
 version = "0.8.0"
 description = "Desktop sticky notes built with Python and GTK/libadwaita."
 requires-python = ">=3.11"
-dependencies = ["jsonschema>=4.10", "cryptography>=41"]
+dependencies = ["jsonschema>=4.10", "cryptography>=41", "google-auth-oauthlib>=1.2", "requests>=2.28", "SecretStorage>=3.3"]
 
 [project.optional-dependencies]
 gtk = [

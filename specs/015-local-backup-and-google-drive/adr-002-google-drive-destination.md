@@ -1,6 +1,9 @@
 # ADR 002: Direct Google Drive backup destination
 
-Status: accepted for slice B planning on 2026-10-11; not implemented or configured.
+Status: accepted for slice B planning on 2026-10-11; OAuth connection implemented
+on 2026-10-16. Maintainer configured a desktop client/test account and confirmed
+live consent/account connection. Drive transfers remain unqualified. See
+[Drive execution](execution-drive.md).
 Traceability: BK-01/03, GD-01–06, PR-02 in [spec](spec.md).
 
 ## Context

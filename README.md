@@ -135,7 +135,35 @@ local restore and preserves unreadable original database/journal files first.
 
 The first format accepts library schema 6. Raw SQLite migration snapshots and
 other portable versions are not inputs for this reader. Google Drive is the
-next delivery slice and is not connected by this local implementation.
+next delivery slice. The development window now supports connecting and
+disconnecting an account; Drive upload/download are not implemented yet.
+
+### Google Drive development setup
+
+The maintainer registers a desktop OAuth client with the Google Drive API
+enabled and only `https://www.googleapis.com/auth/drive.file` declared. Keep the
+downloaded client JSON outside tracked files. Point development at it explicitly:
+
+```bash
+PINLEAF_GOOGLE_CLIENT_FILE=/absolute/path/to/client.json \
+  XDG_DATA_HOME=/tmp/pinleaf-dev /usr/bin/python3 -m pinleaf
+```
+
+In **Backup & Restore**, choose **Connect Google Drive…**. Authorization opens
+the system browser and waits up to three minutes. Cancel stops waiting. Saved
+access uses the system Secret Service, separated by client/account/installation.
+If the keyring is unavailable or locked, unlock it or explicitly select
+**Connect for this session only**; there is no plaintext token-file fallback.
+**Disconnect / Forget Saved Access** removes this installation's saved access;
+it does not revoke other installations or remove Drive files. Saved credentials
+are loaded/refreshed only when you explicitly Connect, never at app startup.
+In session-only mode, **Disconnect This Session** clears memory; any previously
+saved access can then be removed separately with **Forget Saved Access**.
+
+For Google's testing mode, add the designated account under OAuth test users.
+Testing grants may expire and require Disconnect followed by Connect. The
+development client override is not included in backups or packages. A registered
+client resource/distribution configuration is still required before release.
 
 ## Install
 
@@ -209,6 +237,9 @@ sudo apt install \
   python3-gi \
   python3-jsonschema \
   python3-cryptography \
+  python3-google-auth-oauthlib \
+  python3-requests \
+  python3-secretstorage \
   gir1.2-gtk-4.0 \
   gir1.2-adw-1 \
   gir1.2-ayatanaappindicator3-0.1 \

@@ -14,6 +14,7 @@ from gi.repository import Adw, Gtk
 from pinleaf.backup_format import BackupError, PasswordRequired, decode, read_bytes
 from pinleaf.services.backup_service import BackupService, ExportResult
 from pinleaf.services.context_controller import TransitionError
+from pinleaf.services.drive_auth import DriveAuthError
 from pinleaf.storage.atomic_files import OperationCancelled, check_cancel
 from pinleaf.storage.restore_recovery import PreparedRestore, RestorePreview
 from pinleaf.ui.dialogs import show_error
@@ -139,6 +140,21 @@ class BackupWindow(Adw.Window):
         self.status.add_css_class("dim-label")
         self._show_last_status()
         content.append(self.status)
+        drive_heading = _label("Google Drive")
+        drive_heading.add_css_class("title-3")
+        content.append(drive_heading)
+        content.append(_label("Connect your account for upcoming Drive backups. Upload and download are not available yet."))
+        self.drive_status = _label("")
+        content.append(self.drive_status)
+        self.session_only = Gtk.CheckButton(label="Connect for this session only (do not save access)")
+        content.append(self.session_only)
+        self.connect_drive = Gtk.Button(label="Connect Google Drive…")
+        self.connect_drive.connect("clicked", lambda _: self._connect_drive())
+        content.append(self.connect_drive)
+        self.disconnect_drive = Gtk.Button(label="Disconnect / Forget Saved Access")
+        self.disconnect_drive.connect("clicked", lambda _: self._disconnect_drive())
+        content.append(self.disconnect_drive)
+        self._drive_status()
         self.progress = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         self.spinner = Gtk.Spinner()
         self.progress.append(self.spinner)
@@ -183,7 +199,8 @@ class BackupWindow(Adw.Window):
             self.status.set_text("No local backup recorded on this computer.")
 
     def _busy(self, active: bool, message: str = "") -> None:
-        for widget in (self.create_button, self.restore_button, self.final_restore):
+        for widget in (self.create_button, self.restore_button, self.final_restore,
+                       self.connect_drive, self.disconnect_drive, self.session_only):
             widget.set_sensitive(not active)
         self.progress.set_visible(active)
         self.spinner.set_spinning(active)
@@ -208,10 +225,32 @@ class BackupWindow(Adw.Window):
             self.password_window.present()
             self.password_window.password.grab_focus()
             return
-        message = str(error) if isinstance(error, (BackupError, OSError, TransitionError)) else "Could not complete this operation. Check available storage and retry."
+        message = str(error) if isinstance(error, (BackupError, OSError, TransitionError, DriveAuthError)) else "Could not complete this operation. Check available storage and retry."
         self.status.set_text(message)
+        self._drive_status()
         if not isinstance(error, OperationCancelled):
             show_error(self, "Backup operation could not finish", message)
+
+    def _drive_status(self) -> None:
+        connection = self.service.drive_auth.connection
+        if connection is None:
+            self.drive_status.set_text("Not connected in this session. Connect to use saved access or authorize in your browser.")
+            self.disconnect_drive.set_label("Forget Saved Access")
+        else:
+            mode = "This session only" if connection.session_only else "Access saved in the system keyring"
+            self.drive_status.set_text(f"Connected: {connection.account}\n{mode}")
+            self.disconnect_drive.set_label("Disconnect This Session" if connection.session_only else "Disconnect / Forget Saved Access")
+        self.connect_drive.set_sensitive(connection is None and not self.service.busy)
+
+    def _connect_drive(self) -> None:
+        session_only = self.session_only.get_active()
+        self._run("Connecting Google Drive. Complete authorization in your browser…",
+                  lambda cancel: self.service.drive_auth.connect(cancel, session_only=session_only),
+                  lambda _: self._drive_status())
+
+    def _disconnect_drive(self) -> None:
+        self._run("Forgetting Google Drive access on this computer…",
+                  self.service.drive_auth.disconnect, lambda _: self._drive_status())
 
     def _create(self) -> None:
         self.password_window = PasswordWindow(self, self._choose_save)
@@ -368,7 +407,7 @@ class BackupWindow(Adw.Window):
     def _close(self, _) -> bool:
         if self.service.busy or self.gated:
             self.service.cancel()
-            self.progress_text.set_text("Cancelling before replacement…")
+            self.progress_text.set_text("Cancelling operation…")
             return True
         if self.chooser is not None:
             self.chooser.destroy()

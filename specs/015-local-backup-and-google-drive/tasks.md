@@ -12,7 +12,7 @@ The maintainer accepted Q1/Q2 and requested advancing on 2026-10-11.
 - [x] **B02 — Plan and contracts:** Record ADRs, format-1 schemas/examples,
   limits/version matrix, replacement/recovery boundaries and ordered work.
   Validate schema structure, valid/invalid fixtures and cryptographic examples
-  with system jsonschema/cryptography. Product implementation is still pending.
+  with system jsonschema/cryptography. Local product implementation is complete below.
 
 ## Slice A: local backup and restore
 
@@ -65,6 +65,9 @@ The maintainer accepted Q1/Q2 and requested advancing on 2026-10-11.
   bounded cancellation and Secret Service/session-only storage. Verify
   TC-BKP-010,013 with provider/credential doubles, no startup network, no plaintext
   token files, cancellation/denied scopes and disconnect without project revocation.
+  Implementation and automated coverage added 2026-10-16; maintainer confirmed
+  live OAuth/account connection. Real keyring persistence/restart qualification
+  remains pending. See [Drive execution](execution-drive.md).
 - [ ] **D02 — Publish and discover dated copies:** Implement marked visible
   folders, pending/complete publication, attempt reconciliation, pagination and
   metadata checks. Verify TC-BKP-010,011,012 against mock transport, duplicate
@@ -87,5 +90,5 @@ The maintainer accepted Q1/Q2 and requested advancing on 2026-10-11.
   separate publication instruction.
 
 Slice A is complete with product evidence in [execution](execution.md).
-Drive tasks remain pending. No application network code, daily-use data access,
-version bump or remote publication was introduced by the local slice.
+Drive transfers remain pending. D01 now adds explicit account operations; no
+startup network, daily-use data access, version bump or publication was introduced.

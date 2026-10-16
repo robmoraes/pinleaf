@@ -63,10 +63,10 @@ the temporary libraries are removed. If a created file changes unexpectedly,
 it is preserved and the local report records the remaining test IDs for
 inspection. This helper is test infrastructure, not a remote deletion feature.
 
-As of this checkpoint, the first live consent attempt timed out without
-confirmation. It created no cloud files and stored no usable connection.
-Independent live authorization/disconnection remains pending; earlier D03 live
-restores reused development access and do not replace this drill.
+The completed live drill passed both independent browser authorizations,
+1,000-note transfers in both modes, recovery preservation and B's actual token
+refresh after A disconnected. Cleanup removed all three new copies and preserved
+every pre-existing copy. See the [sanitized report](../../specs/015-local-backup-and-google-drive/artifacts/two-installations.json).
 
 ## Local package qualification
 

@@ -103,9 +103,10 @@ Auth 1.5.1 and OAuthlib helper 0.4.2 were extracted without installation and use
 for focused tests and a live restore; the older credential serialization API is
 supported. This is SDK compatibility evidence, not a separate Ubuntu 24.04 boot.
 
-Independent live authorization/disconnection on two installations still needs
-the maintainer's two browser confirmations. The first consent attempt expired
-without creating cloud files. AT-SPI control names/roles/focusability, real Enter
+Independent live authorization/disconnection passed using two disposable
+installations, 1,000 notes and both protection modes. B refreshed its own token
+after A disconnected; all three new test copies were removed and existing copies
+were preserved. AT-SPI control names/roles/focusability, real Enter
 defaulting to Cancel, normal/light and 360-pixel dark layouts, and 1,000-note
 restore workflows passed in isolated X11; Orca speech remains unqualified.
 

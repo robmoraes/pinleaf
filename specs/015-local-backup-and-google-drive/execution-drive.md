@@ -279,6 +279,25 @@ Inspected synthetic screenshots:
 - [Final confirmation, light](screenshots/drive-confirmation-light.png)
 - [Final confirmation, narrow dark](screenshots/drive-confirmation-narrow-dark.png)
 
-D04 and final D05 closure remain pending independent consent and distribution
-configuration. No version bump, package installation, push, release or PPA upload
+At this checkpoint D04 and final D05 closure remained pending independent
+consent and distribution configuration (D04 was subsequently completed below). No version bump, package installation, push, release or PPA upload
 has occurred.
+
+## D04 completed live qualification
+
+The maintainer completed both browser consents on 2026-10-16. The real Drive
+helper passed with two fresh data directories and independent Secret Service
+keys, using 1,000 synthetic notes. B discovered, downloaded and restored A's
+unprotected and protected copies without origin history; recovery retained the
+edit made after preview. A discovered B's distinct copy.
+
+After A disconnected, B reopened its own saved connection, performed a real
+expired-token refresh, listed and downloaded successfully. Cleanup removed
+exactly the three files created by this invocation and verified every pre-existing
+file remained. Disposable keyring entries and local libraries were removed.
+Daily-use notes and the development connection were preserved.
+
+The [sanitized live report](artifacts/two-installations.json) records PASS for
+all checks. D01–D04 are complete. D05's technical checks have passed; final
+closure still awaits the maintainer's release-client selection. No version bump,
+installation, push or publication occurred.

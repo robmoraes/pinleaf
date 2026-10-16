@@ -82,19 +82,17 @@ The maintainer accepted Q1/Q2 and requested advancing on 2026-10-11.
   Implemented with provider/transport/storage/GTK tests and real-app restore
   drills using simulated and live Drive, both protection modes, on 2026-10-16.
   Live restores targeted disposable libraries only. See [Drive execution](execution-drive.md).
-- [ ] **D04 — Maintainer OAuth setup and live drill:** Once a registered desktop
+- [x] **D04 — Maintainer OAuth setup and live drill:** Once a registered desktop
   client and designated test account are available, document setup/testing expiry,
   perform explicit browser consent, save on one isolated installation and restore
   on another with no origin history. Verify TC-BKP-011,013 in real Drive; clean up
   only identified test artifacts. This operational prerequisite does not block A
   or mocked D01–D03. Do not replace daily-use notes or publish credentials.
-  Setup, consent and synthetic upload/download/restore into a disposable target
-  have passed. Independent authorization/disconnection on two installations and
-  deliberate remote test-artifact cleanup remain pending.
-  `tests/drive_two_installations.py` prepares fresh A/B libraries and keyring
-  identities, 1,000-note both-mode transfers, independent refresh and scoped
-  cleanup. The first A consent expired without confirmation; no cloud files
-  were created. Waiting for the maintainer's availability to retry the two consents.
+  Two independent browser authorizations passed with 1,000 synthetic notes,
+  protected/unprotected A-to-B restore and B-to-A discovery. After A disconnected,
+  a fresh B connection loaded its own key and refreshed its token successfully.
+  All three newly created copies were removed; every pre-existing copy survived.
+  See [live report](artifacts/two-installations.json).
 - [ ] **D05 — Complete package evidence:** Run full regression, compileall,
   schema/example/resource/dependency/diff checks and native accessibility/layout
   validation; record live versus mocked coverage and update delivered documentation.
@@ -102,9 +100,9 @@ The maintainer accepted Q1/Q2 and requested advancing on 2026-10-11.
   separate publication instruction.
   Local regression, Noble Google SDK compatibility, live restore, native
   keyboard/layout/AT-SPI checks, contracts and Debian build/inspection/Lintian
-  have passed. Final package evidence awaits D04 and the release-client choice;
+  have passed. Final package evidence awaits the release-client choice;
   only the isolated build copy received client configuration. See [D05 evidence](execution-drive.md#d05-local-qualification-checkpoint).
 
 Slice A is complete with product evidence in [execution](execution.md).
-Drive D01–D03 are implemented and qualified as recorded; D04/D05 remain pending.
+Drive D01–D04 are implemented and qualified as recorded; D05 awaits the release-client choice.
 No startup network, daily-use data access, version bump or publication was introduced.

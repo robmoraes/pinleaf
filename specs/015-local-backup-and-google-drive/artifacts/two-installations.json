@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "notes": 1000,
+  "independent_authorizations": true,
+  "modes": [
+    "unprotected",
+    "protected"
+  ],
+  "a_disconnected_b_refreshed": true,
+  "created_files": 3,
+  "removed_files": 3,
+  "preexisting_files_preserved": true
+}

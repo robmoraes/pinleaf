@@ -66,6 +66,7 @@ cover TC-BKP-010–014/016 error and preservation boundaries. Live D03 restores
 used the designated account and disposable target libraries in both protection
 modes; D05 additionally qualified Noble's Google SDKs, 1,000-note native restore,
 actual default-Cancel keyboard input, responsive layouts, AT-SPI controls and a
-configured disposable Debian binary. Independent A/B browser authorization and
-post-disconnect live token refresh remain D04 prerequisites, not replaced by
-reusing development access or provider doubles.
+configured disposable Debian binary. Independent A/B browser authorizations subsequently passed with 1,000 notes in
+both modes. After A disconnected, a fresh B connection refreshed its own token
+and downloaded successfully. Scoped cleanup removed all three new files and
+preserved every pre-existing file; see [live report](artifacts/two-installations.json).

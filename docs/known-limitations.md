@@ -110,10 +110,9 @@ were preserved. AT-SPI control names/roles/focusability, real Enter
 defaulting to Cancel, normal/light and 360-pixel dark layouts, and 1,000-note
 restore workflows passed in isolated X11; Orca speech remains unqualified.
 
-The release OAuth client is not yet bundled in the repository. A local test
-binary with an injected client passed build/inspection/Lintian but was not
-installed or published. A release workflow gate rejects a missing bundled
-client. Google's testing-mode account/expiry restrictions remain until deliberate
+The selected Pinleaf Desktop OAuth client is bundled in the repository. A local
+test binary built from that resource passed build/inspection/Lintian and loaded
+the client without a development override. It was not installed or published. Google's testing-mode account/expiry restrictions remain until deliberate
 publishing configuration. See [OAuth qualification](release/google-drive-oauth.md).
 
 ## Packaging

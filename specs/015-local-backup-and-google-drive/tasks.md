@@ -93,16 +93,16 @@ The maintainer accepted Q1/Q2 and requested advancing on 2026-10-11.
   a fresh B connection loaded its own key and refreshed its token successfully.
   All three newly created copies were removed; every pre-existing copy survived.
   See [live report](artifacts/two-installations.json).
-- [ ] **D05 — Complete package evidence:** Run full regression, compileall,
+- [x] **D05 — Complete package evidence:** Run full regression, compileall,
   schema/example/resource/dependency/diff checks and native accessibility/layout
   validation; record live versus mocked coverage and update delivered documentation.
   Keep remote publication/version/release work deferred until the maintainer's
   separate publication instruction.
   Local regression, Noble Google SDK compatibility, live restore, native
   keyboard/layout/AT-SPI checks, contracts and Debian build/inspection/Lintian
-  have passed. Final package evidence awaits the release-client choice;
-  only the isolated build copy received client configuration. See [D05 evidence](execution-drive.md#d05-local-qualification-checkpoint).
+  have passed. The maintainer selected the existing desktop client for
+  distribution; the bundled resource passed package checks without an override. See [D05 evidence](execution-drive.md#d05-local-qualification-checkpoint).
 
 Slice A is complete with product evidence in [execution](execution.md).
-Drive D01–D04 are implemented and qualified as recorded; D05 awaits the release-client choice.
+Drive D01–D05 are complete with the distribution client selected and qualified.
 No startup network, daily-use data access, version bump or publication was introduced.

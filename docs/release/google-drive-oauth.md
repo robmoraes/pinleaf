@@ -25,12 +25,12 @@ system Secret Service or explicitly selected session memory. They must never
 enter the client resource, package, repository or portable backup. See Google's
 [desktop OAuth documentation](https://developers.google.com/identity/protocols/oauth2/native-app).
 
-Selecting the release client is a maintainer decision. At the current D05
-checkpoint, the existing client is still a development override and its original
-download remains ignored. The qualified local binary injected a sanitized
-client into its temporary build copy only. No client contents were committed.
-The release workflow validates the bundled resource, with development overrides
-disabled, before building/publishing; it will refuse an unconfigured release.
+The maintainer selected the existing “Pinleaf Desktop” client for distribution.
+Its four-field desktop configuration is bundled in
+`pinleaf/resources/google-client.json`; the original download remains ignored.
+A disposable Debian binary built directly from this resource passed cold client
+loading with no development override and strict Lintian checks. The release
+workflow validates the bundled resource before building/publishing.
 
 Google's **Testing** mode limits access to configured test users and may expire
 refresh grants after seven days for these scopes. Disconnect/reconnect remains

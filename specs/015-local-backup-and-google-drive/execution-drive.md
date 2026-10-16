@@ -301,3 +301,20 @@ The [sanitized live report](artifacts/two-installations.json) records PASS for
 all checks. D01–D04 are complete. D05's technical checks have passed; final
 closure still awaits the maintainer's release-client selection. No version bump,
 installation, push or publication occurred.
+
+## Distribution client selected and D05 completed
+
+The maintainer selected the existing Pinleaf Desktop client for distribution;
+a separate development client can be created later. Only the installed client's
+four public desktop configuration fields were added to the bundled resource.
+The original download stays ignored; no user tokens or account data are bundled.
+
+A fresh disposable Debian build used the repository resource directly, without
+client injection, and loaded it with the development override unset. Package
+inspection and strict Lintian passed with empty diagnostics. The 20 focused OAuth
+tests passed with loopback permission (the sandbox initially blocked listeners).
+The updated [package report](artifacts/package-qualification.json) records the
+artifact hash. D01–D05 are complete. Google Testing-mode limitations remain;
+general distribution still requires deliberate Console publishing configuration
+and the normal release process. No install, version bump, push or publication
+was performed.

@@ -6,18 +6,23 @@ import json
 import re
 import tempfile
 import unittest
+from dataclasses import replace
 from pathlib import Path
 from threading import Event
 from unittest.mock import MagicMock, Mock, patch
 
 from pinleaf.backup_format import decode
+from pinleaf.backup_format import AuthenticationError, BackupError, PasswordRequired
 from pinleaf.services.backup_service import BackupService
 from pinleaf.services.drive_auth import DriveConnection
 from pinleaf.services.drive_backup import (
     API, APP, UPLOAD, BACKUP_MIME, CHUNK_SIZE, FOLDER_MIME, DriveDestination,
-    DriveError, DriveHTTPError, DriveTransport, UploadAttempt,
+    DriveCopy, DriveError, DriveHTTPError, DriveTransport, UploadAttempt,
 )
 from pinleaf.storage.atomic_files import OperationCancelled, check_cancel
+from pinleaf.storage.library_backup import capture, read_library
+from pinleaf.storage.sqlite_store import NoteStore
+from pinleaf.services.note_service import NoteService
 
 
 class FakeDrive:
@@ -68,7 +73,9 @@ class FakeDrive:
             item = self.files.get(url.rsplit("/", 1)[1])
             if item is None:
                 raise DriveHTTPError(404)
-            return 200, {}, copy.deepcopy(item)
+            result = copy.deepcopy(item)
+            result.setdefault("capabilities", {"canDownload": True})
+            return 200, {}, result
         if method == "POST" and url == API:
             file_id = self.folder(body["name"], body["appProperties"]["kind"], body.get("parents", [None])[0])
             self.after("folder", self.files[file_id])
@@ -107,6 +114,19 @@ class FakeDrive:
             self.after("published", item)
             return 200, {}, copy.deepcopy(item)
         raise AssertionError((method, url))
+
+    def download(self, source, path, cancel):
+        check_cancel(cancel)
+        self.calls.append(("GET", f"{API}/{source.file_id}", {"alt": "media"}, None, {}))
+        self.before("GET", f"{API}/{source.file_id}?alt=media")
+        raw = self.raw[source.file_id]
+        if len(raw) != source.size or hashlib.md5(raw, usedforsecurity=False).hexdigest() != source.checksum:
+            raise DriveError("Synthetic changed download")
+        with path.open("xb") as target:
+            path.chmod(0o600)
+            target.write(raw)
+        self.after("downloaded", self.files[source.file_id])
+        check_cancel(cancel)
 
 
 def attempt(raw=b"synthetic portable bytes", protected=False):
@@ -256,6 +276,45 @@ class DriveDestinationTests(unittest.TestCase):
             self.destination.upload(source, Event())
         self.assertFalse(any(method in ("POST", "PATCH", "PUT", "DELETE") for method, *_ in self.provider.calls[previous:]))
 
+    def test_download_rechecks_selection_and_removal_before_transfer(self):
+        selected = self.destination.upload(attempt(), Event())
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "download"
+            self.provider.files[selected.file_id]["md5Checksum"] = "0" * 32
+            with self.assertRaises(DriveError):
+                self.destination.download(selected, target, Event())
+            del self.provider.files[selected.file_id]
+            with self.assertRaises(DriveError):
+                self.destination.download(selected, target, Event())
+            self.assertFalse(target.exists())
+            self.assertFalse(any(params.get("alt") == "media" for _, _, params, *_ in self.provider.calls))
+
+    def test_download_rejects_restricted_or_moved_file(self):
+        selected = self.destination.upload(attempt(), Event())
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "download"
+            item = self.provider.files[selected.file_id]
+            item["capabilities"] = {"canDownload": False}
+            with self.assertRaises(DriveError):
+                self.destination.download(selected, target, Event())
+            item["capabilities"] = {"canDownload": True}
+            item["parents"] = [self.provider.folder("Backups")]
+            with self.assertRaises(DriveError):
+                self.destination.download(selected, target, Event())
+            self.assertFalse(target.exists())
+
+    def test_download_changed_during_transfer_is_discarded(self):
+        selected = self.destination.upload(attempt(), Event())
+        def changed(stage, item):
+            if stage == "downloaded":
+                item["appProperties"]["status"] = "pending"
+        self.provider.after = changed
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "download"
+            with self.assertRaises(DriveError):
+                self.destination.download(selected, target, Event())
+            self.assertFalse(target.exists())
+
 
 class DriveTransportTests(unittest.TestCase):
     def setUp(self):
@@ -294,6 +353,74 @@ class DriveTransportTests(unittest.TestCase):
         with self.assertRaises(OperationCancelled):
             self.transport.request("GET", API, cancel)
         self.session.request.assert_not_called()
+
+    def selected(self, raw=b"synthetic-backup"):
+        return DriveCopy("file-1", "backup", "2026-10-16T12:00:00+00:00", len(raw), False,
+                         hashlib.md5(raw, usedforsecurity=False).hexdigest())
+
+    def test_download_is_private_bounded_and_disables_redirects(self):
+        raw = b"synthetic-backup"
+        selected = self.selected(raw)
+        self.session.get.return_value.__enter__.return_value = self.response
+        self.response.headers = {"Content-Length": str(len(raw))}
+        self.response.iter_content.return_value = [raw[:4], raw[4:]]
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "download"
+            self.transport.download(selected, target, Event())
+            self.assertEqual(target.read_bytes(), raw)
+            self.assertEqual(target.stat().st_mode & 0o777, 0o600)
+        args = self.session.get.call_args
+        self.assertEqual(args.kwargs["params"], {"alt": "media"})
+        self.assertEqual(args.kwargs["timeout"], (10, 30))
+        self.assertFalse(args.kwargs["allow_redirects"])
+
+    def test_download_corruption_truncation_size_lies_and_redirect_are_rejected(self):
+        selected = self.selected()
+        self.session.get.return_value.__enter__.return_value = self.response
+        for chunks, headers, status in (([b"x" * selected.size], {}, 200), ([b"small"], {}, 200),
+                                        ([b"x" * (selected.size + 1)], {}, 200), ([], {"Content-Length": "999999999"}, 200),
+                                        ([], {}, 302), ([], {}, 206), ([], {}, 401), ([], {}, 403), ([], {}, 404)):
+            with self.subTest(status=status, headers=headers), tempfile.TemporaryDirectory() as directory:
+                self.response.status_code, self.response.headers = status, headers
+                self.response.iter_content.return_value = chunks
+                target = Path(directory) / "download"
+                with self.assertRaises(DriveError):
+                    self.transport.download(selected, target, Event())
+                self.assertFalse(target.exists())
+
+    def test_download_cancel_midstream_and_connection_loss_remove_partial_file(self):
+        selected = self.selected()
+        self.session.get.return_value.__enter__.return_value = self.response
+        for cancelled in (True, False):
+            cancel = Event()
+            def chunks(_size):
+                yield b"synt"
+                if cancelled:
+                    cancel.set()
+                    yield b"hetic"
+                else:
+                    raise RuntimeError("synthetic-private-token")
+            self.response.iter_content.side_effect = chunks
+            with tempfile.TemporaryDirectory() as directory:
+                target = Path(directory) / "download"
+                with self.assertRaises(OperationCancelled if cancelled else DriveError) as error:
+                    self.transport.download(selected, target, cancel)
+                self.assertNotIn("private-token", str(error.exception))
+                self.assertFalse(target.exists())
+
+    def test_download_never_clobbers_existing_file_or_uses_invalid_ids(self):
+        self.session.get.return_value.__enter__.return_value = self.response
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "download"
+            target.write_bytes(b"previous")
+            with self.assertRaises(DriveError):
+                self.transport.download(self.selected(), target, Event())
+            self.assertEqual(target.read_bytes(), b"previous")
+            for source in (replace(self.selected(), file_id="../escape"), replace(self.selected(), size=64 * 1024 * 1024 + 1)):
+                self.auth.reset_mock()
+                with self.assertRaises(DriveError):
+                    self.transport.download(source, target, Event())
+                self.auth.access_token.assert_not_called()
 
 
 class DriveBackupServiceTests(unittest.TestCase):
@@ -363,3 +490,122 @@ class DriveBackupServiceTests(unittest.TestCase):
         with self.assertRaises(DriveError):
             self.service.list_drive(Event())
         self.assertEqual(self.provider.calls, [])
+
+
+class DriveRestoreServiceTests(unittest.TestCase):
+    def setUp(self):
+        DriveBackupServiceTests.setUp(self)
+        self.target_root = Path(self.directory.name) / "second-installation"
+        self.target_root.mkdir()
+        self.target = BackupService(self.target_root / "notes.sqlite3", lambda call: call())
+        self.target.drive_auth.connection = DriveConnection("test@example.org", True)
+        self.target.drive_auth.client_id = "client"
+        self.target.drive = DriveDestination(self.provider)
+        self.store = NoteStore(self.target.recovery.database)
+        self.notes = NoteService(self.store)
+        self.note = self.notes.create_note()
+        self.notes.update_content(self.note.id, "Original target library")
+
+    def tearDown(self):
+        self.target.close()
+        self.store.close()
+        DriveBackupServiceTests.tearDown(self)
+
+    def selected(self, password=None):
+        self.service.save_drive(self.payload, password, Event())
+        self.assertFalse(self.target.state_path.exists())
+        return self.target.list_drive(Event())[0]
+
+    def test_fresh_installation_roundtrip_both_modes_and_repeated_restore(self):
+        for password in (None, "synthetic-password"):
+            selected = self.selected(password)
+            raw = self.target.download_drive(selected, Event())
+            self.assertEqual(list(self.target_root.glob("drive-download-*")), [])
+            credentials = self.target.drive_auth.connection
+            for _ in range(2):
+                current = capture(self.store.connection)
+                preview = self.target.stage_drive(raw, selected, password, Event())
+                prepared = self.target.recovery.prepare(preview, current, Event())
+                recovery = self.target.recovery.apply(self.store, prepared)
+                self.assertEqual(read_library(self.store.connection), self.payload["library"])
+                self.assertEqual(decode(recovery.read_bytes()).payload["library"], current["library"])
+                self.assertIs(self.target.drive_auth.connection, credentials)
+            self.assertFalse(self.target.state_path.exists())
+
+    def test_password_detection_wrong_password_and_cancel_leave_library_unchanged(self):
+        selected = self.selected("synthetic-password")
+        current = read_library(self.store.connection)
+        raw = self.target.download_drive(selected, Event())
+        with self.assertRaises(PasswordRequired):
+            self.target.stage_drive(raw, selected, None, Event())
+        with self.assertRaises(AuthenticationError):
+            self.target.stage_drive(raw, selected, "wrong", Event())
+        preview = self.target.stage_drive(raw, selected, "synthetic-password", Event())
+        self.target.recovery.discard(preview)
+        self.assertFalse(preview.stage.exists())
+        self.assertEqual(read_library(self.store.connection), current)
+
+    def test_edits_after_remote_preview_are_preserved_in_recovery(self):
+        selected = self.selected()
+        raw = self.target.download_drive(selected, Event())
+        preview = self.target.stage_drive(raw, selected, None, Event())
+        self.notes.update_content(self.note.id, "Edit after remote preview")
+        current = capture(self.store.connection)
+        prepared = self.target.recovery.prepare(preview, current, Event())
+        recovery = self.target.recovery.apply(self.store, prepared)
+        self.assertEqual(decode(recovery.read_bytes()).payload["library"], current["library"])
+
+    def test_malformed_or_incompatible_download_cannot_reach_restore(self):
+        selected = self.selected()
+        current = read_library(self.store.connection)
+        for invalid in (b"{}", b"not-json"):
+            self.provider.raw[selected.file_id] = invalid
+            item = self.provider.files[selected.file_id]
+            item["size"] = str(len(invalid))
+            item["md5Checksum"] = hashlib.md5(invalid, usedforsecurity=False).hexdigest()
+            copy = self.target.list_drive(Event())[0]
+            raw = self.target.download_drive(copy, Event())
+            with self.assertRaises(BackupError):
+                self.target.stage_drive(raw, copy, None, Event())
+        self.assertEqual(read_library(self.store.connection), current)
+        self.assertFalse(self.target.recovery.staging.exists())
+
+    def test_protection_and_capture_metadata_must_match_validated_contents(self):
+        selected = self.selected()
+        raw = self.target.download_drive(selected, Event())
+        for changed in (replace(selected, protected=True), replace(selected, captured_at="2026-10-01T00:00:00+00:00")):
+            with self.assertRaises(DriveError):
+                self.target.stage_drive(raw, changed, None, Event())
+        self.assertFalse(self.target.recovery.staging.exists())
+
+    def test_failed_or_cancelled_download_cleans_private_staging(self):
+        selected = self.selected()
+        current = read_library(self.store.connection)
+        def interrupted(method, url):
+            if url.endswith("?alt=media"):
+                raise DriveError("Synthetic network interruption")
+        self.provider.before = interrupted
+        with self.assertRaises(DriveError):
+            self.target.download_drive(selected, Event())
+        self.assertEqual(list(self.target_root.glob("drive-download-*")), [])
+        self.provider.before = lambda *_: None
+        cancel = Event()
+        self.provider.after = lambda stage, _: cancel.set() if stage == "downloaded" else None
+        with self.assertRaises(OperationCancelled):
+            self.target.download_drive(selected, cancel)
+        self.assertEqual(list(self.target_root.glob("drive-download-*")), [])
+        self.assertEqual(read_library(self.store.connection), current)
+
+    def test_validated_remote_preview_restores_offline_without_reconnecting(self):
+        selected = self.selected()
+        raw = self.target.download_drive(selected, Event())
+        preview = self.target.stage_drive(raw, selected, None, Event())
+        self.target.drive_auth.connection = None
+        self.target.drive_auth.credentials = None
+        self.provider.before = Mock(side_effect=AssertionError("No network after validation"))
+        current = capture(self.store.connection)
+        prepared = self.target.recovery.prepare(preview, current, Event())
+        self.target.recovery.apply(self.store, prepared)
+        self.assertEqual(read_library(self.store.connection), self.payload["library"])
+        self.assertIsNone(self.target.drive_auth.connection)
+        self.provider.before.assert_not_called()

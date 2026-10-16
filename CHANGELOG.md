@@ -11,7 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Save and list dated Google Drive backups, with optional password protection,
   marked visible folders, verified publication, resumable transfer and deliberate
-  retry of the same captured copy. Drive download/restore remains in development.
+  retry of the same captured copy.
+- Download selected Google Drive copies into private staging and restore through
+  the existing validated preview, optional-password and local-recovery workflow.
 - Development Google Drive account connection through browser OAuth with PKCE,
   cancellable loopback return, system-keyring or explicit session-only access,
   and local disconnection. Drive transfers remain in development.

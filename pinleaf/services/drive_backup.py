@@ -3,9 +3,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 from dataclasses import dataclass, field
 from datetime import datetime
+from pathlib import Path
 from threading import Event
 from urllib.parse import urlsplit
 from uuid import UUID, uuid4
@@ -19,7 +21,7 @@ UPLOAD = "https://www.googleapis.com/upload/drive/v3/files"
 APP = "dev.pinleaf.Pinleaf"
 FOLDER_MIME = "application/vnd.google-apps.folder"
 BACKUP_MIME = "application/octet-stream"
-FIELDS = "id,name,mimeType,parents,appProperties,size,md5Checksum,trashed"
+FIELDS = "id,name,mimeType,parents,appProperties,size,md5Checksum,trashed,capabilities(canDownload)"
 MAX_PAGES = 100
 MAX_ITEMS = 10000
 CHUNK_SIZE = 256 * 1024
@@ -65,6 +67,7 @@ class DriveCopy:
     captured_at: str
     size: int
     protected: bool
+    checksum: str
 
 
 @dataclass
@@ -137,6 +140,53 @@ class DriveTransport:
             raise
         except Exception:
             raise DriveError("Drive transfer interrupted. Check your connection and retry; the same attempt will be checked first.") from None
+
+    def download(self, copy: DriveCopy, path: Path, cancel: Event) -> None:
+        """Stream a selected blob into an exclusive private file, capped at 64 MiB."""
+        file_id = _identifier(copy.file_id)
+        if not 0 < copy.size <= MAX_FILE_BYTES:
+            raise DriveError("This Drive backup exceeds the supported size limit.")
+        check_cancel(cancel)
+        token = self.auth.access_token(cancel)
+        created = False
+        try:
+            import requests
+            own_session = self.session is None
+            session = self.session or requests.Session()
+            try:
+                with session.get(f"{API}/{file_id}", params={"alt": "media"},
+                                 headers={"Authorization": f"Bearer {token}", "Accept-Encoding": "identity"},
+                                 timeout=(10, 30), allow_redirects=False, stream=True) as response:
+                    if response.status_code != 200:
+                        raise DriveHTTPError(response.status_code)
+                    length = response.headers.get("Content-Length")
+                    if length is not None and int(length) != copy.size:
+                        raise DriveError("The Drive backup size changed. Refresh and select it again.")
+                    digest, size = hashlib.md5(usedforsecurity=False), 0
+                    with path.open("xb") as target:
+                        created = True
+                        path.chmod(0o600)
+                        for chunk in response.iter_content(64 * 1024):
+                            check_cancel(cancel)
+                            size += len(chunk)
+                            if size > copy.size or size > MAX_FILE_BYTES:
+                                raise DriveError("The Drive download exceeds its expected size. Refresh and retry.")
+                            target.write(chunk)
+                            digest.update(chunk)
+                        if size != copy.size or digest.hexdigest() != copy.checksum:
+                            raise DriveError("The Drive download is incomplete or changed. Refresh and retry.")
+                        target.flush()
+                        os.fsync(target.fileno())
+                    check_cancel(cancel)
+            finally:
+                if own_session:
+                    session.close()
+        except BaseException as error:
+            if created:
+                path.unlink(missing_ok=True)
+            if isinstance(error, (DriveError, OperationCancelled, KeyboardInterrupt, SystemExit)):
+                raise
+            raise DriveError("Could not download the Drive backup. Check your connection and available storage, then retry.") from None
 
 
 class DriveDestination:
@@ -240,7 +290,7 @@ class DriveDestination:
             name = item["name"]
             if not isinstance(name, str) or not 0 < len(name) <= 512:
                 return None
-            return DriveCopy(file_id, name, captured, size, props["protection"] == "password")
+            return DriveCopy(file_id, name, captured, size, props["protection"] == "password", item["md5Checksum"])
         except (KeyError, ValueError, TypeError, AttributeError, DriveError):
             return None
 
@@ -257,6 +307,30 @@ class DriveDestination:
             if copy is not None:
                 copies.append(copy)
         return sorted(copies, key=lambda copy: (datetime.fromisoformat(copy.captured_at), copy.file_id), reverse=True)
+
+    def download(self, copy: DriveCopy, path: Path, cancel: Event) -> None:
+        """Recheck the selected complete copy before and after reading its bytes."""
+        check_cancel(cancel)
+        item = self._get(copy.file_id, cancel)
+        if item is None or self._copy(item) != copy:
+            raise DriveError("This Drive copy was removed or changed. Refresh and select a backup again.")
+        capabilities = item.get("capabilities")
+        if not isinstance(capabilities, dict) or capabilities.get("canDownload") is not True:
+            raise DriveError("Google does not allow downloading this copy. Check access or select another backup.")
+        folders = {folder["id"] for folder in self._folders("backups", cancel)}
+        parents = item.get("parents", [])
+        if not isinstance(parents, list) or not any(parent in folders for parent in parents if isinstance(parent, str)):
+            raise DriveError("This copy is no longer in a Pinleaf backup folder. Refresh and select another backup.")
+        self.transport.download(copy, path, cancel)
+        try:
+            confirmed = self._get(copy.file_id, cancel)
+            if (confirmed is None or self._copy(confirmed) != copy
+                    or confirmed.get("parents") != parents):
+                raise DriveError("The Drive copy changed during download. Refresh and select it again.")
+            check_cancel(cancel)
+        except BaseException:
+            path.unlink(missing_ok=True)
+            raise
 
     def _verify(self, attempt: UploadAttempt, item: dict) -> None:
         props = item.get("appProperties", {})

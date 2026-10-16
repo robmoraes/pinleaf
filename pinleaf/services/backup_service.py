@@ -3,12 +3,13 @@ from __future__ import annotations
 
 import json
 import hashlib
+import tempfile
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from threading import Event, Thread
 
-from pinleaf.backup_format import BackupError, canonical, decode, encode
+from pinleaf.backup_format import BackupError, canonical, decode, encode, read_bytes
 from pinleaf.storage.atomic_files import OperationCancelled, check_cancel, publish, write_private
 from pinleaf.storage.restore_recovery import PreparedRestore, RestorePreview, RestoreRecovery
 from pinleaf.services.drive_auth import DriveAuth
@@ -102,6 +103,25 @@ class BackupService:
     def list_drive(self, cancel: Event) -> list[DriveCopy]:
         self._drive_owner()
         return self.drive.list_copies(cancel)
+
+    def download_drive(self, copy: DriveCopy, cancel: Event) -> bytes:
+        owner = self._drive_owner()
+        with tempfile.TemporaryDirectory(prefix="drive-download-", dir=self.recovery.root) as directory:
+            path = Path(directory) / "selected.pinleaf-backup"
+            self.drive.download(copy, path, cancel)
+            raw = read_bytes(path)
+            check_cancel(cancel)
+            if self._drive_owner() != owner:
+                raise DriveError("The connected account changed. Refresh and select the backup again.")
+            return raw
+
+    def stage_drive(self, raw: bytes, copy: DriveCopy, password: str | None,
+                    cancel: Event) -> RestorePreview:
+        check_cancel(cancel)
+        backup = decode(raw, password)
+        if backup.protected != copy.protected or backup.payload["created_at"] != copy.captured_at:
+            raise DriveError("The downloaded contents do not match the selected copy. Refresh and select another backup.")
+        return self.recovery.stage(backup, cancel)
 
     def last_drive_status(self) -> dict | None:
         try:

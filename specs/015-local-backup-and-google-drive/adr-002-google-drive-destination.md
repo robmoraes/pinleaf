@@ -2,8 +2,9 @@
 
 Status: accepted for slice B planning on 2026-10-11; OAuth connection implemented
 on 2026-10-16. Maintainer configured a desktop client/test account and confirmed
-live consent/account connection. Upload/list passed a real synthetic-data drill;
-download/restore and two-installation qualification remain pending. See
+live consent/account connection. Upload/list and download/restore passed real
+synthetic-data drills into disposable libraries; independent two-installation
+authorization qualification remains pending. See
 [Drive execution](execution-drive.md).
 Traceability: BK-01/03, GD-01–06, PR-02 in [spec](spec.md).
 

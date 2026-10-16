@@ -1,8 +1,8 @@
 # Plan: Local backup and restore, then Google Drive
 
 Status: prepared on 2026-10-11 after Q1/Q2 were resolved; local slice A implemented
-and qualified in [execution](execution.md). Drive D01/D02 are implemented and
-qualified in [Drive execution](execution-drive.md); D03–D05 remain pending. The [spec](spec.md)
+and qualified in [execution](execution.md). Drive D01–D03 are implemented and
+qualified in [Drive execution](execution-drive.md); D04/D05 remain pending. The [spec](spec.md)
 owns product behavior; [tasks](tasks.md) order delivery and verification.
 Architecture decisions: [ADR 001](adr-001-portable-backup-and-recovery.md),
 [ADR 002](adr-002-google-drive-destination.md).

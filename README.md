@@ -134,9 +134,9 @@ preview leaves the current library in place. The startup-error screen also offer
 local restore and preserves unreadable original database/journal files first.
 
 The first format accepts library schema 6. Raw SQLite migration snapshots and
-other portable versions are not inputs for this reader. Google Drive is the
-partially delivered: the development window supports account connection, saving
-backups and listing completed copies. Download/restore from Drive is next.
+other portable versions are not inputs for this reader. The development window
+supports Google Drive account connection, saving/listing copies and downloading
+them through the same validated replacement-restore workflow.
 
 ### Google Drive development setup
 
@@ -170,8 +170,24 @@ copy. Editing can continue during upload; the status identifies the capture time
 Uploads are resumable, verified by size/checksum and marked complete only after
 verification. **Refresh Drive Copies** discovers complete compatible files across
 marked backup folders, including from another installation using the same Google
-account and OAuth client. Listing checks metadata; file contents will be validated
-by the upcoming download/restore flow.
+account and OAuth client. Listing checks metadata; file contents are validated
+when you select a copy for restore.
+
+To restore, use **Refresh Drive Copies**, then **Preview & Restore…** beneath
+the chosen copy. Pinleaf rechecks that it is still available and unchanged,
+downloads at most 64 MiB into private temporary staging and validates the portable
+format. Protected copies request their password before showing a private preview;
+**Enter Backup Password…** lets you retry without downloading again. No password
+is required for an unprotected copy. **Cancel Preview** discards the staged
+selection without replacing your library.
+
+The preview identifies the selected Drive file, counts and recovery location.
+**Restore This Backup…** opens the same explicit replacement confirmation as a
+local file, with Cancel as default. Confirming preserves the latest current
+library in a local recovery backup before replacing it. Hidden/deleted state and
+IDs are retained; the connected Google account and local history are not imported
+from the backup. Once downloaded and validated, restoration can finish offline.
+No restore starts automatically when connecting or listing copies.
 
 After an interrupted save, **Retry Drive Save** checks the same UUID/file ID and
 continues that captured copy, including the original encrypted bytes. It does not

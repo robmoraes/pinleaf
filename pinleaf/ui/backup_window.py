@@ -11,7 +11,8 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Adw, Gtk
 
-from pinleaf.backup_format import BackupError, PasswordRequired, decode, read_bytes
+from pinleaf.backup_format import AuthenticationError, BackupError, PasswordRequired, decode, read_bytes
+from pinleaf.services.drive_backup import DriveCopy
 from pinleaf.services.backup_service import BackupService, DriveExportResult, ExportResult
 from pinleaf.services.context_controller import TransitionError
 from pinleaf.services.drive_auth import DriveAuthError
@@ -118,6 +119,7 @@ class BackupWindow(Adw.Window):
         self.on_closed = on_closed
         self.preview: RestorePreview | None = None
         self.selected_raw: bytes | None = None
+        self.selected_drive: DriveCopy | None = None
         self.password_window: PasswordWindow | None = None
         self.chooser: Gtk.FileChooserNative | None = None
         self.confirmation: Adw.MessageDialog | None = None
@@ -145,7 +147,7 @@ class BackupWindow(Adw.Window):
         drive_heading = _label("Google Drive")
         drive_heading.add_css_class("title-3")
         content.append(drive_heading)
-        content.append(_label("Save dated copies of your complete library to Google Drive. Each save creates a separate file. Download and restore from Drive are coming next."))
+        content.append(_label("Save dated copies of your complete library to Google Drive. Refresh to select a copy, validate it and preview a replacement restore."))
         self.drive_status = _label("")
         content.append(self.drive_status)
         self.session_only = Gtk.CheckButton(label="Connect for this session only (do not save access)")
@@ -187,6 +189,10 @@ class BackupWindow(Adw.Window):
         self.progress.append(self.cancel_button)
         self.progress.set_visible(False)
         content.append(self.progress)
+        self.unlock_button = Gtk.Button(label="Enter Backup Password…")
+        self.unlock_button.connect("clicked", lambda _: self._ask_password())
+        self.unlock_button.set_visible(False)
+        content.append(self.unlock_button)
         self.preview_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
         self.preview_text = _label("")
         self.preview_box.append(self.preview_text)
@@ -194,6 +200,10 @@ class BackupWindow(Adw.Window):
         self.final_restore.add_css_class("destructive-action")
         self.final_restore.connect("clicked", lambda _: self._confirm_restore())
         self.preview_box.append(self.final_restore)
+        cancel_preview = Gtk.Button(label="Cancel Preview")
+        cancel_preview.connect("clicked", lambda _: self._cancel_preview())
+        self.preview_box.append(cancel_preview)
+        self.cancel_preview = cancel_preview
         self.preview_box.set_visible(False)
         content.append(self.preview_box)
         scroll = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER, vexpand=True)
@@ -222,7 +232,8 @@ class BackupWindow(Adw.Window):
     def _busy(self, active: bool, message: str = "") -> None:
         for widget in (self.create_button, self.restore_button, self.final_restore,
                        self.connect_drive, self.disconnect_drive, self.session_only,
-                       self.save_drive, self.retry_drive, self.refresh_drive):
+                       self.save_drive, self.retry_drive, self.refresh_drive,
+                       self.drive_copies, self.unlock_button, self.cancel_preview):
             widget.set_sensitive(not active)
         self.progress.set_visible(active)
         self.spinner.set_spinning(active)
@@ -245,15 +256,27 @@ class BackupWindow(Adw.Window):
         self._busy(False)
         self._ungate()
         if isinstance(error, PasswordRequired):
-            self.password_window = PasswordWindow(self, lambda password: self._read_selection(password), unlock=True)
-            self.password_window.present()
-            self.password_window.password.grab_focus()
+            self.unlock_button.set_visible(True)
+            self._ask_password()
             return
+        if isinstance(error, AuthenticationError):
+            self.unlock_button.set_visible(self.selected_raw is not None)
         message = str(error) if isinstance(error, (BackupError, OSError, TransitionError, DriveAuthError)) else "Could not complete this operation. Check available storage and retry."
-        self.status.set_text(message)
+        self._restore_status(message)
         self._drive_status()
         if not isinstance(error, OperationCancelled):
             show_error(self, "Backup operation could not finish", message)
+
+    def _ask_password(self) -> None:
+        if self.selected_raw is None:
+            return
+        self.password_window = PasswordWindow(self, lambda password: self._read_selection(password), unlock=True)
+        self.password_window.present()
+        self.password_window.password.grab_focus()
+
+    def _restore_status(self, message: str) -> None:
+        destination = self.drive_transfer_status if self.selected_drive is not None else self.status
+        destination.set_text(message)
 
     def _drive_status(self) -> None:
         connection = self.service.drive_auth.connection
@@ -316,18 +339,19 @@ class BackupWindow(Adw.Window):
             return
         self._run_drive("Saving backup to Drive…", lambda cancel: self.service.save_drive(payload, password, cancel), self._drive_saved)
 
-    def _run_drive(self, message: str, job: Callable, done: Callable) -> None:
+    def _run_drive(self, message: str, job: Callable, done: Callable, *, cancel_message: str | None = None) -> None:
         self.drive_transfer_status.set_text(message)
         self._busy(True, message)
         def completed(result) -> None:
             self._busy(False)
-            done(result)
+            if not self.disconnect_pending:
+                done(result)
             self._finish_pending_disconnect()
         def failed(error) -> None:
             self._busy(False)
             message = str(error) if isinstance(error, (DriveAuthError, BackupError, OperationCancelled)) else "Drive operation failed. Check your connection and retry."
             if isinstance(error, OperationCancelled):
-                message = "Drive operation cancelled. Retry checks the same copy; refresh can reveal a copy that finished remotely."
+                message = cancel_message or "Drive operation cancelled. Retry checks the same copy; refresh can reveal a copy that finished remotely."
             self.drive_transfer_status.set_text(message)
             if not isinstance(error, OperationCancelled) and not self.disconnect_pending:
                 show_error(self, "Google Drive operation could not finish", message)
@@ -366,9 +390,25 @@ class BackupWindow(Adw.Window):
                 self.drive_copies.append(_label("No completed compatible copies found."))
             for copy in copies:
                 mode = "Password protected" if copy.protected else "Unprotected"
-                self.drive_copies.append(_label(f"{copy.captured_at} · {mode} · {copy.size:,} bytes\n{copy.name}"))
-            self.drive_transfer_status.set_text(f"Found {len(copies)} completed copies. Contents have not been downloaded or validated.")
-        self._run_drive("Listing Drive copies…", self.service.list_drive, listed)
+                row = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+                row.append(_label(f"{copy.captured_at} · {mode} · {copy.size:,} bytes\n{copy.name}"))
+                select = Gtk.Button(label="Preview & Restore…")
+                select.update_property([Gtk.AccessibleProperty.LABEL], [f"Preview and restore Drive backup {copy.name}"])
+                select.connect("clicked", lambda _, selected=copy: self._download_drive(selected))
+                row.append(select)
+                self.drive_copies.append(row)
+            self.drive_transfer_status.set_text(f"Found {len(copies)} completed copies. Select one to download and validate before restoring.")
+        self._run_drive("Listing Drive copies…", self.service.list_drive, listed,
+                        cancel_message="Listing cancelled. Your current library was kept. Refresh to try again.")
+
+    def _download_drive(self, copy: DriveCopy) -> None:
+        if self.service.busy or self.gated:
+            return
+        self._clear_selection()
+        self._run_drive("Downloading the selected Drive backup…",
+                        lambda cancel: self.service.download_drive(copy, cancel),
+                        lambda raw: self._selected(raw, drive_copy=copy),
+                        cancel_message="Download cancelled. Your current library was kept. Select a copy to try again.")
 
     def _create(self) -> None:
         self.password_window = PasswordWindow(self, self._choose_save)
@@ -446,22 +486,39 @@ class BackupWindow(Adw.Window):
         check_cancel(cancel)
         return raw
 
-    def _selected(self, raw: bytes) -> None:
-        self.selected_raw = raw
+    def _clear_selection(self) -> None:
+        self.selected_raw = None
+        self.selected_drive = None
+        self.unlock_button.set_visible(False)
         if self.preview is not None:
             self.service.recovery.discard(self.preview)
             self.preview = None
         self.preview_box.set_visible(False)
+
+    def _cancel_preview(self) -> None:
+        if not self.service.busy and not self.gated:
+            self._restore_status("Preview cancelled. Your current library was kept.")
+            self._clear_selection()
+
+    def _selected(self, raw: bytes, *, drive_copy: DriveCopy | None = None) -> None:
+        self._clear_selection()
+        self.selected_raw = raw
+        self.selected_drive = drive_copy
         self._read_selection(None)
 
     def _read_selection(self, password: str | None) -> None:
         raw = self.selected_raw
-        self._run("Validating backup…", lambda cancel: self.service.recovery.stage(decode(raw, password), cancel), self._show_preview)
+        if raw is None:
+            return
+        selected = self.selected_drive
+        job = (lambda cancel: self.service.stage_drive(raw, selected, password, cancel)) if selected is not None else (lambda cancel: self.service.recovery.stage(decode(raw, password), cancel))
+        self._run("Validating backup…", job, self._show_preview)
 
     def _show_preview(self, preview: RestorePreview) -> None:
         self.preview = preview
         self.selected_raw = None
-        self.status.set_text("Backup validated. Your current library has not been replaced.")
+        self.unlock_button.set_visible(False)
+        self._restore_status("Backup validated. Your current library has not been replaced.")
         payload = preview.backup.payload
         library = payload["library"]
         profiles = sum(row["deleted_at"] is None for row in library["profiles"])
@@ -471,7 +528,8 @@ class BackupWindow(Adw.Window):
         recovery = preview.recovery if self.capture else preview.stage.parent / "original"
         counts = " · ".join(f"{count} {name if count == 1 else name + 's'}" for count, name in
                             ((profiles, "profile"), (groups, "group"), (len(notes), "note")))
-        self.preview_text.set_text(f"Backup captured {payload['created_at']}\nPinleaf {payload['producer']['version']}\n"
+        source = f"Source: Google Drive · {self.selected_drive.name}\n" if self.selected_drive is not None else ""
+        self.preview_text.set_text(source + f"Backup captured {payload['created_at']}\nPinleaf {payload['producer']['version']}\n"
             f"{counts} ({hidden} hidden)\n"
             f"{'Password protected' if preview.backup.protected else 'Unprotected backup'}\n\n"
             f"Restore replaces the entire current library. Recovery copy:\n{recovery}")
@@ -508,7 +566,7 @@ class BackupWindow(Adw.Window):
         self.cancel_button.set_sensitive(False)
         try:
             location = self.apply(prepared)
-            self.status.set_text(f"Library restored. Previous data preserved at:\n{location}")
+            self._restore_status(f"Library restored. Previous data preserved at:\n{location}")
             self.preview = None
             self.preview_box.set_visible(False)
         except Exception as exc:
@@ -534,6 +592,7 @@ class BackupWindow(Adw.Window):
         if self.preview is not None:
             self.service.recovery.discard(self.preview)
         self.selected_raw = None
+        self.selected_drive = None
         self.on_closed()
         self.destroy()
         return True

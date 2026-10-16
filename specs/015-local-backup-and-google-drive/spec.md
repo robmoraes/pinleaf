@@ -86,11 +86,12 @@ where the current library's recovery copy will be kept. For a protected backup,
 request the password before reading or displaying its private contents. Do not
 show note contents in a preview.
 
-**Google Drive** appears when slice B is delivered. It offers Connect Google
-Drive, then shows the connected account, Save Backup to Drive, Restore from
-Drive… and Disconnect. The restore selector lists dated copies newest first;
+**Google Drive** offers Connect Google Drive, then shows the connected account,
+Save Backup to Drive, Refresh Drive Copies and Disconnect. The inline restore
+selector lists dated copies newest first, with Preview & Restore per copy;
 selection leads through the same validation, preview and confirmation as a
-local file. A downloaded backup can also be restored through the local flow.
+local file. Cancel Preview discards a selection. A downloaded backup can also
+be restored through the local flow.
 
 Local and remote status are distinct: never backed up, in progress, successful
 at a captured time, or failed/cancelled. A successful upload describes a copy

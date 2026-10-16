@@ -116,7 +116,7 @@ class DriveUITests(unittest.TestCase):
         self.window.refresh_drive.emit("clicked")
         self.wait_idle()
         self.assertIn("Found 1 completed copies", self.window.drive_transfer_status.get_text())
-        self.assertIn("Unprotected", self.window.drive_copies.get_first_child().get_text())
+        self.assertIn("Unprotected", self.window.drive_copies.get_first_child().get_first_child().get_text())
         self.assertFalse(self.window.retry_drive.get_visible())
 
     def test_failed_drive_save_retries_original_capture_despite_later_edits(self):
@@ -175,3 +175,87 @@ class DriveUITests(unittest.TestCase):
         self.assertIsNone(self.service.drive_attempt)
         self.assertEqual(provider.raw, {})
         self.assertTrue(self.window.create_button.get_sensitive())
+
+    def test_remote_selection_previews_without_applying_and_cancel_discards_stage(self):
+        provider, payload = self.drive_fixture()
+        self.window._save_drive(None)
+        self.wait_idle()
+        self.window.refresh_drive.emit("clicked")
+        self.wait_idle()
+        select = self.window.drive_copies.get_first_child().get_last_child()
+        self.assertEqual(select.get_label(), "Preview & Restore…")
+        select.emit("clicked")
+        self.wait_idle()
+        self.assertEqual(self.window.preview.backup.payload, payload)
+        self.window.apply.assert_not_called()
+        self.window.capture.assert_called_once()  # Save only; inspection is read-only.
+        self.assertIn("Source: Google Drive", self.window.preview_text.get_text())
+        stage = self.window.preview.stage
+        self.window.cancel_preview.emit("clicked")
+        self.assertFalse(stage.exists())
+        self.assertIsNone(self.window.preview)
+        self.assertFalse(self.window.preview_box.get_visible())
+
+    def test_protected_remote_selection_can_retry_password_without_redownloading(self):
+        provider, payload = self.drive_fixture()
+        self.window._save_drive("synthetic-password")
+        self.wait_idle()
+        selected = self.service.list_drive(Event())[0]
+        self.window._download_drive(selected)
+        self.wait_idle()
+        self.assertIsNone(self.window.preview)
+        self.assertTrue(self.window.unlock_button.get_visible())
+        self.assertTrue(self.window.password_window.unlock)
+        self.window.password_window.password.set_text("wrong")
+        with patch("pinleaf.ui.backup_window.show_error"):
+            self.window.password_window.confirm.emit("clicked")
+            self.wait_idle()
+        self.assertIsNone(self.window.preview)
+        self.window.unlock_button.emit("clicked")
+        self.window.password_window.password.set_text("synthetic-password")
+        self.window.password_window.confirm.emit("clicked")
+        self.wait_idle()
+        self.assertEqual(self.window.preview.backup.payload, payload)
+        self.assertFalse(self.window.unlock_button.get_visible())
+        downloads = [params for _, _, params, *_ in provider.calls if params.get("alt") == "media"]
+        self.assertEqual(len(downloads), 1)
+        self.window.cancel_preview.emit("clicked")
+
+    def test_failed_remote_selection_cannot_leave_an_older_preview_restorable(self):
+        provider, _ = self.drive_fixture()
+        self.window._save_drive(None)
+        self.wait_idle()
+        selected = self.service.list_drive(Event())[0]
+        self.window._download_drive(selected)
+        self.wait_idle()
+        old_stage = self.window.preview.stage
+        del provider.files[selected.file_id]
+        with patch("pinleaf.ui.backup_window.show_error"):
+            self.window._download_drive(selected)
+            self.wait_idle()
+        self.assertFalse(old_stage.exists())
+        self.assertIsNone(self.window.preview)
+        self.assertFalse(self.window.preview_box.get_visible())
+        self.assertIsNone(self.window.selected_raw)
+
+    def test_disconnect_racing_download_completion_cannot_open_a_new_preview(self):
+        provider, _ = self.drive_fixture()
+        self.window._save_drive(None)
+        self.wait_idle()
+        selected = self.service.list_drive(Event())[0]
+        raw = provider.raw[selected.file_id]
+        started, release = Event(), Event()
+        def download(*_args):
+            started.set()
+            release.wait(2)
+            return raw  # Simulate a response that completed as Cancel was pressed.
+        with patch.object(self.service, "download_drive", side_effect=download):
+            self.window._download_drive(selected)
+            self.assertTrue(started.wait(1))
+            self.window.disconnect_drive.emit("clicked")
+            release.set()
+            self.wait_idle()
+        self.assertIsNone(self.service.drive_auth.connection)
+        self.assertIsNone(self.window.preview)
+        self.assertIsNone(self.window.selected_raw)
+        self.assertFalse(self.service.recovery.staging.exists())

@@ -1,6 +1,6 @@
 # Execution: Google Drive connection
 
-Date: 2026-10-16. Boundary: D01 connection and D02 upload/discovery.
+Date: 2026-10-16. Boundary: D01 connection, D02 upload/discovery and D03 restore.
 
 The maintainer enabled Drive API, registered a desktop OAuth client with
 `drive.file`, downloaded its configuration under ignored `tmp/`, and added the
@@ -110,3 +110,80 @@ contract fixtures passed. The same nonfatal GTK popup stacking warning remains.
 
 No Drive download, library replacement, release version, Git push, PR
 modification or package publication is part of D02. D03–D05 remain pending.
+
+## D03: download, preview and restore
+
+The inline selector adds **Preview & Restore…** to each discovered copy. Selection
+rechecks complete status, size/MD5, captured time, protection mode, name, marked
+parent folder and `capabilities.canDownload` before download. The transport uses
+only the fixed Drive `files.get?alt=media` endpoint, disables redirects and streams
+into an exclusive 0600 file inside a private temporary directory. Declared and
+actual length cannot exceed the expected size or 64 MiB; truncated, oversized or
+checksum-mismatched responses are rejected. Metadata is reread after transfer to
+reject concurrent replacement/removal. Temporary files are removed on every
+completion, failure or cancellation; a remote filename is never a local path.
+
+The selected bytes pass through the same portable reader and trusted SQLite
+staging as local input. Password detection comes from the file, not the checkbox
+or listing. Wrong passwords/authentication failures reveal no private preview;
+an explicit password retry reuses the immutable downloaded bytes. The validated
+payload's capture time and protection mode must match the selection metadata.
+Selecting another copy discards an older preview before download, so a failed
+new selection cannot leave a stale Restore action enabled.
+
+**Cancel Preview** removes the staged selection. Final **Restore This Backup…**
+uses A's default-Cancel destructive confirmation, captures pending edits again,
+preserves a validated local recovery copy and applies the same journaled
+replacement and application/editor-generation reload. No network request is
+needed once a preview is validated. Restore preserves this installation's
+connection and status; credentials/history never travel in the portable payload.
+There is no automatic restore or sync. A cancelled download restarts only on an
+explicit new selection, without reusing an unverified partial file.
+
+Automated coverage adds selection rechecks, restricted/moved/deleted files,
+concurrent metadata changes, response limits, redirects, corruption/truncation,
+midstream cancellation/network failure, exclusive/private output, malformed
+portable data, metadata mismatch, cleanup and password retry without redownload.
+Two isolated service directories demonstrate discovery without origin history,
+full-library round trips in both modes, repeated restore without duplication,
+preserved hidden/deleted/context/appearance values, edits after preview in
+recovery, unchanged target data on rejection/cancel, and offline final restore.
+GTK tests click actual row/password/cancel controls and ensure failed selection
+cannot leave an old preview restorable.
+
+`tests/gui_drive.py` runs the full application with a unique application ID,
+disposable library and explicit helper cleanup. Both simulated and live Drive
+runs passed for unprotected and protected copies. They select actual rows,
+reject one synthetic wrong password, preview without replacing data, verify
+default Cancel, then restore after a pending editor change. Every retained
+library field matches the synthetic fixture, only its two eligible note windows
+open, hidden/deleted notes stay closed, and local recovery includes the last edit
+made after preview. The connected account object survives library replacement.
+The simulated run observed two worker timer heartbeats; the live run observed
+37, demonstrating that the GUI loop continued while network/crypto work ran.
+These are workflow observations, not performance guarantees.
+
+Reproduction on a graphical desktop:
+
+```bash
+/usr/bin/python3 tests/gui_drive.py
+/usr/bin/python3 tests/gui_drive.py --live
+```
+
+Live mode requires the maintainer's ignored development JSON/result manifest and
+saved development keyring access. It selects only the two identified synthetic
+D02 files, requests no new consent, creates no cloud files and replaces only its
+own disposable library. The remote fixtures remain intact. This qualifies the
+live storage/UI path into a separate library on this machine; it does not replace
+the D04 independent-authorization/disconnection drill on two installations.
+
+Final D03 regression: **277 tests passed, zero skips**, 17.392 seconds.
+Compileall, whitespace checks and both schemas/nine format fixtures passed.
+An additional race test confirms that Disconnect at download completion cannot
+start a preview; offline restore after validation is also covered. The final
+simulated native run passed after helper-cleanup checks were tightened. Existing
+nonfatal GTK popup stacking and Ayatana deprecation diagnostics remain.
+
+D04/D05 remain pending: independent installation authorization, deliberate test
+cleanup, release client distribution, native screenshots/accessibility and final
+packaging qualification. Version and remote publication remain unchanged.

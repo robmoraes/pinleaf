@@ -74,17 +74,23 @@ The maintainer accepted Q1/Q2 and requested advancing on 2026-10-11.
   names, absent local history, ambiguous responses and preservation of other files.
   Implemented with stateful provider/GTK tests and a live two-copy upload/list
   drill on 2026-10-16. See [Drive execution](execution-drive.md).
-- [ ] **D03 — Download through local restore:** Add bounded download/validation
+- [x] **D03 — Download through local restore:** Add bounded download/validation
   and remote selector/status; reuse A's preview/confirmation/recovery path and
   per-file protection. Verify TC-BKP-011,012,014,016, connection loss, quota,
   revoked access, external removal and both backup modes. Local editing remains
   independent and no automatic synchronization is introduced.
+  Implemented with provider/transport/storage/GTK tests and real-app restore
+  drills using simulated and live Drive, both protection modes, on 2026-10-16.
+  Live restores targeted disposable libraries only. See [Drive execution](execution-drive.md).
 - [ ] **D04 — Maintainer OAuth setup and live drill:** Once a registered desktop
   client and designated test account are available, document setup/testing expiry,
   perform explicit browser consent, save on one isolated installation and restore
   on another with no origin history. Verify TC-BKP-011,013 in real Drive; clean up
   only identified test artifacts. This operational prerequisite does not block A
   or mocked D01–D03. Do not replace daily-use notes or publish credentials.
+  Setup, consent and synthetic upload/download/restore into a disposable target
+  have passed. Independent authorization/disconnection on two installations and
+  deliberate remote test-artifact cleanup remain pending.
 - [ ] **D05 — Complete package evidence:** Run full regression, compileall,
   schema/example/resource/dependency/diff checks and native accessibility/layout
   validation; record live versus mocked coverage and update delivered documentation.
@@ -92,6 +98,5 @@ The maintainer accepted Q1/Q2 and requested advancing on 2026-10-11.
   separate publication instruction.
 
 Slice A is complete with product evidence in [execution](execution.md).
-Drive download/restore remains pending. D01/D02 add explicit account/upload/list
-operations; no
-startup network, daily-use data access, version bump or publication was introduced.
+Drive D01–D03 are implemented and qualified as recorded; D04/D05 remain pending.
+No startup network, daily-use data access, version bump or publication was introduced.

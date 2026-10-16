@@ -175,6 +175,46 @@ On 2026-10-10 the replacement computer passed default-key signing, independent
 `.dsc`, `.buildinfo` and `.changes` files. Both PPA targets passed `dput -s`.
 This was local setup validation; no source package was uploaded.
 
+## Replacement computer qualification — 2026-10-16
+
+The Ubuntu 26.04 development computer was prepared from the maintainer's
+private transfer backup. The public key fingerprint was checked before import
+and independently matched the key listed on the public Launchpad account API.
+The private key was restored into the user's GPG keyring; the revocation
+certificate was retained with private permissions, never imported. Default GPG
+signing, `DEBSIGN_KEYID` and the `pinleaf-ppa` dput alias were configured.
+No private key, passphrase or revocation contents were added to this repository.
+
+Installed `devscripts` and `dput` with their required dependencies. On this
+Ubuntu version, optional `ubuntu-dev-tools` requires `dput-ng`, which conflicts
+with classic `dput`; installing those two together failed dependency resolution
+without changing installed packages. The optional bundle was omitted. Existing
+build tools and Lintian were retained; Pinleaf itself was not installed.
+
+Completed checks:
+
+- Local detached signing and independent `gpgv` verification passed.
+- A disposable source-only build targeting `noble` passed.
+- `debsign` used the configured default key and signed `.dsc`, `.buildinfo`
+  and `.changes`; all three signatures matched the expected fingerprint.
+- Strict source Lintian passed with no warnings or errors.
+- Both `dput -s ppa:robmoraes/pinleaf` and `dput -s pinleaf-ppa` checked
+  signatures/hashes and ended with `Simulated upload.` No files were uploaded.
+
+The disposable build retained **0.8.0 only for local tooling qualification**.
+That version has already been published and must never be uploaded again.
+The actual release must use a new version and freshly rebuilt artifacts from
+its tagged commit. Publication remains deferred until Google branding approval,
+production OAuth status and the normal release checks are complete; elapsed
+24 hours alone does not authorize a release. Server acceptance and remote
+build success can only be confirmed during the eventual real upload.
+
+The private transfer ZIP remains ignored, with mode 0600. It contains both the
+private key and its passphrase; retain an offline backup and move the temporary
+transfer archive out of the working copy when convenient. Its passphrase was
+used through an inherited file descriptor, never a command-line argument or
+printed output. Future signing may request that passphrase again.
+
 ## Release Checklist
 
 Start from a clean and updated `main` branch:

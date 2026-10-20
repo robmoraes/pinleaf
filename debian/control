@@ -7,7 +7,7 @@ Build-Depends:
  python3,
 Standards-Version: 4.6.2
 Rules-Requires-Root: no
-Homepage: https://robmoraes.github.io/pinleaf/
+Homepage: https://pinleaf.dslab.dev.br/
 
 Package: pinleaf
 Architecture: all

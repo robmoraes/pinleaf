@@ -31,6 +31,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Support Ubuntu 24.04's Google credential API, reveal backup selections and
   previews in narrow windows, and include a command manual in Debian packages.
+- Move the project homepage to pinleaf.dslab.dev.br and serve its privacy
+  policy and terms at the same public address.
 - Convert General to Shared in place with an atomic schema-6 upgrade, private
   snapshot, reserved-name collision handling and a dismissible conversion notice.
 - Keep shared editor windows in place when switching projects; preserve hidden

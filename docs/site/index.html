@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Pinleaf</title>
     <meta name="description" content="Pinleaf is a local-first desktop sticky notes app for Ubuntu-first, GNOME-style Linux desktops.">
+    <link rel="canonical" href="https://pinleaf.dslab.dev.br/">
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
@@ -20,6 +21,7 @@
           <a href="https://github.com/robmoraes/pinleaf">GitHub Repository</a>
           <a href="https://github.com/robmoraes/pinleaf/releases/latest">Download latest</a>
           <a href="#install">Install</a>
+          <a href="privacy.html">Privacy Policy</a>
         </div>
       </div>
       <img src="assets/screenshots/overview.png" alt="Pinleaf desktop with four colored notes, the main panel and the AppIndicator menu open.">
@@ -107,6 +109,23 @@
         </div>
       </section>
 
+      <section id="backups" class="release-highlights">
+        <p class="eyebrow">In development</p>
+        <h2>Optional backups, with your notes still local</h2>
+        <p>
+          An upcoming version will add local backup and restore, with
+          optional Google Drive integration. You will be able to save a backup
+          to your own Drive and restore it on another computer, with optional
+          password protection. These features are not included in 0.8.0.
+        </p>
+        <p>
+          Google Drive will be used only after you connect your account and
+          choose to save or restore a backup. Everyday note editing will remain
+          local and available offline. Read the
+          <a href="privacy.html#google-drive">Google Drive privacy details</a>.
+        </p>
+      </section>
+
       <section id="install">
         <h2>Install</h2>
         <p>
@@ -176,16 +195,14 @@ cd pinleaf
           for details.
         </p>
       </section>
-      <section id="privacy">
-        <h2>Privacy and optional backups</h2>
-        <p>Pinleaf stores notes on your computer. The upcoming backup integration
-          adds manual local exports and optional Google Drive backup and restore;
-          it is not included in the published 0.8.0 release. Google access is
-          requested only when you choose to connect, and backups are sent directly
-          to your Drive. There is no maintainer-operated notes server.</p>
-        <p><a href="privacy.html">Privacy Policy</a> · <a href="terms.html">Terms of Use</a> ·
-          <a href="https://github.com/robmoraes/pinleaf/issues">Support</a></p>
-      </section>
     </main>
+    <footer class="site-footer">
+      <nav aria-label="Site links">
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms of Use</a>
+        <a href="https://github.com/robmoraes/pinleaf">Source code</a>
+        <a href="mailto:carlos.moraes.as@gmail.com">Contact Carlos R Moraes</a>
+      </nav>
+    </footer>
   </body>
 </html>

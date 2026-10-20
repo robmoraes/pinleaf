@@ -15,3 +15,4 @@ tar-ignore = debian/debhelper-build-stamp
 tar-ignore = debian/files
 tar-ignore = debian/*.substvars
 tar-ignore = debian/pinleaf
+tar-ignore = local-deploy

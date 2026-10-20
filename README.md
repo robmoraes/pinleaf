@@ -3,7 +3,10 @@
 Pinleaf is a local-first desktop sticky notes app for Ubuntu-first,
 GNOME-style Linux desktops, built with Python, GTK 4 and libadwaita.
 
-Project page: [https://robmoraes.github.io/pinleaf/](https://robmoraes.github.io/pinleaf/)
+Project page: [https://pinleaf.dslab.dev.br/](https://pinleaf.dslab.dev.br/)
+
+[Privacy Policy](https://pinleaf.dslab.dev.br/privacy.html) ·
+[Terms of Use](https://pinleaf.dslab.dev.br/terms.html)
 
 The latest release is [0.8.0](https://github.com/robmoraes/pinleaf/releases/tag/v0.8.0),
 with profiles, groups and scoped text search. Install it through the Ubuntu PPA,

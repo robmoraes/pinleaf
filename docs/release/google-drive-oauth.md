@@ -4,6 +4,10 @@ Pinleaf is a direct desktop client. The maintainer registers the OAuth
 application once; users authorize their own Drive in the system browser.
 There is no Pinleaf backend or user-operated Cloud project.
 
+Public application information: [homepage](https://pinleaf.dslab.dev.br/),
+[privacy policy](https://pinleaf.dslab.dev.br/privacy.html) and
+[terms of use](https://pinleaf.dslab.dev.br/terms.html).
+
 ## Development and distribution
 
 The accepted integration requests only

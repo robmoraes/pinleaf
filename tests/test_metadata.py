@@ -13,7 +13,7 @@ class MetadataTests(unittest.TestCase):
         self.assertTrue(metadata.BUILD_DATE)
         self.assertEqual(metadata.MAINTAINER_NAME, "Carlos R Moraes")
         self.assertEqual(metadata.MAINTAINER_WEBSITE, "https://about.robmoraes.dev.br")
-        self.assertEqual(metadata.PROJECT_WEBSITE, "https://robmoraes.github.io/pinleaf/")
+        self.assertEqual(metadata.PROJECT_WEBSITE, "https://pinleaf.dslab.dev.br/")
         self.assertTrue(metadata.APP_DESCRIPTION)
         self.assertEqual(metadata.APP_LICENSE, "MIT")
         self.assertIn("SIL Open Font License", metadata.FONT_CREDIT)

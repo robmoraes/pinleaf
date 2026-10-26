@@ -346,12 +346,25 @@ bindings. The system Python installation was not changed. Nonfatal nested-X11
 software-rendering/private-bus tray diagnostics did not affect the checks.
 No daily-use note library or saved development connection was read or replaced.
 
-The fresh production two-installation OAuth/Drive drill is **pending explicit
-browser consent**. No browser is connected to automation in this session; the
-maintainer has been asked to confirm the two consent screens or connect Chrome.
-The earlier completed live two-installation evidence remains available, but it
-does not establish a newly authorized production grant. Release readiness must
-not label this fresh drill as passed before receiving and validating its result.
+The additional production two-installation OAuth/Drive spot check was **not
+completed**. The first short attempt expired while waiting for consent. A
+subsequent attempt connected A but expired during B's authorization. The final
+attempt used a test-only 900-second consent timeout to accommodate interaction;
+the product's default 180-second timeout was unchanged. Browser account-selection
+delays continued, and the maintainer instructed stopping this redundant check.
+The last attempt was cancelled before uploads, with no new Drive files and no
+cleanup errors. No result from these incomplete attempts is labeled as passed.
+
+The earlier completed real two-installation drill remains the live transfer,
+refresh and scoped-cleanup evidence. The registered client, requested scope and
+integration behavior were unchanged for this release check. This evidence does
+not establish a fresh production grant; the distinction is retained explicitly.
+
+Main was integrated into the feature branch to resolve add/add conflicts in
+the public privacy and terms pages. The resulting tree was byte-for-byte
+identical to the already tested feature tree; the merge preserves the updated
+canonical links and policy content while joining the previously separate
+policy-document histories.
 
 See [the sanitized checkpoint](artifacts/pre-release-2026-10-26.json). Public
 test records contain no OAuth tokens, account identifiers or website-server

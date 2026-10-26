@@ -44,8 +44,10 @@ of local qualification. See [OAuth token lifecycle](https://developers.google.co
 
 For general distribution, confirm both verified branding and an External / In
 production audience. The maintainer confirmed those Console states on October
-26, 2026. Fresh consent and transfer qualification are separate runtime checks;
-see the [pre-release checkpoint](../../specs/015-local-backup-and-google-drive/execution-drive.md#2026-10-26-pre-release-checkpoint).
+26, 2026. The earlier live two-installation drill qualifies the selected client
+and backup workflow. An additional post-production re-consent attempt was not
+completed because of browser delays; it is not a passing test. See the
+[pre-release checkpoint](../../specs/015-local-backup-and-google-drive/execution-drive.md#2026-10-26-pre-release-checkpoint).
 
 ## Two independently authorized installations
 

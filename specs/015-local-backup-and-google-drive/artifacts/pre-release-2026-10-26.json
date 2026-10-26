@@ -55,12 +55,38 @@
     "publishing_status": "In production"
   },
   "fresh_production_oauth_drill": {
-    "status": "PENDING",
-    "reason": "Awaiting browser consent; no browser is connected to automation in this session",
+    "status": "NOT_COMPLETED",
+    "disposition": "Additional spot check stopped at maintainer direction after prolonged browser account-selection delays; earlier completed live qualification retained",
     "test_helper": "tests/drive_two_installations.py",
-    "client": "bundled distribution resource; no development override"
+    "client": "bundled distribution resource; no development override",
+    "new_drive_files_created": 0,
+    "cleanup_errors": [],
+    "product_oauth_timeout_changed": false,
+    "last_attempt_test_only_consent_timeout_seconds": 900
   },
   "daily_use_library_accessed": false,
   "release_version_changed": false,
-  "release_published": false
+  "release_published": false,
+  "live_drive_qualification": {
+    "status": "PASS",
+    "evidence": "two-installations.json",
+    "notes": 1000,
+    "independent_authorizations": true,
+    "modes": [
+      "unprotected",
+      "protected"
+    ],
+    "created_files": 3,
+    "removed_files": 3,
+    "preexisting_files_preserved": true,
+    "evidence_note": "Earlier completed live drill; not a new October 26 production grant"
+  },
+  "main_integration": {
+    "status": "PASS",
+    "conflicts": [
+      "docs/site/privacy.html",
+      "docs/site/terms.html"
+    ],
+    "resolved_tree_identical_to_tested_tree": true
+  }
 }

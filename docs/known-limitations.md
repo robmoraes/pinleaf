@@ -114,8 +114,10 @@ The selected Pinleaf Desktop OAuth client is bundled in the repository. A local
 test binary built from that resource passed build/inspection/Lintian and loaded
 the client without a development override. It was not installed or published.
 On October 26, 2026, the maintainer confirmed verified branding and an External /
-In production audience. Fresh production consent remains a separate runtime
-check; see [OAuth qualification](release/google-drive-oauth.md).
+In production audience. The completed live two-installation drill remains the
+transfer evidence. An additional production re-consent spot check was stopped
+after browser delays and is not recorded as passed; see
+[OAuth qualification](release/google-drive-oauth.md).
 
 ## Packaging
 

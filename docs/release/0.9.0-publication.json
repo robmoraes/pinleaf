@@ -1,0 +1,66 @@
+{
+  "version": "0.9.0",
+  "tag": "v0.9.0",
+  "commit": "8f8d2e7b0809fedb96c6befcdafe585f5c713f29",
+  "target": "Ubuntu 24.04 LTS / noble",
+  "github": {
+    "status": "PUBLISHED",
+    "url": "https://github.com/robmoraes/pinleaf/releases/tag/v0.9.0",
+    "workflow": "https://github.com/robmoraes/pinleaf/actions/runs/40412255825",
+    "workflow_result": "success",
+    "published_at": "2026-10-26T22:33:44Z",
+    "asset_downloads_sizes_and_sha256_verified": true,
+    "assets": {
+      "pinleaf_0.9.0_all.deb": "8c64d66b6f92f531ca618ed7c721264cd5fde7a35aedb3d61aea9ee10d3c0a55",
+      "pinleaf_0.9.0_amd64.buildinfo": "ec711804f3146c7447e682cd29d71c0097355b495591c5dee34e2ab7db49d21a",
+      "pinleaf_0.9.0_amd64.changes": "17fbd15d78b6af92cc2d8fc52e9ce3fff35d502eb4d09b018e88dfb3ea4fff9d"
+    }
+  },
+  "source_upload": {
+    "built_from_tag": true,
+    "included_files_matching_tag": 280,
+    "private_deploy_and_local_data_absent": true,
+    "gpg_fingerprint": "C8F3D9976DEDB74C5C31BFC87854367646319599",
+    "all_three_signatures_and_manifest_hashes_verified": true,
+    "lintian": {
+      "returncode": 0,
+      "warnings": 0,
+      "errors": 0
+    },
+    "dput_simulation": "PASS",
+    "dput_upload": "Successfully uploaded packages.",
+    "destination": "ppa:robmoraes/pinleaf",
+    "accepted_at": "2026-10-26T22:37:12.742197+00:00",
+    "version_consumed_do_not_reupload": true,
+    "artifacts": {
+      "pinleaf_0.9.0.dsc": "beb4c0ad23a781d14eeddec56a249178f5712bab7df15ead988aaaa67fd65b33",
+      "pinleaf_0.9.0.tar.xz": "8bae4f0e7fefad2618b4d2d0d997d9c02ed2686f30cde320f8746a1bee9757c7",
+      "pinleaf_0.9.0_source.buildinfo": "377747b1a769c5b7a0b32b61209def269f16fa31eb8a5c3287cd37e4fc41cb7f",
+      "pinleaf_0.9.0_source.changes": "5fc2bee8fb4d0ebdec06d37e13b5eb712e2d38b24467fdaf5b3441e103c8b1d1"
+    }
+  },
+  "launchpad_observation": {
+    "source": {
+      "self_link": "https://api.launchpad.net/1.0/~robmoraes/+archive/ubuntu/pinleaf/+sourcepub/18900741",
+      "status": "Pending",
+      "date_published": null
+    },
+    "build": {
+      "self_link": "https://api.launchpad.net/1.0/~robmoraes/+archive/ubuntu/pinleaf/+build/33874878",
+      "buildstate": "Gathering build output",
+      "datebuilt": null,
+      "build_log_url": "https://launchpad.net/~robmoraes/+archive/ubuntu/pinleaf/+build/33874878/+files/buildlog_ubuntu-noble-amd64.pinleaf_0.9.0_BUILDING.txt.gz",
+      "web_link": "https://launchpad.net/~robmoraes/+archive/ubuntu/pinleaf/+build/33874878",
+      "date_first_dispatched": "2026-10-26T22:37:27.272463+00:00"
+    },
+    "apt": [
+      {
+        "version": "0.8.0",
+        "filename": "pool/main/p/pinleaf/pinleaf_0.8.0_all.deb",
+        "sha256": "3ffefa50682cbbf4bdd7c030bbe3acf0c89a45a19c263b35161972f3948956ff"
+      }
+    ],
+    "checked_at": "2026-10-26T22:39:56.039295+00:00"
+  },
+  "application_installed": false
+}

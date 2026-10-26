@@ -8,14 +8,14 @@ Project page: [https://pinleaf.dslab.dev.br/](https://pinleaf.dslab.dev.br/)
 [Privacy Policy](https://pinleaf.dslab.dev.br/privacy.html) ·
 [Terms of Use](https://pinleaf.dslab.dev.br/terms.html)
 
-**0.9.0 is being prepared** with Shared notes, the header New menu, offline
-backup/restore and optional Google Drive backups.
-See the [release checklist](docs/release/0.9.0.md).
-
-The latest published release is [0.8.0](https://github.com/robmoraes/pinleaf/releases/tag/v0.8.0),
-with profiles, groups and scoped text search. Install it through the Ubuntu PPA,
-download its Debian package from GitHub Releases or
+**[0.9.0 is available on GitHub](https://github.com/robmoraes/pinleaf/releases/tag/v0.9.0)**
+with Shared notes, the header New menu, offline backup/restore and optional
+Google Drive backups. Download its Debian package or
 [run from source](#development-setup).
+
+The Ubuntu PPA accepted the 0.9.0 source upload; its build and publication are
+in progress. Until publication completes, the PPA provides 0.8.0.
+See the [release record](docs/release/0.9.0.md).
 
 ![Pinleaf desktop overview](docs/site/assets/screenshots/overview.png)
 
@@ -69,8 +69,8 @@ Pinleaf includes:
 
 ## Profiles and Groups
 
-The following describes 0.9.0. Published 0.8.0 uses General and an
-active-group-only desktop; 0.9.0 is currently being prepared for publication.
+The following describes 0.9.0. Earlier 0.8.0 uses General and an
+active-group-only desktop.
 
 Choose a profile in the panel's title bar. Its last ordinary group is restored,
 including the valid state with no ordinary group active. Every profile has a

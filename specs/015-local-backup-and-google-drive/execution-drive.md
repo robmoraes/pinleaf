@@ -318,3 +318,43 @@ artifact hash. D01–D05 are complete. Google Testing-mode limitations remain;
 general distribution still requires deliberate Console publishing configuration
 and the normal release process. No install, version bump, push or publication
 was performed.
+
+## 2026-10-26 pre-release checkpoint
+
+The maintainer reported verified Google branding and supplied an Audience
+screenshot showing External / In production. After authorization to proceed,
+the distribution client was checked with `PINLEAF_GOOGLE_CLIENT_FILE` unset.
+Console confirmation is recorded separately from live OAuth execution.
+
+Completed checks against source revision `8b4c29d`:
+
+- **280 tests passed, zero skips**, in 20.356 seconds on isolated nested X11.
+- System Python compileall, both schemas and nine contract fixtures passed,
+  including incorrect-password and authenticated-header tampering checks.
+- The real GTK restore workflow passed with **1,000 synthetic notes**, protected
+  and unprotected copies, and eight worker-progress heartbeats. This check used
+  the stateful provider double, not Google Drive.
+- Actual v0.8.0 and v0.7.0 readers refused schema 6 without mutation. Snapshot
+  recovery restored the three exact original rows and preserved newer WAL work.
+- A disposable Debian package built from the bundled client without injection
+  passed inspection, cold configuration loading and strict Lintian with empty
+  diagnostics. No package was installed or published; 0.8.0 was retained only
+  for this qualification build.
+
+Runtime Google dependencies were installed in a temporary venv with system GTK
+bindings. The system Python installation was not changed. Nonfatal nested-X11
+software-rendering/private-bus tray diagnostics did not affect the checks.
+No daily-use note library or saved development connection was read or replaced.
+
+The fresh production two-installation OAuth/Drive drill is **pending explicit
+browser consent**. No browser is connected to automation in this session; the
+maintainer has been asked to confirm the two consent screens or connect Chrome.
+The earlier completed live two-installation evidence remains available, but it
+does not establish a newly authorized production grant. Release readiness must
+not label this fresh drill as passed before receiving and validating its result.
+
+See [the sanitized checkpoint](artifacts/pre-release-2026-10-26.json). Public
+test records contain no OAuth tokens, account identifiers or website-server
+deployment configuration. The maintained verification index and operator
+commands were refreshed to use the bundled client by default. Version changes,
+release/tag publication and PPA upload remain outside these completed checks.

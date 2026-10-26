@@ -112,8 +112,10 @@ restore workflows passed in isolated X11; Orca speech remains unqualified.
 
 The selected Pinleaf Desktop OAuth client is bundled in the repository. A local
 test binary built from that resource passed build/inspection/Lintian and loaded
-the client without a development override. It was not installed or published. Google's testing-mode account/expiry restrictions remain until deliberate
-publishing configuration. See [OAuth qualification](release/google-drive-oauth.md).
+the client without a development override. It was not installed or published.
+On October 26, 2026, the maintainer confirmed verified branding and an External /
+In production audience. Fresh production consent remains a separate runtime
+check; see [OAuth qualification](release/google-drive-oauth.md).
 
 ## Packaging
 

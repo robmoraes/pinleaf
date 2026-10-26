@@ -1,6 +1,7 @@
 """Live, explicit two-installation drill with synthetic notes and scoped cleanup.
 
-Requires --live --cleanup-created and the registered development client override.
+Requires --live --cleanup-created. Uses the bundled desktop client by default;
+PINLEAF_GOOGLE_CLIENT_FILE is an optional development override.
 Both installations authorize independently in the system browser. Only files
 created by this invocation are deleted; pre-existing Drive copies are preserved.
 """

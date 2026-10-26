@@ -1,8 +1,10 @@
 # Maintained verification cases: Backup and restore
 
 Local cases TC-BKP-001–009 and 015 are automated; local portions of 014/016 are
-automated. Drive cases 010–013 and remote portions of 014/016 remain candidates.
-These are reusable definitions; actual results are in [execution](execution.md).
+automated. Drive cases 010–013 and remote portions of 014/016 have provider,
+GTK and native checks, complemented by a live two-installation drill. These are
+reusable definitions; actual results and remaining qualification limits are in
+[local execution](execution.md) and [Drive execution](execution-drive.md).
 
 ## Shared preconditions, data and cleanup
 

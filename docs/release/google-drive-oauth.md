@@ -42,16 +42,25 @@ available. Changing the application's publishing/verification status is a
 separate Google Console operation before general distribution, not a side effect
 of local qualification. See [OAuth token lifecycle](https://developers.google.com/identity/protocols/oauth2).
 
+For general distribution, confirm both verified branding and an External / In
+production audience. The maintainer confirmed those Console states on October
+26, 2026. Fresh consent and transfer qualification are separate runtime checks;
+see the [pre-release checkpoint](../../specs/015-local-backup-and-google-drive/execution-drive.md#2026-10-26-pre-release-checkpoint).
+
 ## Two independently authorized installations
 
 Run from the repository root in a desktop session with an unlocked system
 keyring, using the designated test account:
 
 ```bash
-PINLEAF_GOOGLE_CLIENT_FILE=/absolute/path/to/client.json \
+env -u PINLEAF_GOOGLE_CLIENT_FILE \
   /usr/bin/python3 tests/drive_two_installations.py \
   --live --cleanup-created --report /tmp/pinleaf-two-installations-report.json
 ```
+
+This command qualifies the bundled distribution client. For a deliberately
+selected development client, set `PINLEAF_GOOGLE_CLIENT_FILE` to its absolute
+path instead; both installations must use the same registered client.
 
 The helper opens consent for A, then for B. Confirm both with the same Google
 account. Each has a fresh data directory and its own installation key in Secret
@@ -76,12 +85,14 @@ every pre-existing copy. See the [sanitized report](../../specs/015-local-backup
 
 ```bash
 /usr/bin/python3 tests/qualify_debian_package.py \
-  --client-file /absolute/path/to/client.json \
   --report /tmp/pinleaf-package-report.json
 ```
 
+Omitting `--client-file` checks the bundled distribution resource without
+injection. Use that option only when qualifying a separate development client.
+
 This copies only tracked/nonignored sources into a private temporary build tree,
-injects only the whitelisted client configuration there, builds an unsigned
+optionally injects whitelisted client configuration there, builds an unsigned
 Debian binary, extracts it and checks schemas/modules/dependencies/manpage and
 client loading without the developer override. Lintian must pass with no errors
 or warnings. It neither installs the package nor publishes artifacts. The

@@ -1,0 +1,66 @@
+{
+  "checked_on": "2026-10-26",
+  "source_revision": "8b4c29d179dba968df36743d479d9a8cfaeb532b",
+  "regression": {
+    "status": "PASS",
+    "tests": 280,
+    "skips": 0,
+    "seconds": 20.356,
+    "session": "isolated nested X11",
+    "python": "3.12.3"
+  },
+  "compileall": "PASS",
+  "contract_examples": {
+    "status": "PASS",
+    "schemas": 2,
+    "fixtures": 9,
+    "wrong_password_and_header_tampering": "PASS"
+  },
+  "gui_restore": {
+    "status": "PASS",
+    "provider": "double",
+    "notes": 1000,
+    "restored_modes": [
+      "unprotected",
+      "protected"
+    ],
+    "responsive_worker_heartbeats": 8
+  },
+  "downgrade_recovery": {
+    "status": "PASS",
+    "old_readers": [
+      "v0.8.0",
+      "v0.7.0"
+    ],
+    "new_schema": 6,
+    "original_rows_restored": 3,
+    "wal_work_preserved": true
+  },
+  "debian_package": {
+    "status": "PASS",
+    "installed": false,
+    "published": false,
+    "client_injected_in_build_copy": false,
+    "packaged_client_configured": true,
+    "sha256": "4e244f7e79f57a63e47d320e8a1ce591259263d01895cdb554e8494208220295",
+    "depends": "python3, python3-gi, python3-jsonschema, python3-cryptography, python3-google-auth (>= 1.5.1), python3-google-auth-oauthlib (>= 0.4.2), python3-requests, python3-secretstorage, gir1.2-gtk-4.0, gir1.2-adw-1, gir1.2-ayatanaappindicator3-0.1, libayatana-appindicator3-1, libfontconfig1",
+    "lintian_returncode": 0,
+    "lintian_output": "",
+    "version_note": "0.8.0 retained only for disposable qualification; no installation or publication"
+  },
+  "oauth_console": {
+    "evidence_source": "maintainer confirmation and supplied screenshot",
+    "branding": "verified",
+    "audience": "External",
+    "publishing_status": "In production"
+  },
+  "fresh_production_oauth_drill": {
+    "status": "PENDING",
+    "reason": "Awaiting browser consent; no browser is connected to automation in this session",
+    "test_helper": "tests/drive_two_installations.py",
+    "client": "bundled distribution resource; no development override"
+  },
+  "daily_use_library_accessed": false,
+  "release_version_changed": false,
+  "release_published": false
+}

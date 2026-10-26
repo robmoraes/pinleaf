@@ -15,10 +15,12 @@ the uploader through the source package's GPG signature. SSH setup is needed
 when choosing SFTP instead; see the
 [official upload guide](https://ubuntu.com/docs/launchpad/user/how-to/packaging/ppa-package-upload/).
 
-Release **0.9.0 is being prepared**. The operational examples below target
-0.9.0; they do not mean it has been uploaded or published. GitHub and the PPA
-still publish 0.8.0 until their respective publication steps complete. Version
-0.8.0 has already been uploaded and must not be reused.
+Release **0.9.0 is published on
+[GitHub](https://github.com/robmoraes/pinleaf/releases/tag/v0.9.0)**. Launchpad
+accepted its signed `noble` source upload and is building it; PPA publication
+is pending. See the [release record](0.9.0.md) for evidence and current status.
+The examples below document that upload. Versions 0.8.0 and 0.9.0 have already
+been uploaded and must not be reused for another source upload.
 
 The current PPA target is Ubuntu 24.04 LTS:
 

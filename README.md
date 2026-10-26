@@ -8,7 +8,11 @@ Project page: [https://pinleaf.dslab.dev.br/](https://pinleaf.dslab.dev.br/)
 [Privacy Policy](https://pinleaf.dslab.dev.br/privacy.html) ·
 [Terms of Use](https://pinleaf.dslab.dev.br/terms.html)
 
-The latest release is [0.8.0](https://github.com/robmoraes/pinleaf/releases/tag/v0.8.0),
+**0.9.0 is being prepared** with Shared notes, the header New menu, offline
+backup/restore and optional Google Drive backups.
+See the [release checklist](docs/release/0.9.0.md).
+
+The latest published release is [0.8.0](https://github.com/robmoraes/pinleaf/releases/tag/v0.8.0),
 with profiles, groups and scoped text search. Install it through the Ubuntu PPA,
 download its Debian package from GitHub Releases or
 [run from source](#development-setup).
@@ -65,8 +69,8 @@ Pinleaf includes:
 
 ## Profiles and Groups
 
-The following describes the development branch. Published 0.8.0 uses General
-and an active-group-only desktop; Shared is scheduled for the next release.
+The following describes 0.9.0. Published 0.8.0 uses General and an
+active-group-only desktop; 0.9.0 is currently being prepared for publication.
 
 Choose a profile in the panel's title bar. Its last ordinary group is restored,
 including the valid state with no ordinary group active. Every profile has a
@@ -116,11 +120,11 @@ expansion leave the desktop unchanged; an actual context switch resets search.
 Press **Ctrl+F** to focus search. Clear it or press **Escape** to restore normal
 sections and previous expansion. With no matches, use **Clear Search**.
 
-## Backup and Restore (development branch)
+## Backup and Restore
 
 Open **Main menu → Backup & Restore…** to create a local `.pinleaf-backup`
-file or restore one. This unreleased feature works offline and includes the
-whole library: profiles, groups, hidden notes, retained deleted records, current
+file or restore one. Available in the 0.9.0 source, this works offline and
+includes the whole library: profiles, groups, hidden notes, retained deleted records, current
 context and text defaults. Pending edits are saved before capture; later edits
 remain local and are not included in the captured copy.
 
@@ -137,20 +141,17 @@ preview leaves the current library in place. The startup-error screen also offer
 local restore and preserves unreadable original database/journal files first.
 
 The first format accepts library schema 6. Raw SQLite migration snapshots and
-other portable versions are not inputs for this reader. The development window
+other portable versions are not inputs for this reader. The backup window
 supports Google Drive account connection, saving/listing copies and downloading
 them through the same validated replacement-restore workflow.
 
-### Google Drive development setup
+### Google Drive
 
-The maintainer registers a desktop OAuth client with the Google Drive API
-enabled and only `https://www.googleapis.com/auth/drive.file` declared. Keep the
-downloaded client JSON outside tracked files. Point development at it explicitly:
-
-```bash
-PINLEAF_GOOGLE_CLIENT_FILE=/absolute/path/to/client.json \
-  XDG_DATA_HOME=/tmp/pinleaf-dev /usr/bin/python3 -m pinleaf
-```
+The 0.9.0 build includes Pinleaf's registered desktop OAuth client. Normal users
+only need their own Google account and browser authorization; they do not need
+to create a Google Cloud project or supply client JSON or AWS credentials.
+Pinleaf requests only `https://www.googleapis.com/auth/drive.file`, covering
+files created by or explicitly made available to the app.
 
 In **Backup & Restore**, choose **Connect Google Drive…**. Authorization opens
 the system browser and waits up to three minutes. Cancel stops waiting. Saved
@@ -201,12 +202,16 @@ there is no automatic retry, cleanup or pruning. A cancelled/lost response can
 leave a remotely completed copy, which Refresh or Retry can discover. Local
 backup status and the last recorded successful Drive upload are kept separately.
 
-For Google's testing mode, add the designated account under OAuth test users.
-Testing grants may expire and require Disconnect followed by Connect. The
-development client override is not included in backups or packages. A registered
-client resource/distribution configuration is still required before release.
-See [OAuth setup and package qualification](docs/release/google-drive-oauth.md)
-for independent-installation testing, client distribution and local package checks.
+Google access can expire or be revoked; use Disconnect followed by Connect to
+reauthorize. The distributed client uses verified branding and an External /
+In production audience. Google Workspace administrators may apply their own
+account restrictions.
+
+Developers who deliberately use a separate registered desktop client can select
+it with `PINLEAF_GOOGLE_CLIENT_FILE=/absolute/path/to/client.json`. That override
+is not included in backups or packages. See
+[OAuth setup and package qualification](docs/release/google-drive-oauth.md)
+for client registration and independent-installation tests.
 
 ## Install
 
@@ -292,7 +297,7 @@ sudo apt install \
 Clone the repository and run the app from the project root:
 
 ```bash
-git clone https://github.com/<owner>/pinleaf.git
+git clone https://github.com/robmoraes/pinleaf.git
 cd pinleaf
 /usr/bin/python3 -m pinleaf
 ```
@@ -372,8 +377,8 @@ After merging the release changes into `main`, create and push a version tag:
 ```bash
 git switch main
 git pull
-git tag -a v0.8.0 -m "Release Pinleaf 0.8.0"
-git push origin v0.8.0
+git tag -a v0.9.0 -m "Release Pinleaf 0.9.0"
+git push origin v0.9.0
 ```
 
 The release workflow runs on `v*` tags. It runs tests, builds the local Debian
@@ -390,15 +395,15 @@ Launchpad:
 
 ```bash
 debuild -S -kC8F3D9976DEDB74C5C31BFC87854367646319599
-lintian ../pinleaf_0.8.0_source.changes
-dput -s ppa:robmoraes/pinleaf ../pinleaf_0.8.0_source.changes
+lintian ../pinleaf_0.9.0_source.changes
+dput -s ppa:robmoraes/pinleaf ../pinleaf_0.9.0_source.changes
 ```
 
 After the release is approved, signatures are verified and Lintian passes,
 publish the source package:
 
 ```bash
-dput ppa:robmoraes/pinleaf ../pinleaf_0.8.0_source.changes
+dput ppa:robmoraes/pinleaf ../pinleaf_0.9.0_source.changes
 ```
 
 The PPA target is Ubuntu 24.04 LTS (`noble`).

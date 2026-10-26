@@ -40,7 +40,7 @@
       </section>
 
       <section>
-        <h2>Available in 0.8.0</h2>
+        <h2>Desktop notes, kept local</h2>
         <ul class="features">
           <li>Independent post-it-style note windows.</li>
           <li>Autosave and local SQLite persistence.</li>
@@ -54,36 +54,37 @@
       </section>
 
       <section id="preview" class="release-highlights">
-        <p class="eyebrow">New in 0.8.0</p>
-        <h2>Organize your desktop in 0.8.0</h2>
+        <p class="eyebrow">Preparing 0.9.0</p>
+        <h2>Shared notes and portable backups</h2>
         <p>
-          Profiles, groups and text search keep the notes for each project together.
-          Get 0.8.0 from
+          The 0.9.0 source adds Shared notes, a compact New menu and local or
+          Google Drive backups. Release publication is being prepared.
+          The latest published version is still 0.8.0 on
           <a href="https://github.com/robmoraes/pinleaf/releases/tag/v0.8.0">GitHub Releases</a>
-          or install it from the <a href="#install">Ubuntu PPA</a>.
-          You can also <a href="#run">run from source</a>.
+          and the <a href="#install">Ubuntu PPA</a>.
+          You can <a href="#run">run the new source</a> while publication is prepared.
         </p>
         <ul class="features">
-          <li>Separate work, freelance and personal notes with profiles chosen in the panel header.</li>
-          <li>Expand groups to browse notes. Activate one group to show its open notes on the desktop.</li>
-          <li>Keep hidden notes hidden when switching groups, and restore each profile's last active group.</li>
-          <li>Search full note text in the active group, current profile or all profiles, ignoring case and accents.</li>
-          <li>Move notes between groups or profiles. When deleting a group or profile, transfer its notes or delete them.</li>
-          <li>Existing notes start in Personal / General, with a permanent General group in every profile.</li>
+          <li>Keep Shared notes visible alongside the active project in each profile.</li>
+          <li>Create Shared notes through its + action, or use the header's New Note / New Group menu.</li>
+          <li>Search Shared and the active group together, or broaden the search to a profile or all profiles.</li>
+          <li>Save and restore the complete note library locally, with optional password protection.</li>
+          <li>Connect your own Google account to save dated Drive backups and restore them on another computer.</li>
+          <li>Upgrade General to Shared in place with a validated recovery snapshot; hidden notes stay hidden.</li>
         </ul>
         <div class="gallery release-gallery">
           <figure>
-            <img src="assets/screenshots/preview-groups.png" width="520" height="620" loading="lazy" alt="Pinleaf 0.8.0 panel with a Personal profile selector, expandable groups and an explicit Activate action.">
-            <figcaption>Profiles and expandable groups</figcaption>
+            <img src="assets/screenshots/shared-panel.png" width="520" height="620" loading="lazy" alt="Pinleaf 0.9.0 source panel with a Shared-only profile, its + action and the New dropdown in the header.">
+            <figcaption>A Shared-only profile and the header New menu</figcaption>
           </figure>
           <figure>
-            <img src="assets/screenshots/preview-search.png" width="520" height="620" loading="lazy" alt="Pinleaf 0.8.0 search across all profiles, with profile and group paths identifying each result.">
-            <figcaption>Search across profiles and groups</figcaption>
+            <img src="assets/screenshots/drive-backups.png" width="500" height="580" loading="lazy" alt="Pinleaf Backup and Restore window listing protected and unprotected synthetic Google Drive copies with Preview and Restore actions.">
+            <figcaption>Manual backups in your own Google Drive</figcaption>
           </figure>
         </div>
         <p>
           <a href="https://github.com/robmoraes/pinleaf/blob/main/README.md#profiles-and-groups">Read the profiles and groups guide</a>
-          for activation, hidden notes, movement and deletion behavior.
+          for Shared, activation, hidden notes, movement and deletion behavior.
         </p>
       </section>
 
@@ -110,17 +111,18 @@
       </section>
 
       <section id="backups" class="release-highlights">
-        <p class="eyebrow">In development</p>
+        <p class="eyebrow">Included in the 0.9.0 source</p>
         <h2>Optional backups, with your notes still local</h2>
         <p>
-          An upcoming version will add local backup and restore, with
-          optional Google Drive integration. You will be able to save a backup
-          to your own Drive and restore it on another computer, with optional
-          password protection. These features are not included in 0.8.0.
+          Create a local copy of the complete note library, or connect Google
+          Drive to save a dated backup and restore it on another computer.
+          Password protection is optional. Restore validates the file, shows a
+          preview and preserves a recovery copy before replacing the library.
+          These features are prepared for 0.9.0 and are not in published 0.8.0.
         </p>
         <p>
-          Google Drive will be used only after you connect your account and
-          choose to save or restore a backup. Everyday note editing will remain
+          Google Drive is used only after you connect your account and
+          choose to save or restore a backup. Everyday note editing remains
           local and available offline. Read the
           <a href="privacy.html#google-drive">Google Drive privacy details</a>.
         </p>
@@ -149,6 +151,11 @@ sudo apt install ../pinleaf_*.deb</code></pre>
         <p>Run from source with Ubuntu 24.04 system dependencies:</p>
         <pre><code>sudo apt install \
   python3-gi \
+  python3-jsonschema \
+  python3-cryptography \
+  python3-google-auth-oauthlib \
+  python3-requests \
+  python3-secretstorage \
   gir1.2-gtk-4.0 \
   gir1.2-adw-1 \
   gir1.2-ayatanaappindicator3-0.1 \
@@ -166,6 +173,11 @@ cd pinleaf
         <p>Install the Ubuntu 24.04 system dependencies:</p>
         <pre><code>sudo apt install \
   python3-gi \
+  python3-jsonschema \
+  python3-cryptography \
+  python3-google-auth-oauthlib \
+  python3-requests \
+  python3-secretstorage \
   gir1.2-gtk-4.0 \
   gir1.2-adw-1 \
   gir1.2-ayatanaappindicator3-0.1 \
@@ -183,9 +195,11 @@ cd pinleaf
       <section>
         <h2>Current status</h2>
         <p>
-          The latest version on GitHub and the Ubuntu PPA is
+          Version 0.9.0 is being prepared with Shared notes, the header New menu
+          and local or Google Drive backups. The latest published version on
+          GitHub and the Ubuntu PPA remains
           <a href="https://github.com/robmoraes/pinleaf/releases/tag/v0.8.0">v0.8.0</a>,
-          with <a href="#preview">profiles, groups and scoped text search</a>.
+          with profiles, groups and scoped text search.
           Known limitations include
           best-effort window positioning and desktop-environment-specific
           AppIndicator behavior.

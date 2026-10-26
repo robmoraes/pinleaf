@@ -15,9 +15,10 @@ the uploader through the source package's GPG signature. SSH setup is needed
 when choosing SFTP instead; see the
 [official upload guide](https://ubuntu.com/docs/launchpad/user/how-to/packaging/ppa-package-upload/).
 
-Release 0.8.0 is published on GitHub and the Ubuntu PPA. The operational
-examples below document that release; 0.8.0 has already been uploaded and must
-not be reused for a future upload. Choose a new package version for the next release.
+Release **0.9.0 is being prepared**. The operational examples below target
+0.9.0; they do not mean it has been uploaded or published. GitHub and the PPA
+still publish 0.8.0 until their respective publication steps complete. Version
+0.8.0 has already been uploaded and must not be reused.
 
 The current PPA target is Ubuntu 24.04 LTS:
 
@@ -204,10 +205,11 @@ Completed checks:
 The disposable build retained **0.8.0 only for local tooling qualification**.
 That version has already been published and must never be uploaded again.
 The actual release must use a new version and freshly rebuilt artifacts from
-its tagged commit. Publication remains deferred until Google branding approval,
-production OAuth status and the normal release checks are complete; elapsed
-24 hours alone does not authorize a release. Server acceptance and remote
-build success can only be confirmed during the eventual real upload.
+its tagged commit. At that checkpoint, publication remained deferred pending
+Google branding approval, production OAuth status and the normal release checks.
+The current 0.9.0 preparation is tracked in [its release checklist](0.9.0.md).
+Server acceptance and remote build success can only be confirmed during the
+eventual real upload.
 
 The private transfer ZIP remains ignored, with mode 0600. It contains both the
 private key and its passphrase; retain an offline backup and move the temporary
@@ -228,7 +230,7 @@ git status -sb
 Create a short-lived release or packaging branch:
 
 ```bash
-git switch -c release/0.8.0
+git switch -c release/0.9.0
 ```
 
 Update version references:
@@ -243,14 +245,16 @@ Update version references:
 For the PPA upload, `debian/changelog` must use the target Ubuntu series:
 
 ```text
-pinleaf (0.8.0) noble; urgency=medium
+pinleaf (0.9.0) noble; urgency=medium
 
-  * Release Pinleaf 0.8.0 with profiles, groups and scoped text search.
-  * Preserve hidden notes and pending edits when switching desktop contexts.
-  * Add note transfer and container deletion with move/delete choices.
-  * Migrate existing notes to Personal / General with validated local backups.
+  * Keep Shared notes visible alongside the active project in each profile.
+  * Add the header New Note and New Group menu.
+  * Add local backup and replacement restore with optional password protection.
+  * Add manual Google Drive backup and restore with browser OAuth and keyring.
+  * Preserve libraries with validated previews, recovery copies and schema-6
+    migration snapshots; include the new runtime dependencies and manual.
 
- -- Carlos R Moraes <carlos.moraes.as@gmail.com>  Sat, 10 Oct 2026 09:55:55 -0300
+ -- Carlos R Moraes <carlos.moraes.as@gmail.com>  Mon, 26 Oct 2026 18:55:09 -0300
 ```
 
 Use a new version for every upload. Launchpad will reject uploading the same
@@ -274,14 +278,14 @@ dpkg-buildpackage -us -uc -b
 Inspect the package if needed:
 
 ```bash
-dpkg-deb -I ../pinleaf_0.8.0_all.deb
-dpkg-deb -c ../pinleaf_0.8.0_all.deb | less
+dpkg-deb -I ../pinleaf_0.9.0_all.deb
+dpkg-deb -c ../pinleaf_0.9.0_all.deb | less
 ```
 
 Run `lintian` on the binary build:
 
 ```bash
-lintian ../pinleaf_0.8.0_amd64.changes
+lintian ../pinleaf_0.9.0_amd64.changes
 ```
 
 The current accepted warning is:
@@ -304,18 +308,18 @@ debuild -S -kC8F3D9976DEDB74C5C31BFC87854367646319599
 This creates source artifacts in the parent directory:
 
 ```text
-../pinleaf_0.8.0.dsc
-../pinleaf_0.8.0.tar.xz
-../pinleaf_0.8.0_source.buildinfo
-../pinleaf_0.8.0_source.changes
+../pinleaf_0.9.0.dsc
+../pinleaf_0.9.0.tar.xz
+../pinleaf_0.9.0_source.buildinfo
+../pinleaf_0.9.0_source.changes
 ```
 
 Verify the signatures:
 
 ```bash
-gpg --verify ../pinleaf_0.8.0.dsc
-gpg --verify ../pinleaf_0.8.0_source.buildinfo
-gpg --verify ../pinleaf_0.8.0_source.changes
+gpg --verify ../pinleaf_0.9.0.dsc
+gpg --verify ../pinleaf_0.9.0_source.buildinfo
+gpg --verify ../pinleaf_0.9.0_source.changes
 ```
 
 The signature should be from the Launchpad-registered key.
@@ -323,7 +327,7 @@ The signature should be from the Launchpad-registered key.
 Run `lintian` on the source upload:
 
 ```bash
-lintian ../pinleaf_0.8.0_source.changes
+lintian ../pinleaf_0.9.0_source.changes
 ```
 
 The source upload should be clean before publishing.
@@ -337,7 +341,7 @@ before continuing to a real upload.
 Before uploading for real, run `dput` checks:
 
 ```bash
-dput -s ppa:robmoraes/pinleaf ../pinleaf_0.8.0_source.changes
+dput -s ppa:robmoraes/pinleaf ../pinleaf_0.9.0_source.changes
 ```
 
 The simulation should show uploads to:
@@ -349,7 +353,7 @@ ppa.launchpad.net:~robmoraes/pinleaf
 With the optional local alias, the equivalent simulation is:
 
 ```bash
-dput -s pinleaf-ppa ../pinleaf_0.8.0_source.changes
+dput -s pinleaf-ppa ../pinleaf_0.9.0_source.changes
 ```
 
 It resolves to `ppa.launchpad.net:~robmoraes/ubuntu/pinleaf/`. A successful
@@ -362,7 +366,7 @@ are checked only after an actual release upload.
 Upload the signed source package:
 
 ```bash
-dput ppa:robmoraes/pinleaf ../pinleaf_0.8.0_source.changes
+dput ppa:robmoraes/pinleaf ../pinleaf_0.9.0_source.changes
 ```
 
 Expected result:
@@ -392,8 +396,8 @@ Useful states:
 - `Failed to build`: inspect the build log, fix packaging, bump the version and
   upload again.
 
-The build page provides the build log and generated files. The successful
-Ubuntu 24.04 (`noble`) build for release `0.8.0` is:
+The build page provides the build log and generated files. As a historical
+reference, the successful Ubuntu 24.04 (`noble`) build for release `0.8.0` was:
 
 ```text
 https://launchpad.net/~robmoraes/+archive/ubuntu/pinleaf/+build/33831012
@@ -493,10 +497,10 @@ debuild -S -kC8F3D9976DEDB74C5C31BFC87854367646319599
 
 Publish the two channels in this order:
 
-1. Prepare `release/0.8.0`, promote `CHANGELOG.md`, and update package metadata,
+1. Prepare `release/0.9.0`, promote `CHANGELOG.md`, and update package metadata,
    README and GitHub Pages. Keep the actual PPA version explicit until it changes.
 2. Run local checks and open the release PR.
-3. Merge to `main`, then create and push `v0.8.0`.
+3. Merge to `main`, then create and push `v0.9.0`.
 4. Confirm the GitHub Release workflow publishes the Debian artifacts.
 5. Build and sign the source package from the tagged commit, verify its
    signatures, run Lintian and simulate the PPA upload with `dput -s`.

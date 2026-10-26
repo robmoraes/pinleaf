@@ -1,0 +1,58 @@
+{
+  "release_candidate": "0.9.0",
+  "prepared_on": "2026-10-26",
+  "target": "Ubuntu 24.04 LTS / noble",
+  "base_main": "94edac8be28ddb876c9b7cd7f9bef88117f62775",
+  "regression": {
+    "status": "PASS",
+    "tests": 280,
+    "skips": 0,
+    "seconds": 21.868,
+    "session": "isolated nested X11"
+  },
+  "compileall": "PASS",
+  "contracts": {
+    "status": "PASS",
+    "schemas": 2,
+    "fixtures": 9,
+    "wrong_password_and_header_tampering": "PASS"
+  },
+  "version_alignment": "PASS",
+  "site_and_documentation_links": "PASS",
+  "binary_package": {
+    "status": "PASS",
+    "version": "0.9.0",
+    "installed": false,
+    "published": false,
+    "client_injected_in_build_copy": false,
+    "packaged_client_configured": true,
+    "artifact": "pinleaf_0.9.0_all.deb",
+    "sha256": "81bca252771ce2e7eeef28c297d2b89cfda98bdb6950eefb76e9fc8be35020c5",
+    "depends": "python3, python3-gi, python3-jsonschema, python3-cryptography, python3-google-auth (>= 1.5.1), python3-google-auth-oauthlib (>= 0.4.2), python3-requests, python3-secretstorage, gir1.2-gtk-4.0, gir1.2-adw-1, gir1.2-ayatanaappindicator3-0.1, libayatana-appindicator3-1, libfontconfig1",
+    "lintian_returncode": 0,
+    "lintian_output": ""
+  },
+  "source_package": {
+    "status": "PASS",
+    "version": "0.9.0",
+    "signed": false,
+    "uploaded": false,
+    "lintian_returncode": 0,
+    "lintian_output": "",
+    "private_deploy_and_local_data_absent": true,
+    "artifacts": {
+      "pinleaf_0.9.0.dsc": "e6c88a27742c6e5282352b288b5d2444402ce08bc976d5298b0d23a8d1f1e7b9",
+      "pinleaf_0.9.0.tar.xz": "9b5c6f4239e2cca3374fbc3f048bfe57017d4575a17d4fc4340689b27ec1982b",
+      "pinleaf_0.9.0_source.buildinfo": "029df767302bee3d2047d0fdb1f569461f8e1c936c3c1c008af6b1cceb016ce3",
+      "pinleaf_0.9.0_source.changes": "dca67d159d90392c99f52f8f61266780c8bb8d09dedf48c4b101653fa77e22f6"
+    }
+  },
+  "source_format_repair": "Privacy/terms HTML reformatted; structure, attributes and paragraph text preserved; strict source Lintian then passed without overrides",
+  "live_drive_evidence": "../../specs/015-local-backup-and-google-drive/artifacts/two-installations.json",
+  "additional_production_reconsent": "Stopped on maintainer direction; not claimed as passed; no repeat required for this preparation",
+  "qualification_note": "Temporary validation builds only. Publish fresh artifacts from the approved tagged commit.",
+  "tag_created": false,
+  "github_release_published": false,
+  "ppa_upload_performed": false,
+  "application_installed": false
+}

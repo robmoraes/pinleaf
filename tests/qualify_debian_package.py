@@ -12,6 +12,7 @@ import os
 import shutil
 import subprocess
 import tempfile
+import tomllib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -23,7 +24,8 @@ def main() -> None:
     parser.add_argument("--report", type=Path, required=True)
     args = parser.parse_args()
     root = Path(tempfile.mkdtemp(prefix="pinleaf-package-qa-"))
-    source = root / "pinleaf-0.8.0"
+    version = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]["version"]
+    source = root / f"pinleaf-{version}"
     source.mkdir()
     tracked = subprocess.check_output(["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"], cwd=ROOT).decode().split("\0")
     for name in tracked:
@@ -48,6 +50,8 @@ def main() -> None:
     artifacts = list(root.glob("pinleaf_*.deb"))
     assert len(artifacts) == 1
     artifact = artifacts[0]
+    package_version = subprocess.check_output(["dpkg-deb", "-f", str(artifact), "Version"], text=True).strip()
+    assert package_version == version, (package_version, version)
     unpacked = root / "unpacked"
     subprocess.run(["dpkg-deb", "-x", str(artifact), str(unpacked)], check=True)
     package = unpacked / "usr/lib/python3/dist-packages/pinleaf"
@@ -69,7 +73,7 @@ def main() -> None:
                        cwd=root, env=environment, check=True)
     inspected = subprocess.check_output(["dpkg-deb", "-f", str(artifact), "Depends"], text=True).strip()
     linted = subprocess.run(["lintian", "--fail-on", "error,warning", str(artifact)], capture_output=True, text=True)
-    result = {"status": "PASS" if linted.returncode == 0 else "FAIL", "installed": False,
+    result = {"status": "PASS" if linted.returncode == 0 else "FAIL", "version": package_version, "installed": False,
               "published": False, "client_injected_in_build_copy": args.client_file is not None,
               "packaged_client_configured": configured,
               "artifact": str(artifact), "sha256": hashlib.sha256(artifact.read_bytes()).hexdigest(),

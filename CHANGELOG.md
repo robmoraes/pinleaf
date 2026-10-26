@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-10-26
+
 ### Added
 
 - Save and list dated Google Drive backups, with optional password protection,
@@ -14,9 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   retry of the same captured copy.
 - Download selected Google Drive copies into private staging and restore through
   the existing validated preview, optional-password and local-recovery workflow.
-- Development Google Drive account connection through browser OAuth with PKCE,
+- Optional Google Drive account connection through browser OAuth with PKCE,
   cancellable loopback return, system-keyring or explicit session-only access,
-  and local disconnection. Drive transfers remain in development.
+  and local disconnection.
 - Offline whole-library backup and replacement restore, with optional password
   protection, validated preview, private recovery copies, interrupted-restore
   reconciliation and restore access from storage-startup errors.
@@ -38,6 +40,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Keep shared editor windows in place when switching projects; preserve hidden
   notes, pending edits and note metadata during movement and container deletion.
 - Deleting the active ordinary group leaves the profile with shared notes only.
+
+### Fixed
+
+- Keep the privacy policy and terms in readable HTML so source packages pass
+  Lintian without a source-is-missing error.
 
 
 ## [0.8.0] - 2026-10-10
@@ -203,7 +210,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added GitHub Pages project page with screenshots.
 - Added repository contributor guidelines.
 
-[Unreleased]: https://github.com/robmoraes/pinleaf/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/robmoraes/pinleaf/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/robmoraes/pinleaf/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/robmoraes/pinleaf/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/robmoraes/pinleaf/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/robmoraes/pinleaf/compare/v0.5.0...v0.6.0

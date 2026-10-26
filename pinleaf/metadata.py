@@ -3,8 +3,8 @@ from __future__ import annotations
 
 APP_NAME = "Pinleaf"
 APP_ID = "dev.pinleaf.Pinleaf"
-APP_VERSION = "0.8.0"
-BUILD_DATE = "2026-10-10"
+APP_VERSION = "0.9.0"
+BUILD_DATE = "2026-10-26"
 MAINTAINER_NAME = "Carlos R Moraes"
 MAINTAINER_WEBSITE = "https://about.robmoraes.dev.br"
 PROJECT_WEBSITE = "https://pinleaf.dslab.dev.br/"

@@ -29,8 +29,8 @@ def validate_name(value: str, *, group: bool = False) -> tuple[str, str]:
     if len(name) > 80:
         raise OrganizationError("Use at most 80 characters.")
     key = name_key(name)
-    if group and key in {"general", "geral"}:
-        raise OrganizationError("General/Geral is reserved for the permanent group.")
+    if group and key in {"shared", "compartilhado"}:
+        raise OrganizationError("Shared/Compartilhado is reserved for the permanent group.")
     return name, key
 
 
@@ -47,7 +47,9 @@ def initial_profile_name(language: str | None = None) -> str:
     return "Pessoal" if is_portuguese(language) else "Personal"
 
 
-def group_label(group: Group, language: str | None = None) -> str:
-    if group.is_general:
-        return "Geral" if is_portuguese(language) else "General"
+def group_label(group: Group | None, language: str | None = None) -> str:
+    if group is None:
+        return "Somente notas compartilhadas" if is_portuguese(language) else "Shared notes only"
+    if group.is_shared:
+        return "Compartilhado" if is_portuguese(language) else "Shared"
     return group.name

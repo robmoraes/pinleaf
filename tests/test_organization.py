@@ -14,13 +14,13 @@ class OrganizationNameTests(unittest.TestCase):
 
     def test_boundaries_and_reserved_group_names(self) -> None:
         self.assertEqual(validate_name('G' * 80)[0], 'G' * 80)
-        for name in (' ', 'G' * 81, 'General', ' GERAL '):
+        for name in (' ', 'G' * 81, 'Shared', ' COMPARTILHADO '):
             with self.subTest(name=name), self.assertRaises(OrganizationError):
                 validate_name(name, group=True)
 
-    def test_general_label_does_not_change_identity_or_custom_name(self) -> None:
-        group = Group('stable', 'profile', 'General', True)
-        self.assertEqual(group_label(group, 'pt-BR'), 'Geral')
-        self.assertEqual(group_label(group, 'en'), 'General')
+    def test_shared_label_does_not_change_identity_or_custom_name(self) -> None:
+        group = Group('stable', 'profile', 'Shared', True)
+        self.assertEqual(group_label(group, 'pt-BR'), 'Compartilhado')
+        self.assertEqual(group_label(group, 'en'), 'Shared')
         custom = Group('custom', 'profile', 'Minha Lista', False)
         self.assertEqual(group_label(custom, 'en'), 'Minha Lista')

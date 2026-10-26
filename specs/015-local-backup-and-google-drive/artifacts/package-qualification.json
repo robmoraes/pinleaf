@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "installed": false,
+  "published": false,
+  "client_injected_in_build_copy": false,
+  "packaged_client_configured": true,
+  "sha256": "88f6a55773c2f53ffc2a8734ef1bb05614a813959de191c0951531a3cd8f71a5",
+  "depends": "python3, python3-gi, python3-jsonschema, python3-cryptography, python3-google-auth (>= 1.5.1), python3-google-auth-oauthlib (>= 0.4.2), python3-requests, python3-secretstorage, gir1.2-gtk-4.0, gir1.2-adw-1, gir1.2-ayatanaappindicator3-0.1, libayatana-appindicator3-1, libfontconfig1",
+  "lintian_returncode": 0,
+  "lintian_output": "",
+  "version_note": "0.8.0 retained for a disposable unreleased build; not installed or published"
+}

@@ -6,7 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "docs" / "site"
-PAGE_URL = "https://robmoraes.github.io/pinleaf/"
+PAGE_URL = "https://pinleaf.dslab.dev.br/"
 
 
 class SiteTests(unittest.TestCase):

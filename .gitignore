@@ -11,3 +11,4 @@ tmp
 /debian/files
 /debian/*.substvars
 /debian/pinleaf/
+/local-deploy/

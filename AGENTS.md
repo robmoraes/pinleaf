@@ -11,7 +11,7 @@ Pinleaf is a Python GTK/libadwaita desktop app.
 - `pinleaf/services/`: note service and autosave behavior.
 - `pinleaf/resources/`: CSS, bundled fonts, and icons.
 - `tests/`: `unittest` suite.
-- `docs/.specs/`: spec-driven development artifacts.
+- `specs/`: spec-driven development artifacts.
 - `scripts/`: local install/uninstall helpers.
 
 ## Build, Test, and Development Commands

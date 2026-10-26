@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Save and list dated Google Drive backups, with optional password protection,
+  marked visible folders, verified publication, resumable transfer and deliberate
+  retry of the same captured copy.
+- Download selected Google Drive copies into private staging and restore through
+  the existing validated preview, optional-password and local-recovery workflow.
+- Development Google Drive account connection through browser OAuth with PKCE,
+  cancellable loopback return, system-keyring or explicit session-only access,
+  and local disconnection. Drive transfers remain in development.
+- Offline whole-library backup and replacement restore, with optional password
+  protection, validated preview, private recovery copies, interrupted-restore
+  reconciliation and restore access from storage-startup errors.
+- Header New menu with New Note and New Group actions, replacing the separate
+  group-creation button in the panel body to give the note list more space.
+- Shared notes per profile, shown alongside the active ordinary group, with
+  direct creation through Shared's + and a Shared-only context for new profiles.
+- Current-context search covering Shared and the active project; opening a
+  foreign Shared note resumes its profile's remembered project.
+
+### Changed
+
+- Support Ubuntu 24.04's Google credential API, reveal backup selections and
+  previews in narrow windows, and include a command manual in Debian packages.
+- Move the project homepage to pinleaf.dslab.dev.br and serve its privacy
+  policy and terms at the same public address.
+- Convert General to Shared in place with an atomic schema-6 upgrade, private
+  snapshot, reserved-name collision handling and a dismissible conversion notice.
+- Keep shared editor windows in place when switching projects; preserve hidden
+  notes, pending edits and note metadata during movement and container deletion.
+- Deleting the active ordinary group leaves the profile with shared notes only.
+
+
 ## [0.8.0] - 2026-10-10
 
 ### Added

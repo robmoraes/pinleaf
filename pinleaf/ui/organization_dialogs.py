@@ -218,7 +218,7 @@ class MoveDialog(OrganizationDialog):
 
 
 class InspectNoteDialog(OrganizationDialog):
-    def __init__(self, parent: Gtk.Window, title: str, content: str, on_open: Callable) -> None:
+    def __init__(self, parent: Gtk.Window, title: str, content: str, on_open: Callable, *, open_label: str = "Activate and open") -> None:
         super().__init__(parent, title, lambda *_args, **_kwargs: None)
         self.set_default_size(480, 420)
         view = Gtk.TextView(editable=False, cursor_visible=False, wrap_mode=Gtk.WrapMode.WORD_CHAR)
@@ -226,7 +226,7 @@ class InspectNoteDialog(OrganizationDialog):
         scroller = Gtk.ScrolledWindow(child=view, vexpand=True, min_content_height=180)
         self.append(scroller)
         self.cancel.set_label("Close")
-        self.confirm.set_label("Activate and open")
+        self.confirm.set_label(open_label)
         self.confirm.connect("clicked", lambda _: (self.close(), on_open()))
 
 
@@ -283,12 +283,13 @@ class DeleteDialog(OrganizationDialog):
         self.replacement.set_visible(replacing)
         destination = self.picker.destination
         next_profile, next_group = context.profile.name, group_label(context.group)
-        if context.group.id in preview.group_ids:
+        if deleting_active_profile or context.group_id in preview.group_ids:
             if preview.kind == "group":
-                next_group = group_label(self.organization.repository.general(context.profile.id))
+                next_group = group_label(None)
             elif moving and destination is not None:
                 next_profile = self.organization.repository.get_profile(destination.profile_id).name
-                next_group = group_label(destination)
+                next_group = group_label(self.organization.repository.last_group(destination.profile_id)
+                                        if destination.is_shared else destination)
             elif replacing and self.replacement.get_selected() < len(self.replacements):
                 profile = self.replacements[self.replacement.get_selected()]
                 next_profile = profile.name
@@ -298,7 +299,7 @@ class DeleteDialog(OrganizationDialog):
         if replacing and self.replacement.get_selected() < len(self.replacements):
             profile = self.replacements[self.replacement.get_selected()]
             group = self.organization.repository.last_group(profile.id)
-            self.replacement_identity = (profile.id, profile.name, group.id, group.name)
+            self.replacement_identity = (profile.id, profile.name, group.id if group else None, group.name if group else None)
         self.confirm.set_label(f"Delete {preview.kind} and move notes" if moving else
                                f"Delete {preview.kind} and {quantity}" if count else f"Delete {preview.kind}")
         self.confirm.remove_css_class("destructive-action")

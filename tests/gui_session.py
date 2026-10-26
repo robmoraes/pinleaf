@@ -61,6 +61,9 @@ def main() -> int:
         if accessibility:
             raise RuntimeError("Private AT-SPI QA uses a nested display to avoid the desktop accessibility bus")
         return run_on_private_bus(command[1:], env)
+    # A Wayland host also exports DISPLAY; pin nested QA to the isolated X11
+    # display rather than letting GTK select the real Wayland compositor.
+    env["GDK_BACKEND"] = "x11"
     x11 = ctypes.CDLL("libX11.so.6")
     x11.XOpenDisplay.restype = ctypes.c_void_p
     x11.XDefaultRootWindow.argtypes = [ctypes.c_void_p]

@@ -29,6 +29,7 @@ class PanelContextTests(unittest.TestCase):
         self.store = NoteStore(":memory:")
         self.service = NoteService(self.store)
         self.org = self.service.organization
+        self.org.create_group("General")
         self.original = self.org.context
         self.open = Mock()
         self.window = MainWindow(application=self.application, note_service=self.service,

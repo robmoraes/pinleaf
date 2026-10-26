@@ -20,7 +20,7 @@ class NoteSearchTests(unittest.TestCase):
         self.counter += 1
         note = Note.new(
             f"note-{self.counter}",
-            group_id=self.store.organization.context().group.id,
+            group_id=self.store.organization.shared(self.store.organization.context().profile.id).id,
             now=f"2026-06-12T{self.counter:02d}:00:00+00:00",
         )
         return self.store.create(note.with_content(content, now=note.created_at))

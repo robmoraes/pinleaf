@@ -1,0 +1,33 @@
+{
+  "global_search_1000": {
+    "median_ms": 21.92,
+    "max_ms": 25.25
+  },
+  "global_search_panel_1000": {
+    "median_ms": 616.14,
+    "max_ms": 635.38
+  },
+  "context_shared_plus_project_native_editors": {
+    "median_ms": 349.72,
+    "max_ms": 573.22
+  },
+  "fixture": {
+    "notes": 1000,
+    "groups": 30,
+    "shared_groups": 3,
+    "ordinary_groups": 27,
+    "profiles": 3,
+    "note_code_points": 128,
+    "hidden_notes": 250,
+    "reused_shared_editors": 17,
+    "visible_editors_per_context": [
+      34,
+      51
+    ]
+  },
+  "migration_v4_3_notes_with_backup": {
+    "median_ms": 9.83,
+    "max_ms": 9.83
+  },
+  "startup_100_open_notes_ms": 4790.02
+}

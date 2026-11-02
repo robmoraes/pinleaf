@@ -13,8 +13,9 @@ with Shared notes, the header New menu, offline backup/restore and optional
 Google Drive backups. Download its Debian package or
 [run from source](#development-setup).
 
-The Ubuntu PPA accepted the 0.9.0 source upload; its build and publication are
-in progress. Until publication completes, the PPA provides 0.8.0.
+Version 0.9.0 is also available through the Ubuntu PPA for Ubuntu 24.04 LTS
+(`noble`). Its Launchpad build and publication are complete, and the APT index
+provides 0.9.0.
 See the [release record](docs/release/0.9.0.md).
 
 ![Pinleaf desktop overview](docs/site/assets/screenshots/overview.png)
